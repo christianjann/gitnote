@@ -157,4 +157,7 @@
     <string name="loading">Chargement…</string>
     <string name="logs">Journaux</string>
     <string name="extension">Extension: %1$s</string>
+    <string name="syncing_repository">Synchronisation avec le dépôt distant…</string>
+    <string name="sync_success">Dépôt synchronisé avec succès</string>
+    <string name="sync_failed">Échec de la synchronisation avec le dépôt distant</string>
 </resources>

@@ -138,4 +138,7 @@
     <string name="logs">Logs</string>
     <string name="extension">Extensão: %1$s</string>
     <string name="pick_folder">Escolher esta pasta</string>
+    <string name="syncing_repository">Sincronizando com repositório remoto…</string>
+    <string name="sync_success">Repositório sincronizado com sucesso</string>
+    <string name="sync_failed">Falha ao sincronizar com repositório remoto</string>
 </resources>

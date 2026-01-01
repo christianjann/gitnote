@@ -56,6 +56,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - Support for remote images via HTTP/HTTPS URLs
   - Support for local repository files via relative paths (resolved from the note's directory)
   - PNG/JPG/SVG images load correctly with proper path resolution
+- Git Synchronization Improvements: Better handling of external repository changes
+  - Automatic database synchronization when external commits are detected
+  - Improved error handling for notes modified or deleted remotely
+  - Database index automatically updates when app detects external changes
 
 ### Changed
 

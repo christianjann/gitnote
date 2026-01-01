@@ -146,5 +146,8 @@
     <string name="loading">Nahrávání…</string>
     <string name="logs">Logy</string>
     <string name="extension">Rozšíření: %1$s</string>
+    <string name="syncing_repository">Synchronizace se vzdáleným repozitářem…</string>
+    <string name="sync_success">Repozitář úspěšně synchronizován</string>
+    <string name="sync_failed">Nepodařilo se synchronizovat se vzdáleným repozitářem</string>
 
 </resources>

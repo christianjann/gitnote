@@ -129,6 +129,9 @@
     <string name="success_note_update">Note successfully updated</string>
     <string name="success_note_create">Note successfully created</string>
     <string name="error_delete_folder">Can\'t delete folder: %1$s</string>
+    <string name="syncing_repository">Syncing with remote repository…</string>
+    <string name="sync_success">Repository synced successfully</string>
+    <string name="sync_failed">Failed to sync with remote repository</string>
 
     <plurals name="delete_selected_notes">
         <item quantity="one">Delete selected note</item>

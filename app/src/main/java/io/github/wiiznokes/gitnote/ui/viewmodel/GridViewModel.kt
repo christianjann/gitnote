@@ -50,6 +50,16 @@ class GridViewModel : ViewModel() {
     private val dao = db.repoDatabaseDao
     val uiHelper = MyApp.appModule.uiHelper
 
+    init {
+        // Check if database is out of sync when ViewModel initializes, but only if repo is initialized
+        // Run this in the background to avoid blocking UI initialization
+        viewModelScope.launch(Dispatchers.IO) {
+            if (MyApp.appModule.gitManager.isRepositoryInitialized()) {
+                storageManager.updateDatabaseIfNeeded()
+            }
+        }
+    }
+
     private val _query = MutableStateFlow("")
     val query: StateFlow<String> = _query
 

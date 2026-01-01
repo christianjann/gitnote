@@ -114,5 +114,8 @@
 
     <string name="read_only_mode_activate">Включить режим только для чтения</string>
     <string name="read_only_mode_deactive">Отключить режим только для чтения</string>
+    <string name="syncing_repository">Синхронизация с удалённым репозиторием…</string>
+    <string name="sync_success">Репозиторий успешно синхронизирован</string>
+    <string name="sync_failed">Не удалось синхронизировать с удалённым репозиторием</string>
 
 </resources>

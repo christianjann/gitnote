@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import kotlin.Result.Companion.failure
 import kotlin.Result.Companion.success
 
@@ -186,6 +187,47 @@ class StorageManager {
     }
 
     /**
+     * Check if the database is out of sync with the repository
+     */
+    suspend fun isDatabaseOutOfSync(): Boolean {
+        return try {
+            val fsCommit = gitManager.lastCommit()
+            val databaseCommit = prefs.databaseCommit.get()
+            fsCommit != databaseCommit
+        } catch (e: Exception) {
+            Log.e(TAG, "Error checking database sync status: ${e.message}", e)
+            false // Assume in sync if we can't check
+        }
+    }
+
+    /**
+     * Update database if it's out of sync, best effort
+     */
+    suspend fun updateDatabaseIfNeeded() {
+        try {
+            if (isDatabaseOutOfSync()) {
+                Log.d(TAG, "Database is out of sync, updating...")
+                // Show user feedback that sync is happening
+                withContext(Dispatchers.Main) {
+                    uiHelper.makeToast(uiHelper.getString(R.string.syncing_repository))
+                }
+                updateDatabaseWithoutLocker().onFailure {
+                    Log.e(TAG, "Failed to update database: ${it.message}")
+                    withContext(Dispatchers.Main) {
+                        uiHelper.makeToast(uiHelper.getString(R.string.sync_failed))
+                    }
+                }.onSuccess {
+                    withContext(Dispatchers.Main) {
+                        uiHelper.makeToast(uiHelper.getString(R.string.sync_success))
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error checking database sync status: ${e.message}", e)
+        }
+    }
+
+    /**
      * Best effort
      */
     suspend fun updateNote(new: Note, previous: Note): Result<Unit> = locker.withLock {
@@ -201,11 +243,18 @@ class StorageManager {
             val rootPath = prefs.repoPath()
             val previousFile = previous.toFileFs(rootPath)
 
-            previousFile.delete().onFailure {
-                val message =
-                    uiHelper.getString(R.string.error_delete_file, previousFile.path, it.message)
-                Log.e(TAG, message)
-                uiHelper.makeToast(message)
+            // Check if the file exists before trying to delete it
+            // If it was deleted remotely, this is fine - we just skip the delete
+            if (previousFile.exist()) {
+                previousFile.delete().onFailure {
+                    val message =
+                        uiHelper.getString(R.string.error_delete_file, previousFile.path, it.message)
+                    Log.e(TAG, message)
+                    uiHelper.makeToast(message)
+                    return@update failure(Exception(message))
+                }
+            } else {
+                Log.d(TAG, "Previous file ${previousFile.path} does not exist, skipping delete")
             }
 
             val newFile = new.toFileFs(rootPath)
@@ -213,12 +262,14 @@ class StorageManager {
                 val message = uiHelper.getString(R.string.error_create_file, it.message)
                 Log.e(TAG, message)
                 uiHelper.makeToast(message)
+                return@update failure(Exception(message))
             }
 
             newFile.write(new.content).onFailure {
                 val message = uiHelper.getString(R.string.error_write_file, it.message)
                 Log.e(TAG, message)
                 uiHelper.makeToast(message)
+                return@update failure(Exception(message))
             }
 
             success(Unit)

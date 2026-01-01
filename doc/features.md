@@ -9,6 +9,7 @@ GitNote is a Git-based note-taking app for Android that integrates seamlessly wi
 - **Version Control**: Automatic commits on note changes, with conflict resolution.
 - **SSH Support**: Secure authentication using SSH keys.
 - **Git Log Viewer**: Access commit history directly in the app with formatted timestamps, author information, and commit messages.
+- **External Change Detection**: Automatically detects and syncs changes made outside the app.
 
 ### Note Management
 - **Markdown Support**: Full Markdown rendering with syntax highlighting and image display.

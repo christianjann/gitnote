@@ -61,6 +61,9 @@ class GitManager {
     private val locker = Mutex()
     var isRepoInitialized = false
         private set
+
+    fun isRepositoryInitialized(): Boolean = isRepoInitialized
+
     private var isLibInitialized = false
 
     private suspend fun <T> safelyAccessLibGit2(f: suspend () -> T): Result<T> = locker.withLock {
