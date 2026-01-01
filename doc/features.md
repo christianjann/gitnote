@@ -145,6 +145,36 @@ GitNote now supports marking notes as completed using a checkbox in the UI, tied
 3. Click the checkbox to mark as complete; the file updates to `completed?: yes`.
 4. Sync with Git to persist changes across devices.
 
+### Interactive Checkboxes in Markdown
+
+GitNote supports interactive checkboxes directly within rendered markdown content, allowing you to toggle task completion without switching to edit mode.
+
+#### How It Works
+- **Rendered Mode**: In read-only markdown view, `- [ ]` and `- [X]` patterns become interactive checkboxes.
+- **Visual Components**: Plain markdown text is replaced with Material Design checkbox components.
+- **Local Editing**: Tapping checkboxes updates the display immediately but doesn't save until confirmed.
+- **Accept Button**: An accept button appears when changes are made, allowing you to save all modifications.
+- **Git Integration**: Confirmed changes are committed to the repository with proper version control.
+
+#### Usage Tips
+- Perfect for task lists and checklists within note content.
+- Changes are local until you tap the accept button.
+- Use in read-only mode for quick task management.
+- Supports indented checkboxes for nested task hierarchies.
+- All checkbox changes in a session are saved together.
+
+#### Example Workflow
+1. Create a note with checkbox markdown:
+   ```
+   ## Project Tasks
+   - [ ] Design mockups
+   - [ ] Implement backend
+   - [ ] Write documentation
+   ```
+2. Switch to read-only mode to see rendered markdown.
+3. Tap checkboxes to mark tasks complete - they toggle visually.
+4. Tap the accept button to save all changes to the file and Git.
+
 ## Task Sorting in List View
 
 Completed tasks are automatically sorted to the end of the list view to keep active tasks visible at the top.

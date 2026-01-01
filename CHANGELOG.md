@@ -47,6 +47,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Debug Features Toggle: Option to enable debug features in release builds
   - Settings option in About section to enable debug tools
   - Makes reload database button available when needed for troubleshooting
+- Interactive Checkboxes: Clickable checkboxes in rendered markdown mode
+  - Tap checkboxes in read-only mode to toggle completion status
+  - Material Design checkbox components replace plain markdown text
+  - Accept button appears to save changes without switching to edit mode
+  - Seamless task management in rendered markdown view
 
 ### Changed
 

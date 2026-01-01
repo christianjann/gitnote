@@ -96,6 +96,9 @@ fun EditScreen(
     val isReadOnlyModeActive =
         !vm.shouldForceNotReadOnlyMode.value && vm.prefs.isReadOnlyModeActive.getAsState().value
 
+    var hasPendingCheckboxChanges by remember { mutableStateOf(false) }
+    var pendingCheckboxText by remember { mutableStateOf<String?>(null) }
+
     Scaffold(
         contentWindowInsets = WindowInsets.safeDrawing,
         topBar = {
@@ -172,13 +175,20 @@ fun EditScreen(
         floatingActionButton = {
             // bug: https://issuetracker.google.com/issues/224005027
             //AnimatedVisibility(visible = currentNoteFolderRelativePath.isNotEmpty()) {
-            if (!isReadOnlyModeActive && vm.name.value.text.isNotEmpty()) {
+            if ((!isReadOnlyModeActive || hasPendingCheckboxChanges) && vm.name.value.text.isNotEmpty()) {
                 FloatingActionButton(
                     modifier = Modifier
                         .padding(bottom = bottomBarHeight),
                     containerColor = MaterialTheme.colorScheme.primary,
                     shape = RoundedCornerShape(20.dp),
                     onClick = {
+                        if (hasPendingCheckboxChanges && pendingCheckboxText != null) {
+                            // Apply checkbox changes and save
+                            val newTextFieldValue = TextFieldValue(text = pendingCheckboxText!!)
+                            vm.onValueChange(newTextFieldValue)
+                            hasPendingCheckboxChanges = false
+                            pendingCheckboxText = null
+                        }
                         vm.save(onSuccess = onFinished)
                     }
                 ) {
@@ -210,7 +220,11 @@ fun EditScreen(
                             textFocusRequester = textFocusRequester,
                             onFinished = onFinished,
                             isReadOnlyModeActive = isReadOnlyModeActive,
-                            textContent = textContent
+                            textContent = textContent,
+                            onCheckboxChangesPending = { hasChanges, modifiedText ->
+                                hasPendingCheckboxChanges = hasChanges
+                                pendingCheckboxText = modifiedText
+                            }
                         )
                     }
 
