@@ -166,6 +166,12 @@ pub fn create_repo(repo_path: &str) -> Result<(), Error> {
 pub fn open_repo(repo_path: &str) -> Result<(), Error> {
     let repo = Repository::open(repo_path).map_err(|e| Error::git2(e, "Repository::open"))?;
 
+    // Automatically clean up any broken repository state when opening
+    if let Err(e) = cleanup_repo_state(&repo) {
+        warn!("Failed to cleanup repository state on open: {}", e);
+        // Continue anyway - the repo is still opened
+    }
+
     REPO.lock().unwrap().replace(repo);
 
     Ok(())
@@ -477,7 +483,6 @@ pub fn close() {
     repo.take();
 }
 
-#[allow(dead_code)]
 pub fn cleanup_repo() -> Result<(), Error> {
     let repo = REPO.lock().expect("repo lock");
     let repo = repo.as_ref().expect("repo");

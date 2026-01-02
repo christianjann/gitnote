@@ -404,6 +404,16 @@ pub extern "C" fn Java_io_github_christianjann_gitnotecje_manager_GitManagerKt_c
 ) {
     libgit2::close();
 }
+
+#[unsafe(no_mangle)]
+pub extern "C" fn Java_io_github_christianjann_gitnotecje_manager_GitManagerKt_cleanupRepoLib(
+    _env: JNIEnv,
+    _class: JClass,
+) -> jint {
+    unwrap_or_log!(libgit2::cleanup_repo(), "cleanup_repo");
+    OK
+}
+
 #[unsafe(no_mangle)]
 pub extern "C" fn Java_io_github_christianjann_gitnotecje_manager_GitManagerKt_isChangeLib(
     _env: JNIEnv,

@@ -34,7 +34,7 @@ fn normal_merge(
         .tree()?;
     let mut idx = repo.merge_trees(&ancestor, &local_tree, &remote_tree, None)?;
 
-    if idx.has_conflicts() {
+    let result_tree = if idx.has_conflicts() {
         info!("Merge conflicts detected, attempting automatic resolution...");
         
         // First pass: resolve conflicts where we have our version
@@ -90,20 +90,26 @@ fn normal_merge(
         
         info!("Resolved {}/{} conflicts", resolved_count, conflicts.len());
         
-        // Write the resolved index
-        idx.write()?;
+        // Write the tree to repository
+        let tree_id = idx.write_tree_to(repo)?;
         
-        // Checkout the resolved index to update working directory
-        repo.checkout_index(
-            Some(&mut idx), 
+        // Checkout the resolved tree to update working directory
+        let result_tree = repo.find_tree(tree_id)?;
+        repo.checkout_tree(
+            result_tree.as_object(),
             Some(git2::build::CheckoutBuilder::default()
                 .force()
                 .allow_conflicts(false)
             )
         )?;
         
-        // If we still have conflicts after writing and checkout, abort
-        if idx.has_conflicts() {
+        // Add all resolved files to the repository index
+        let mut repo_index = repo.index()?;
+        repo_index.add_all(["*"].iter(), git2::IndexAddOption::DEFAULT, None)?;
+        repo_index.write()?;
+        
+        // Verify no conflicts remain
+        if repo_index.has_conflicts() {
             error!("Could not resolve all conflicts automatically (resolved {}/{}). Aborting merge.", 
                   resolved_count, conflicts.len());
             
@@ -112,9 +118,29 @@ fn normal_merge(
             repo.reset(local_commit.as_object(), git2::ResetType::Hard, None)?;
             return Err(git2::Error::from_str("Could not resolve all merge conflicts automatically"));
         }
-    }
-    
-    let result_tree = repo.find_tree(idx.write_tree_to(repo)?)?;
+        
+        result_tree
+    } else {
+        // No conflicts, just write the tree
+        let tree_id = idx.write_tree_to(repo)?;
+        
+        // Checkout the tree to update working directory
+        let result_tree = repo.find_tree(tree_id)?;
+        repo.checkout_tree(
+            result_tree.as_object(),
+            Some(git2::build::CheckoutBuilder::default()
+                .force()
+                .allow_conflicts(false)
+            )
+        )?;
+        
+        // Add all files to the repository index
+        let mut repo_index = repo.index()?;
+        repo_index.add_all(["*"].iter(), git2::IndexAddOption::DEFAULT, None)?;
+        repo_index.write()?;
+        
+        result_tree
+    };
     // now create the merge commit
     let msg = format!("Merge: {} into {}", remote.id(), local.id());
     let sig = repo.signature()?;
