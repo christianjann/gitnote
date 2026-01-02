@@ -47,6 +47,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.platform.LocalContext
 import io.github.wiiznokes.gitnote.MainActivity
 import io.github.wiiznokes.gitnote.data.Language
@@ -111,10 +114,12 @@ internal val topBarHeight = 80.dp
 internal val topSpacerHeight = topBarHeight + 40.dp + 15.dp
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GridScreen(
     onSettingsClick: () -> Unit,
     onEditClick: (Note, EditType) -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
 
     val vm: GridViewModel = viewModel()
@@ -122,6 +127,8 @@ fun GridScreen(
     val tagDisplayMode by vm.prefs.tagDisplayMode.getAsState()
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     ModalNavigationDrawer(drawerState = drawerState, drawerContent = {
         ModalDrawerSheet {
@@ -138,6 +145,7 @@ fun GridScreen(
                 noteBeingMoved = vm.noteBeingMoved.collectAsState().value,
                 onMoveNoteToFolder = { vm.moveNoteToFolder(it) },
                 onCancelMove = { vm.cancelMoveNote() },
+                scrollBehavior = scrollBehavior,
             )
         }
     }) {
@@ -180,7 +188,14 @@ fun GridScreen(
         val showLanguageDialog = remember { mutableStateOf(false) }
         val currentLanguage by vm.prefs.language.getAsState()
 
+        val nestedScrollConnection = rememberNestedScrollConnection(
+            offset = offset,
+            fabExpanded = fabExpanded,
+            scrollBehavior = scrollBehavior,
+        )
+
         Scaffold(
+            modifier = Modifier.nestedScroll(nestedScrollConnection),
             contentWindowInsets = WindowInsets.safeContent,
             containerColor = MaterialTheme.colorScheme.background,
             floatingActionButton = {
@@ -196,12 +211,6 @@ fun GridScreen(
                 }
 
             }) { padding ->
-
-            val nestedScrollConnection = rememberNestedScrollConnection(
-                offset = offset,
-                fabExpanded = fabExpanded,
-            )
-
 
             GridView(
                 vm = vm,
@@ -679,10 +688,12 @@ internal fun NoteActionsDropdown(
 // https://medium.com/@debdut.saha.1/top-app-bar-animation-using-nestedscrollconnection-like-facebook-jetpack-compose-b446c109ee52
 // todo: fix scroll is blocked when the full size of the grid is the screen,
 //  the stretching will cause tbe offset to not change
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun rememberNestedScrollConnection(
     offset: MutableFloatState,
     fabExpanded: MutableState<Boolean>,
+    scrollBehavior: TopAppBarScrollBehavior,
 ): NestedScrollConnection {
 
 
@@ -691,7 +702,7 @@ private fun rememberNestedScrollConnection(
     return remember {
         var shouldBlock = false
 
-        object : NestedScrollConnection {
+        val fabConnection = object : NestedScrollConnection {
             fun calculateOffset(delta: Float): Offset {
                 offset.floatValue = (offset.floatValue + delta).coerceIn(maxOffset, 0f)
                 //Log.d(TAG, "calculateOffset(newOffset: ${offset.floatValue}, delta: $delta)")
@@ -724,6 +735,41 @@ private fun rememberNestedScrollConnection(
                 return super.onPostFling(consumed, available)
             }
 
+        }
+
+        // Combine FAB connection with TopAppBar scroll behavior connection
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                // Call TopAppBar connection first
+                val topBarConsumed = scrollBehavior.nestedScrollConnection.onPreScroll(available, source)
+                // Then call FAB connection with remaining
+                val fabConsumed = fabConnection.onPreScroll(available - topBarConsumed, source)
+                return topBarConsumed + fabConsumed
+            }
+
+            override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
+                // Call TopAppBar connection first
+                val topBarConsumed = scrollBehavior.nestedScrollConnection.onPostScroll(consumed, available, source)
+                // Then call FAB connection with remaining
+                val fabConsumed = fabConnection.onPostScroll(consumed, available - topBarConsumed, source)
+                return topBarConsumed + fabConsumed
+            }
+
+            override suspend fun onPreFling(available: Velocity): Velocity {
+                // Call TopAppBar connection first
+                val topBarConsumed = scrollBehavior.nestedScrollConnection.onPreFling(available)
+                // Then call FAB connection with remaining
+                val fabConsumed = fabConnection.onPreFling(available - topBarConsumed)
+                return topBarConsumed + fabConsumed
+            }
+
+            override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+                // Call TopAppBar connection first
+                val topBarConsumed = scrollBehavior.nestedScrollConnection.onPostFling(consumed, available)
+                // Then call FAB connection with remaining
+                val fabConsumed = fabConnection.onPostFling(consumed, available - topBarConsumed)
+                return topBarConsumed + fabConsumed
+            }
         }
     }
 }

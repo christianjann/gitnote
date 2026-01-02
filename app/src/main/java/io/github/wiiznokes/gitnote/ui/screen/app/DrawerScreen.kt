@@ -34,6 +34,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
@@ -88,6 +89,7 @@ fun RowNFoldersNavigation(
     onMoveNoteToFolder: (String) -> Unit,
     onCancelMove: () -> Unit,
     onHomeClick: () -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
     val containers = if (currentPath.isEmpty()) emptyList() else currentPath.split('/')
 
@@ -98,6 +100,7 @@ fun RowNFoldersNavigation(
             actionIconContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
             titleContentColor = MaterialTheme.colorScheme.onSecondaryContainer
         ),
+        scrollBehavior = scrollBehavior,
         navigationIcon = {
             IconButton(
                 onClick = onHomeClick
@@ -194,7 +197,7 @@ fun RowNFoldersNavigation(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun DrawerScreen(
     drawerState: DrawerState,
@@ -208,11 +211,9 @@ fun DrawerScreen(
     onTagSelected: (String?) -> Unit,
     noteBeingMoved: Note?,
     onMoveNoteToFolder: (String) -> Unit,
-    onCancelMove: () -> Unit,
-) {
+    onCancelMove: () -> Unit,    scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(),) {
 
     val showTags = rememberSaveable { mutableStateOf(false) }
-
 
     val scope = rememberCoroutineScope()
     BackHandler(enabled = drawerState.isOpen || currentNoteFolderRelativePath.isNotEmpty()) {
@@ -253,6 +254,7 @@ fun DrawerScreen(
                     openFolder("")
                     scope.launch { drawerState.open() }
                 },
+                scrollBehavior = scrollBehavior,
             )
         },
         floatingActionButton = {

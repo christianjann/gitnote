@@ -16,6 +16,7 @@ import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Text
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.MutableState
@@ -143,6 +144,7 @@ fun PickFolderDialog(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PickFolderDialogInternal(
     expanded: MutableState<Boolean>,
@@ -182,6 +184,7 @@ private fun PickFolderDialogInternal(
             onMoveNoteToFolder = {},
             onCancelMove = {},
             onHomeClick = { openFolder("") },
+            scrollBehavior = null,
         )
 
         val listState = rememberLazyListState()

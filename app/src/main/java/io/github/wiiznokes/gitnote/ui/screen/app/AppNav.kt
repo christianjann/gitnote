@@ -1,6 +1,7 @@
 package io.github.wiiznokes.gitnote.ui.screen.app
 
 import androidx.compose.animation.ContentTransform
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import dev.olshevski.navigation.reimagined.AnimatedNavHost
 import dev.olshevski.navigation.reimagined.NavAction
@@ -22,6 +23,7 @@ import io.github.wiiznokes.gitnote.ui.utils.slide
 
 private const val TAG = "AppScreen"
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppScreen(
     appDestination: AppDestination,
