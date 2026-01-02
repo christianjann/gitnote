@@ -9,6 +9,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
+import java.util.Locale
 import dev.olshevski.navigation.reimagined.AnimatedNavHost
 import dev.olshevski.navigation.reimagined.NavBackHandler
 import dev.olshevski.navigation.reimagined.navigate
@@ -17,6 +18,7 @@ import dev.olshevski.navigation.reimagined.popUpTo
 import dev.olshevski.navigation.reimagined.rememberNavController
 import io.github.wiiznokes.gitnote.MyApp.Companion.appModule
 import io.github.wiiznokes.gitnote.helper.NoteSaver
+import io.github.wiiznokes.gitnote.data.Language
 import io.github.wiiznokes.gitnote.ui.destination.AppDestination
 import io.github.wiiznokes.gitnote.ui.destination.Destination
 import io.github.wiiznokes.gitnote.ui.destination.EditParams
@@ -139,6 +141,34 @@ class MainActivity : ComponentActivity() {
                 Log.w(TAG, "code is null")
             }
         }
+    }
+
+    fun changeLanguage(language: Language) {
+        val locale = when (language) {
+            Language.System -> null
+            Language.English -> Locale("en")
+            Language.Czech -> Locale("cs")
+            Language.French -> Locale("fr")
+            Language.PortugueseBrazilian -> Locale("pt", "BR")
+            Language.Russian -> Locale("ru", "RU")
+            Language.Ukrainian -> Locale("uk")
+            Language.German -> Locale("de")
+        }
+
+        // For runtime locale changes, we need to update the configuration
+        val config = resources.configuration
+        if (locale != null) {
+            config.setLocale(locale)
+        } else {
+            config.setLocale(Locale.getDefault())
+        }
+        
+        // Update the configuration
+        @Suppress("DEPRECATION")
+        resources.updateConfiguration(config, resources.displayMetrics)
+        
+        // Recreate activity to apply changes
+        recreate()
     }
 
     override fun onDestroy() {

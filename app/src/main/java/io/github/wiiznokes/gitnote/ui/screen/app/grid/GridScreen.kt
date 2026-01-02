@@ -47,8 +47,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
+import androidx.compose.ui.platform.LocalContext
+import io.github.wiiznokes.gitnote.MainActivity
+import io.github.wiiznokes.gitnote.data.Language
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDrawerState
@@ -62,6 +64,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -81,6 +84,7 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewModelScope
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import io.github.wiiznokes.gitnote.R
@@ -90,6 +94,7 @@ import io.github.wiiznokes.gitnote.ui.component.CustomDropDown
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDownModel
 import io.github.wiiznokes.gitnote.ui.model.EditType
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
+import kotlinx.coroutines.launch
 import io.github.wiiznokes.gitnote.ui.model.GridNote
 import io.github.wiiznokes.gitnote.ui.model.NoteViewType
 import io.github.wiiznokes.gitnote.ui.model.TagDisplayMode
@@ -171,6 +176,9 @@ fun GridScreen(
 
         val offset = remember { mutableFloatStateOf(0f) }
 
+        val showLanguageDialog = remember { mutableStateOf(false) }
+        val currentLanguage by vm.prefs.language.getAsState()
+
         Scaffold(
             contentWindowInsets = WindowInsets.safeContent,
             containerColor = MaterialTheme.colorScheme.background,
@@ -213,6 +221,9 @@ fun GridScreen(
                 onShowGitLog = {
                     vm.showGitLog()
                 },
+                onSelectLanguage = {
+                    showLanguageDialog.value = true
+                },
                 searchFocusRequester = searchFocusRequester,
                 padding = padding,
                 onReloadDatabase = {
@@ -243,7 +254,8 @@ fun GridScreen(
                         }
                     } else {
                         LazyColumn {
-                            items(gitLogEntries) { entry ->
+                            items(count = gitLogEntries.size) { index ->
+                                val entry = gitLogEntries[index]
                                 Column(modifier = Modifier.padding(vertical = 8.dp)) {
                                     Text(
                                         text = entry.message,
@@ -276,6 +288,24 @@ fun GridScreen(
                 }
             )
         }
+
+        // Language Selection Dialog
+        val context = LocalContext.current
+        val coroutineScope = rememberCoroutineScope()
+        LanguageSelectionDialog(
+            showDialog = showLanguageDialog.value,
+            currentLanguage = currentLanguage,
+            onLanguageSelected = { language ->
+                coroutineScope.launch {
+                    vm.prefs.language.update(language)
+                    (context as? MainActivity)?.changeLanguage(language)
+                }
+                showLanguageDialog.value = false
+            },
+            onDismiss = {
+                showLanguageDialog.value = false
+            }
+        )
     }
 }
 

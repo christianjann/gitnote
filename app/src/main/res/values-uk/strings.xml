@@ -13,6 +13,15 @@
     <string name="save">Зберегти</string>
     <string name="none">Немає</string>
     <string name="settings">Налаштування</string>
+    <string name="select_language">Мова</string>
+    <string name="language_system">Системна</string>
+    <string name="language_english">English</string>
+    <string name="language_czech">Čeština</string>
+    <string name="language_french">Français</string>
+    <string name="language_portuguese_brazilian">Português (Brasil)</string>
+    <string name="language_russian">Русский</string>
+    <string name="language_ukrainian">Українська</string>
+    <string name="language_german">Deutsch</string>
     <string name="search_in_notes">Пошук у нотатках</string>
     <string name="user_interface">Інтерфейс</string>
     <string name="dynamic_colors">Динамічні кольори</string>

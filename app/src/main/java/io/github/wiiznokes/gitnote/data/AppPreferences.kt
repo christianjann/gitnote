@@ -189,10 +189,23 @@ class AppPreferences(
 
     val debugFeaturesEnabled = booleanPreference("debugFeaturesEnabled", false)
 
+    val language = enumPreference("language", Language.System)
+
 }
 
 
 enum class StorageConfig {
     App,
     Device
+}
+
+enum class Language(val localeTag: String) {
+    System("system"),
+    English("en"),
+    Czech("cs"),
+    French("fr"),
+    PortugueseBrazilian("pt-rBR"),
+    Russian("ru-rRU"),
+    Ukrainian("uk"),
+    German("de")
 }

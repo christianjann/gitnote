@@ -14,12 +14,19 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.TextButton
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ViewList
@@ -67,6 +74,7 @@ import io.github.wiiznokes.gitnote.manager.SyncState
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDown
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDownModel
 import io.github.wiiznokes.gitnote.ui.component.SimpleIcon
+import io.github.wiiznokes.gitnote.data.Language
 import io.github.wiiznokes.gitnote.ui.model.NoteViewType
 import io.github.wiiznokes.gitnote.ui.viewmodel.GridViewModel
 import kotlinx.coroutines.delay
@@ -85,6 +93,7 @@ fun TopBar(
     drawerState: DrawerState,
     onSettingsClick: () -> Unit,
     onShowGitLog: () -> Unit,
+    onSelectLanguage: () -> Unit,
     searchFocusRequester: FocusRequester,
     onReloadDatabase: () -> Unit,
 ) {
@@ -101,6 +110,7 @@ fun TopBar(
                 vm = vm,
                 onSettingsClick = onSettingsClick,
                 onShowGitLog = onShowGitLog,
+                onSelectLanguage = onSelectLanguage,
                 searchFocusRequester = searchFocusRequester,
                 onReloadDatabase = onReloadDatabase,
             )
@@ -123,6 +133,7 @@ private fun SearchBar(
     vm: GridViewModel,
     onSettingsClick: () -> Unit,
     onShowGitLog: () -> Unit,
+    onSelectLanguage: () -> Unit,
     searchFocusRequester: FocusRequester,
     onReloadDatabase: () -> Unit,
 ) {
@@ -251,6 +262,10 @@ private fun SearchBar(
                                 CustomDropDownModel(
                                     text = stringResource(R.string.settings),
                                     onClick = onSettingsClick
+                                ),
+                                CustomDropDownModel(
+                                    text = stringResource(R.string.select_language),
+                                    onClick = onSelectLanguage
                                 ),
                                 CustomDropDownModel(
                                     text = stringResource(R.string.show_git_log),
@@ -445,6 +460,60 @@ private fun SyncStateIcon(
             imageVector = Icons.Default.CloudUpload,
             contentDescription = "Pushing",
             modifier = modifier,
+        )
+    }
+}
+
+
+@Composable
+fun LanguageSelectionDialog(
+    showDialog: Boolean,
+    currentLanguage: Language,
+    onLanguageSelected: (Language) -> Unit,
+    onDismiss: () -> Unit
+) {
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = {
+                Text(stringResource(R.string.select_language))
+            },
+            text = {
+                Column {
+                    Language.entries.forEach { language ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onLanguageSelected(language) }
+                                .padding(vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = language == currentLanguage,
+                                onClick = { onLanguageSelected(language) }
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = when (language) {
+                                    Language.System -> stringResource(R.string.language_system)
+                                    Language.English -> stringResource(R.string.language_english)
+                                    Language.Czech -> stringResource(R.string.language_czech)
+                                    Language.French -> stringResource(R.string.language_french)
+                                    Language.PortugueseBrazilian -> stringResource(R.string.language_portuguese_brazilian)
+                                    Language.Russian -> stringResource(R.string.language_russian)
+                                    Language.Ukrainian -> stringResource(R.string.language_ukrainian)
+                                    Language.German -> stringResource(R.string.language_german)
+                                }
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = onDismiss) {
+                    Text(stringResource(R.string.save))
+                }
+            }
         )
     }
 }

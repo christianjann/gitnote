@@ -13,6 +13,15 @@
     <string name="save">Uložit</string>
     <string name="none">Nic</string>
     <string name="settings">Nastavení</string>
+    <string name="select_language">Jazyk</string>
+    <string name="language_system">Systém</string>
+    <string name="language_english">English</string>
+    <string name="language_czech">Čeština</string>
+    <string name="language_french">Français</string>
+    <string name="language_portuguese_brazilian">Português (Brasil)</string>
+    <string name="language_russian">Русский</string>
+    <string name="language_ukrainian">Українська</string>
+    <string name="language_german">Deutsch</string>
     <string name="search_in_notes">Hledat v poznámkách</string>
     <string name="user_interface">Uživatelské rozhraní</string>
     <string name="dynamic_colors">Dynamické barvy</string>

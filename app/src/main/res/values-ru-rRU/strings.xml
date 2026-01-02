@@ -13,6 +13,15 @@
     <string name="save">Сохранить</string>
     <string name="none">Нет</string>
     <string name="settings">Настройки</string>
+    <string name="select_language">Язык</string>
+    <string name="language_system">Системный</string>
+    <string name="language_english">English</string>
+    <string name="language_czech">Čeština</string>
+    <string name="language_french">Français</string>
+    <string name="language_portuguese_brazilian">Português (Brasil)</string>
+    <string name="language_russian">Русский</string>
+    <string name="language_ukrainian">Українська</string>
+    <string name="language_german">Deutsch</string>
     <string name="search_in_notes">Поиск в заметках</string>
     <string name="user_interface">Интерфейс</string>
     <string name="dynamic_colors">Динамические цвета</string>

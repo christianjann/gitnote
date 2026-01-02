@@ -14,6 +14,15 @@
     <string name="save">Speichern</string>
     <string name="none">Keine</string>
     <string name="settings">Einstellungen</string>
+    <string name="select_language">Sprache</string>
+    <string name="language_system">System</string>
+    <string name="language_english">English</string>
+    <string name="language_czech">Čeština</string>
+    <string name="language_french">Français</string>
+    <string name="language_portuguese_brazilian">Português (Brasil)</string>
+    <string name="language_russian">Русский</string>
+    <string name="language_ukrainian">Українська</string>
+    <string name="language_german">Deutsch</string>
     <string name="show_git_log">GIT-Log anzeigen</string>
     <string name="search_in_notes">In Notizen suchen</string>
     <string name="user_interface">Benutzeroberfläche</string>

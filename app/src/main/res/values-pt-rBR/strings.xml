@@ -11,6 +11,15 @@
     <string name="save">Salvar</string>
     <string name="none">Não</string>
     <string name="settings">Configurações</string>
+    <string name="select_language">Idioma</string>
+    <string name="language_system">Sistema</string>
+    <string name="language_english">English</string>
+    <string name="language_czech">Čeština</string>
+    <string name="language_french">Français</string>
+    <string name="language_portuguese_brazilian">Português (Brasil)</string>
+    <string name="language_russian">Русский</string>
+    <string name="language_ukrainian">Українська</string>
+    <string name="language_german">Deutsch</string>
     <string name="search_in_notes">Pesquisar anotações</string>
     <string name="user_interface">Interface de usuário</string>
     <string name="dynamic_colors">Cores dinâmicas</string>
