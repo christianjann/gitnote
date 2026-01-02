@@ -91,6 +91,7 @@
     <string name="error_create_folder">Ordner kann nicht erstellt werden: %1$s</string>
     <string name="error_pull_repo">Pull fehlgeschlagen: %1$s</string>
     <string name="error_push_repo">Push fehlgeschlagen: %1$s</string>
+    <string name="error_sync_repo">Synchronisation fehlgeschlagen: %1$s</string>
     <string name="error_commit_repo">Commit fehlgeschlagen: %1$s</string>
     <string name="error_commit_file_change">Kann nicht feststellen, ob Dateien geändert wurden: %1$s</string>
     <string name="error_clone_repo">Repository kann nicht geklont werden: %1$s</string>

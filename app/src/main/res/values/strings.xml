@@ -91,6 +91,7 @@
     <string name="error_create_folder">Can\'t create folder: %1$s</string>
     <string name="error_pull_repo">Can\'t pull: %1$s</string>
     <string name="error_push_repo">Can\'t push: %1$s</string>
+    <string name="error_sync_repo">Can\'t sync: %1$s</string>
     <string name="error_commit_repo">can\'t commit: %1$s</string>
     <string name="error_commit_file_change">can\'t know if there is files change: %1$s</string>
     <string name="error_clone_repo">can\'t clone repository: %1$s</string>

@@ -35,10 +35,85 @@ fn normal_merge(
     let mut idx = repo.merge_trees(&ancestor, &local_tree, &remote_tree, None)?;
 
     if idx.has_conflicts() {
-        error!("Merge conflicts detected...");
-        repo.checkout_index(Some(&mut idx), None)?;
-        return Ok(());
+        info!("Merge conflicts detected, attempting automatic resolution...");
+        
+        // First pass: resolve conflicts where we have our version
+        let mut resolved_count = 0;
+        let conflicts: Vec<_> = idx.conflicts()?.collect::<Result<Vec<_>, _>>()?;
+        
+        for conflict in &conflicts {
+            if let Some(our_entry) = &conflict.our {
+                // We have our version, use it
+                if let Err(e) = idx.add(our_entry) {
+                    warn!("Failed to add our entry for {:?}: {}", 
+                         String::from_utf8_lossy(&our_entry.path), e);
+                } else {
+                    resolved_count += 1;
+                    info!("Resolved conflict for file: {:?}", String::from_utf8_lossy(&our_entry.path));
+                }
+            }
+        }
+        
+        // Second pass: for remaining conflicts, try their version if ours doesn't exist
+        if idx.has_conflicts() {
+            for conflict in &conflicts {
+                if conflict.our.is_none() && conflict.their.is_some() {
+                    let their_entry = conflict.their.as_ref().unwrap();
+                    if let Err(e) = idx.add(their_entry) {
+                        warn!("Failed to add their entry for {:?}: {}", 
+                             String::from_utf8_lossy(&their_entry.path), e);
+                    } else {
+                        resolved_count += 1;
+                        info!("Resolved conflict (no local version) for file: {:?}", 
+                             String::from_utf8_lossy(&their_entry.path));
+                    }
+                }
+            }
+        }
+        
+        // Third pass: for any remaining conflicts, try ancestor version
+        if idx.has_conflicts() {
+            for conflict in &conflicts {
+                if conflict.our.is_none() && conflict.their.is_none() && conflict.ancestor.is_some() {
+                    let ancestor_entry = conflict.ancestor.as_ref().unwrap();
+                    if let Err(e) = idx.add(ancestor_entry) {
+                        warn!("Failed to add ancestor entry for {:?}: {}", 
+                             String::from_utf8_lossy(&ancestor_entry.path), e);
+                    } else {
+                        resolved_count += 1;
+                        info!("Resolved conflict (using ancestor) for file: {:?}", 
+                             String::from_utf8_lossy(&ancestor_entry.path));
+                    }
+                }
+            }
+        }
+        
+        info!("Resolved {}/{} conflicts", resolved_count, conflicts.len());
+        
+        // Write the resolved index
+        idx.write()?;
+        
+        // Checkout the resolved index to update working directory
+        repo.checkout_index(
+            Some(&mut idx), 
+            Some(git2::build::CheckoutBuilder::default()
+                .force()
+                .allow_conflicts(false)
+            )
+        )?;
+        
+        // If we still have conflicts after writing and checkout, abort
+        if idx.has_conflicts() {
+            error!("Could not resolve all conflicts automatically (resolved {}/{}). Aborting merge.", 
+                  resolved_count, conflicts.len());
+            
+            // Clean up: reset to local head
+            let local_commit = repo.find_commit(local.id())?;
+            repo.reset(local_commit.as_object(), git2::ResetType::Hard, None)?;
+            return Err(git2::Error::from_str("Could not resolve all merge conflicts automatically"));
+        }
     }
+    
     let result_tree = repo.find_tree(idx.write_tree_to(repo)?)?;
     // now create the merge commit
     let msg = format!("Merge: {} into {}", remote.id(), local.id());

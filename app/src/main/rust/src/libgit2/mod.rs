@@ -53,6 +53,77 @@ fn apply_ssh_workaround(clone: bool) {
     }
 }
 
+fn cleanup_repo_state(repo: &Repository) -> Result<(), Error> {
+    info!("Checking and cleaning up repository state...");
+
+    let mut cleaned_something = false;
+
+    // Check for ongoing merge state
+    if repo.find_reference("MERGE_HEAD").is_ok() {
+        warn!("Repository is in merge state, cleaning up merge state...");
+        // Remove merge state files
+        let _ = repo.find_reference("MERGE_HEAD").and_then(|mut r| r.delete());
+        let _ = repo.find_reference("MERGE_MSG").and_then(|mut r| r.delete());
+        let _ = repo.find_reference("MERGE_MODE").and_then(|mut r| r.delete());
+        cleaned_something = true;
+    }
+
+    // Check for ongoing rebase state
+    if repo.find_reference("REBASE_HEAD").is_ok() {
+        warn!("Repository is in rebase state, cleaning up rebase state...");
+        // Remove rebase state files
+        let _ = repo.find_reference("REBASE_HEAD").and_then(|mut r| r.delete());
+        let _ = repo.find_reference("REBASE_SEQ").and_then(|mut r| r.delete());
+        cleaned_something = true;
+    }
+
+    // Check for cherry-pick state
+    if repo.find_reference("CHERRY_PICK_HEAD").is_ok() {
+        warn!("Repository is in cherry-pick state, cleaning up cherry-pick state...");
+        let _ = repo.find_reference("CHERRY_PICK_HEAD").and_then(|mut r| r.delete());
+        let _ = repo.find_reference("CHERRY_PICK_SEQ").and_then(|mut r| r.delete());
+        cleaned_something = true;
+    }
+
+    // Check for revert state
+    if repo.find_reference("REVERT_HEAD").is_ok() {
+        warn!("Repository is in revert state, cleaning up revert state...");
+        let _ = repo.find_reference("REVERT_HEAD").and_then(|mut r| r.delete());
+        cleaned_something = true;
+    }
+
+    // Check if index has conflicts
+    if let Ok(index) = repo.index() {
+        if index.has_conflicts() {
+            warn!("Index has conflicts, resetting to HEAD...");
+            if let (Ok(_head), Ok(head_commit)) = (repo.head(), repo.head().and_then(|h| repo.find_commit(h.target().unwrap()))) {
+                let _ = repo.reset(head_commit.as_object(), git2::ResetType::Hard, None);
+                cleaned_something = true;
+            }
+        }
+    }
+
+    // Check for uncommitted changes and reset if needed
+    let mut status_opts = StatusOptions::new();
+    status_opts.include_untracked(false);
+    if let Ok(statuses) = repo.statuses(Some(&mut status_opts)) {
+        if statuses.iter().any(|s| s.status() != git2::Status::CURRENT) {
+            warn!("Repository has uncommitted changes, resetting to HEAD...");
+            if let (Ok(_head), Ok(head_commit)) = (repo.head(), repo.head().and_then(|h| repo.find_commit(h.target().unwrap()))) {
+                let _ = repo.reset(head_commit.as_object(), git2::ResetType::Hard, None);
+                cleaned_something = true;
+            }
+        }
+    }
+
+    if cleaned_something {
+        info!("Repository state was cleaned up");
+    } else {
+        info!("Repository state was already clean");
+    }
+    Ok(())
+}
+
 pub fn init_lib(home_path: String) {
     info!("home_path: {home_path}");
     let _ = HOME_PATH.set(home_path.clone());
@@ -251,24 +322,114 @@ pub fn push(cred: Option<Cred>) -> Result<(), Error> {
         .map_err(|e| Error::git2(e, "find_remote"))?;
 
     let branch = current_branch(repo)?;
+    
+    // Try normal push first
     let refspecs = [format!("refs/heads/{branch}:refs/heads/{branch}")];
-
     let mut callbacks = RemoteCallbacks::new();
-
     callbacks.certificate_check(|_cert, _| Ok(CertificateCheckStatus::CertificateOk));
 
-    if let Some(cred) = cred {
+    if let Some(c) = &cred {
         callbacks
-            .credentials(move |_url, _username_from_url, _allowed_types| credential_helper(&cred));
+            .credentials(move |_url, _username_from_url, _allowed_types| credential_helper(c));
     }
 
     let mut push_opts = PushOptions::new();
     push_opts.remote_callbacks(callbacks);
 
-    remote
-        .push(&refspecs, Some(&mut push_opts))
-        .map_err(|e| Error::git2(e, "push"))?;
+    match remote.push(&refspecs, Some(&mut push_opts)) {
+        Ok(()) => return Ok(()),
+        Err(e) if e.raw_code() == -11 => {  // GIT_ENONFASTFORWARD
+            // Instead of force push, return the non-fast-forward error
+            // The app can handle this by doing a sync operation
+            warn!("Push failed with non-fast-forward - app should sync first");
+            Err(Error::git2(e, "push needs sync"))
+        }
+        Err(e) => Err(Error::git2(e, "push")),
+    }
+}
 
+pub fn sync(cred: Option<Cred>) -> Result<(), Error> {
+    apply_ssh_workaround(false);
+    let mut repo_guard = REPO.lock().expect("repo lock");
+    let repo = repo_guard.as_mut().expect("repo");
+
+    let branch = current_branch(repo)?;
+    
+    // Stash any local changes
+    let has_changes = repo.statuses(None)
+        .map(|statuses| !statuses.is_empty())
+        .unwrap_or(false);
+    
+    let stashed = if has_changes {
+        match repo.stash_save(&repo.signature()?, "Auto-stash before sync", None) {
+            Ok(_) => {
+                info!("Stashed local changes");
+                true
+            }
+            Err(e) => {
+                warn!("Failed to stash changes: {}", e);
+                false
+            }
+        }
+    } else {
+        false
+    };
+
+    // Fetch latest from remote
+    let mut remote = repo
+        .find_remote(REMOTE)
+        .map_err(|e| Error::git2(e, "find_remote"))?;
+
+    let mut callbacks = RemoteCallbacks::new();
+    callbacks.certificate_check(|_cert, _| Ok(CertificateCheckStatus::CertificateOk));
+
+    if let Some(c) = &cred {
+        callbacks
+            .credentials(move |_url, _username_from_url, _allowed_types| credential_helper(c));
+    }
+
+    let mut fetch_options = FetchOptions::new();
+    fetch_options.remote_callbacks(callbacks);
+
+    remote
+        .fetch(&[] as &[&str], Some(&mut fetch_options), None)
+        .map_err(|e| Error::git2(e, "fetch"))?;
+
+    // Drop remote to release the borrow
+    drop(remote);
+
+    // Reset local branch to remote branch (this is like a hard pull)
+    {
+        let remote_branch_ref = format!("refs/remotes/{}/{}", REMOTE, branch);
+        let remote_ref = repo
+            .find_reference(&remote_branch_ref)
+            .map_err(|e| Error::git2(e, "find remote reference"))?;
+        
+        let remote_commit = repo
+            .find_commit(remote_ref.target().unwrap())
+            .map_err(|e| Error::git2(e, "find remote commit"))?;
+        
+        // Reset local branch to remote
+        repo.reset(remote_commit.as_object(), git2::ResetType::Hard, None)
+            .map_err(|e| Error::git2(e, "reset to remote"))?;
+        
+        // Set head to the branch
+        let local_ref_name = format!("refs/heads/{}", branch);
+        repo.set_head(&local_ref_name)
+            .map_err(|e| Error::git2(e, "set head"))?;
+    }
+
+    // Apply stashed changes if any (now all references are dropped)
+    if stashed {
+        if let Err(e) = repo.stash_apply(0, None) {
+            warn!("Failed to apply stashed changes: {}", e);
+            // Continue anyway - the sync succeeded
+        } else {
+            info!("Successfully applied stashed changes");
+        }
+    }
+    
+    info!("Sync completed successfully");
     Ok(())
 }
 
@@ -314,6 +475,13 @@ pub fn pull(cred: Option<Cred>) -> Result<(), Error> {
 pub fn close() {
     let mut repo = REPO.lock().expect("repo lock");
     repo.take();
+}
+
+#[allow(dead_code)]
+pub fn cleanup_repo() -> Result<(), Error> {
+    let repo = REPO.lock().expect("repo lock");
+    let repo = repo.as_ref().expect("repo");
+    cleanup_repo_state(repo)
 }
 
 pub fn is_change() -> Result<bool, Error> {

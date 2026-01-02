@@ -120,6 +120,7 @@ pub extern "C" fn Java_io_github_christianjann_gitnotecje_manager_GitManagerKt_o
     OK
 }
 
+#[derive(Clone)]
 pub enum Cred {
     UserPassPlainText {
         username: String,
@@ -364,6 +365,28 @@ pub extern "C" fn Java_io_github_christianjann_gitnotecje_manager_GitManagerKt_p
 ) -> jint {
     let cred = Cred::from_jni(&mut env, &cred).unwrap();
     unwrap_or_log!(libgit2::pull(cred), "pull");
+    OK
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_syncLib<'local>(
+    mut env: JNIEnv<'local>,
+    _class: JClass<'local>,
+    cred: JString<'local>,
+) -> jint {
+    let cred = Cred::from_jni(&mut env, &cred).unwrap();
+    unwrap_or_log!(libgit2::sync(cred), "sync");
+    OK
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn Java_io_github_christianjann_gitnotecje_manager_GitManagerKt_syncLib<'local>(
+    mut env: JNIEnv<'local>,
+    _class: JClass<'local>,
+    cred: JString<'local>,
+) -> jint {
+    let cred = Cred::from_jni(&mut env, &cred).unwrap();
+    unwrap_or_log!(libgit2::sync(cred), "sync");
     OK
 }
 

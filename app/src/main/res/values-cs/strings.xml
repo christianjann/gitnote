@@ -63,6 +63,7 @@
     <string name="error_create_folder">Nelze vytvořit složku: %1$s</string>
     <string name="error_pull_repo">Nelze provést pull: %1$s</string>
     <string name="error_push_repo">Nelze provést push: %1$s</string>
+    <string name="error_sync_repo">Nelze synchronizovat: %1$s</string>
     <string name="error_commit_repo">Nelze provést commit: %1$s</string>
     <string name="error_commit_file_change">Nelze zjistit, zda došlo ke změně souborů: %1$s</string>
     <string name="error_clone_repo">Nelze klonovat repozitář: %1$s</string>

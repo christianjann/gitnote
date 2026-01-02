@@ -63,6 +63,7 @@
     <string name="error_create_folder">Не вдалося створити папку: %1$s</string>
     <string name="error_pull_repo">Не вдалося виконати pull: %1$s</string>
     <string name="error_push_repo">Не вдалося виконати push: %1$s</string>
+    <string name="error_sync_repo">Не вдалося синхронізувати: %1$s</string>
     <string name="error_commit_repo">Не вдалося виконати commit: %1$s</string>
     <string name="error_commit_file_change">Не вдалося визначити, чи є зміни у файлах: %1$s</string>
     <string name="error_clone_repo">Не вдалося клонувати репозиторій: %1$s</string>

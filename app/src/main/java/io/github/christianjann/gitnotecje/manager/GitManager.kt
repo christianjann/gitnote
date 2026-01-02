@@ -191,9 +191,22 @@ class GitManager {
 
         if (res < 0) {
             Log.d(TAG, "push: $res")
+            
+            // If push failed due to non-fast-forward, try sync instead
+            if (res == -11) { // GIT_ENONFASTFORWARD
+                Log.d(TAG, "push failed with non-fast-forward, attempting sync")
+                val syncRes = syncLib(cred)
+                if (syncRes < 0) {
+                    val msg = uiHelper.getString(R.string.error_sync_repo, syncRes.toString())
+                    Log.d(TAG, "sync: $msg")
+                    throw Exception(msg)
+                }
+                // Sync succeeded, return success
+                return@safelyAccessLibGit2
+            }
+            
             val msg = uiHelper.getString(R.string.error_push_repo, res.toString())
             Log.d(TAG, "push: $msg")
-
             throw Exception(uiHelper.getString(R.string.error_push_repo, res.toString()))
         }
 
@@ -206,6 +219,21 @@ class GitManager {
         val res = pullLib(cred)
 
         if (res < 0) {
+            Log.d(TAG, "pull: $res")
+            
+            // If pull failed due to unmerged files, try sync instead
+            if (res == -3) { // GIT_EUNMERGED
+                Log.d(TAG, "pull failed with unmerged files, attempting sync")
+                val syncRes = syncLib(cred)
+                if (syncRes < 0) {
+                    val msg = uiHelper.getString(R.string.error_sync_repo, syncRes.toString())
+                    Log.d(TAG, "sync: $msg")
+                    throw Exception(msg)
+                }
+                // Sync succeeded, return success
+                return@safelyAccessLibGit2
+            }
+            
             throw Exception(uiHelper.getString(R.string.error_pull_repo, res.toString()))
         }
     }
@@ -276,6 +304,7 @@ private external fun commitAllLib(name: String, email: String, message: String):
 private external fun currentSignatureLib(): Pair<String, String>?
 private external fun pushLib(cred: Cred?): Int
 private external fun pullLib(cred: Cred?): Int
+private external fun syncLib(cred: Cred?): Int
 
 private external fun freeLib()
 
