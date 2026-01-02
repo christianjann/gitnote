@@ -14,11 +14,21 @@
 [![F-Droid](https://img.shields.io/f-droid/v/io.github.christianjann.gitnotecje?logo=f-droid&label=F-Droid&cacheSeconds=3600)](https://f-droid.org/packages/io.github.christianjann.gitnotecje)
 [![IzzyOnDroid](https://img.shields.io/endpoint?url=https://apt.izzysoft.de/fdroid/api/v1/shield/io.github.christianjann.gitnotecje)](https://apt.izzysoft.de/fdroid/index/apk/io.github.christianjann.gitnotecje) -->
 
-Android note app which integrates with Git. You can use this app to share your notes with any desktop editor that also supports Markdown.
+Android note-taking app with Git integration. A personal fork of GitNote, optimized for efficient markdown-based note management with advanced features like tag filtering, Git log viewing, and seamless synchronization.
 
-## Why
+## Quick Start
 
-Because all apps which integrate git on Android either separate the note title from the name of the file or use old UI/UX frameworks
+1. **Install dependencies**: Rust, Android SDK, JDK
+2. **Clone repository**: `git clone https://github.com/christianjann/gitnotecje.git`
+3. **First Android Studio build**: Open the project in Android Studio and build it once to generate `.gradle/config.properties` with the correct JBR path
+4. **Build**: `just install` (builds and installs debug APK)
+5. **Run**: Open the app and create/clone your first Git repository
+
+For development outside Android Studio, a [justfile](justfile) provides convenient commands. See [just](https://github.com/casey/just) for usage details.
+
+# Why
+
+Because all apps which integrate with Git on Android either crash, are slow, are based on technologies I don't like (and are slow as hell) or don't have the features I need.
 
 # Features
 
@@ -35,7 +45,7 @@ Because all apps which integrate git on Android either separate the note title f
 - [x] tag-based filtering and organization
 - [x] full markdown rendering
 - [x] frontmatter metadata support
-- [x] git log viewer
+- [x] Git log viewer
 - [x] folder display mode options
 
 <table align="center">
@@ -100,18 +110,28 @@ Because all apps which integrate git on Android either separate the note title f
   </tr>
 </table>
 
-_Supported Android versions: 11 to 16_
+_Supported Android versions: 11+_
 
 _Supported Architecture: `arm64-v8a`, `x86_64`_
 
-## Documentation
+# Documentation
 
-- [Detailed Features](./doc/features.md)
-- [Design Document](./doc/design/markdown_header.md)
+- [Detailed features documentation](./doc/features.md)
+- [Building the app](./BUILD.md)
+- [Markdown header format](./doc/design/markdown_header.md)
+- [Contributing](./CONTRIBUTING.md)
 
-# Build
+# Build System
 
-[See](./BUILD.md).
+This project uses a custom build system based on [just](https://github.com/casey/just) for task automation. Key commands:
+
+- `just build` - Build debug APK
+- `just install` - Build and install debug APK
+- `just rust-build` - Build Rust native library
+- `just fmt` - Format all code (Kotlin + Rust)
+- `just clean-build` - Clean and rebuild
+
+See [building.md](doc/building.md) for detailed build instructions.
 
 # Current limitation
 
@@ -121,10 +141,11 @@ _Supported Architecture: `arm64-v8a`, `x86_64`_
 - Sometimes the app is misbehaving, the only thing that helps is a reload of the database via the debug menu
 - Opening a local repository in device memory that was previously a remote cloned repo seems not to work, re-clone it
 
-## Contributing
+# Future direction
+- Move more of the core logic and data handling into the Rust part
+- Maybe get rid of the database caching entirely and use a more thin layer on top of the Git abstraction
+- Make it much faster and handle conflicts
 
-See [this file](./CONTRIBUTING.md).
+# Attribution
 
-## Attribution
-
-This project is a fork of the original [GitNote](https://github.com/wiiznokes/gitnote) Android app, it's an opinionated edition to better suit my personal note-taking requirements and workflow preferences.
+This project is a fork of the original [GitNote](https://github.com/wiiznokes/gitnote) Android app by [wiiznokes](https://github.com/wiiznokes). It's an opinionated edition optimized to better suit personal note-taking requirements and workflow preferences, with improvements to performance, UI responsiveness, and feature enhancements.
