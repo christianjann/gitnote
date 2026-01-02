@@ -46,10 +46,11 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.ui.platform.LocalContext
 import io.github.wiiznokes.gitnote.MainActivity
 import io.github.wiiznokes.gitnote.data.Language
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -276,7 +277,7 @@ fun GridScreen(
                                         fontFamily = FontFamily.Monospace
                                     )
                                 }
-                                Divider()
+                                HorizontalDivider()
                             }
                         }
                     }
@@ -590,9 +591,10 @@ private fun NoteCard(
                 if (shouldShowTags) {
                     val tags = FrontmatterParser.parseTags(gridNote.note.content)
                     if (tags.isNotEmpty()) {
-                        Row(
+                        FlowRow(
                             modifier = Modifier.padding(bottom = 6.dp),
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             tags.forEach { tag ->
                                 Surface(
