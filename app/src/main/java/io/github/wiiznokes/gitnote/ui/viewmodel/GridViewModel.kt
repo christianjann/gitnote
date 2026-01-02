@@ -132,13 +132,13 @@ class GridViewModel : ViewModel() {
         viewModelScope.launch {
             val newRelativePath = "$folderRelativePath/${note.fullName()}"
             val newNote = note.copy(relativePath = newRelativePath)
-            val result = storageManager.updateNote(newNote, note)
+            val result = storageManager.updateNote(newNote, note) {
+                // Refresh is handled by Room invalidation
+            }
             result.onFailure { e ->
                 uiHelper.makeToast("Failed to move note: $e")
             }
             _noteBeingMoved.emit(null)
-            // Trigger refresh
-            refreshCounter.value++
         }
     }
 
@@ -296,9 +296,8 @@ class GridViewModel : ViewModel() {
             currentNoteFolderRelativePath,
             prefs.sortOrder.getFlow(),
             query,
-            selectedTag,
-            refreshCounter
-        ) { currentNoteFolderRelativePath, sortOrder, query, selectedTag, refreshCounter ->
+            selectedTag
+        ) { currentNoteFolderRelativePath, sortOrder, query, selectedTag ->
             Pager(
                 config = PagingConfig(pageSize = 50),
                 pagingSourceFactory = {
@@ -323,7 +322,7 @@ class GridViewModel : ViewModel() {
             )
         }
     }.stateIn(
-        CoroutineScope(Dispatchers.IO), SharingStarted.WhileSubscribed(5000), PagingData.empty()
+        CoroutineScope(Dispatchers.Main), SharingStarted.WhileSubscribed(5000), PagingData.empty()
     )
 
     val allTags = dao.allNotes().flowMap { notes: List<Note> ->
@@ -331,7 +330,7 @@ class GridViewModel : ViewModel() {
             FrontmatterParser.parseTags(note.content)
         }.distinct().sorted()
     }.stateIn(
-        CoroutineScope(Dispatchers.IO), SharingStarted.WhileSubscribed(5000), emptyList()
+        CoroutineScope(Dispatchers.Main), SharingStarted.WhileSubscribed(5000), emptyList()
     )
 
     // todo: use pager
@@ -345,7 +344,7 @@ class GridViewModel : ViewModel() {
         val (currentNoteFolderRelativePath, sortOrder) = pair
         dao.drawerFolders(currentNoteFolderRelativePath, sortOrder)
     }.stateIn(
-        CoroutineScope(Dispatchers.IO), SharingStarted.WhileSubscribed(5000), emptyList()
+        CoroutineScope(Dispatchers.Main), SharingStarted.WhileSubscribed(5000), emptyList()
     )
 
     fun reloadDatabase() {
@@ -368,12 +367,12 @@ class GridViewModel : ViewModel() {
                 content = newContent,
                 lastModifiedTimeMillis = System.currentTimeMillis()
             )
-            val result = storageManager.updateNote(newNote, note)
+            val result = storageManager.updateNote(newNote, note) {
+                // Refresh is handled by Room invalidation
+            }
             result.onFailure {
                 uiHelper.makeToast("Failed to update note: $it")
             }
-            // Trigger refresh
-            refreshCounter.value++
         }
     }
 
@@ -384,12 +383,12 @@ class GridViewModel : ViewModel() {
                 content = newContent,
                 lastModifiedTimeMillis = System.currentTimeMillis()
             )
-            val result = storageManager.updateNote(newNote, note)
+            val result = storageManager.updateNote(newNote, note) {
+                // Refresh is handled by Room invalidation
+            }
             result.onFailure {
                 uiHelper.makeToast("Failed to convert note: $it")
             }
-            // Trigger refresh
-            refreshCounter.value++
         }
     }
 
@@ -400,16 +399,17 @@ class GridViewModel : ViewModel() {
                 content = newContent,
                 lastModifiedTimeMillis = System.currentTimeMillis()
             )
-            val result = storageManager.updateNote(newNote, note)
+            val result = storageManager.updateNote(newNote, note) {
+                // Refresh is handled by Room invalidation
+            }
             result.onFailure {
                 uiHelper.makeToast("Failed to convert note: $it")
             }
-            // Trigger refresh
-            refreshCounter.value++
         }
     }
 
     fun showGitLog() {
+        if (_isGitLogLoading.value) return
         viewModelScope.launch {
             _isGitLogLoading.value = true
             storageManager.getGitLog().onSuccess { entries ->

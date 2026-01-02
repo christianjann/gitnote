@@ -415,6 +415,9 @@ pub struct GitLogEntry {
 }
 
 pub fn get_git_log(limit: usize) -> Result<Vec<GitLogEntry>, Error> {
+    let start = std::time::Instant::now();
+    log::debug!("Starting get_git_log with limit {}", limit);
+
     let repo = REPO.lock().expect("repo lock");
     let repo = repo.as_ref().expect("repo");
 
@@ -443,6 +446,9 @@ pub fn get_git_log(limit: usize) -> Result<Vec<GitLogEntry>, Error> {
             date,
         });
     }
+
+    let duration = start.elapsed();
+    log::debug!("get_git_log completed in {}ms, returned {} entries", duration.as_millis(), entries.len());
 
     Ok(entries)
 }

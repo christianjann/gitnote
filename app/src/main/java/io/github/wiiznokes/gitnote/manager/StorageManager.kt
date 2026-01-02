@@ -230,12 +230,13 @@ class StorageManager {
     /**
      * Best effort
      */
-    suspend fun updateNote(new: Note, previous: Note): Result<Unit> = locker.withLock {
+    suspend fun updateNote(new: Note, previous: Note, onUpdated: suspend () -> Unit = {}): Result<Unit> = locker.withLock {
         Log.d(TAG, "updateNote: previous = $previous")
         Log.d(TAG, "updateNote: new = $new")
 
         update(
-            commitMessage = "gitnote changed ${previous.relativePath}"
+            commitMessage = "gitnote changed ${previous.relativePath}",
+            onUpdated = onUpdated
         ) {
             dao.removeNote(previous)
             dao.insertNote(new)
@@ -399,8 +400,9 @@ class StorageManager {
 
     private suspend fun <T> update(
         commitMessage: String,
+        onUpdated: suspend () -> Unit = {},
         f: suspend () -> Result<T>
-    ): Result<T> {
+    ): Result<T> = withContext(Dispatchers.Default) {
 
         val cred = prefs.cred()
         val remoteUrl = prefs.remoteUrl.get()
@@ -413,7 +415,7 @@ class StorageManager {
             author,
             "commit from gitnote, before doing a change"
         ).onFailure {
-            return failure(it)
+            return@withContext failure(it)
         }
 
         // Only perform pull/push if background git operations are disabled
@@ -426,20 +428,24 @@ class StorageManager {
         }
 
         updateDatabaseWithoutLocker().onFailure {
-            return failure(it)
+            return@withContext failure(it)
         }
 
         val payload = f().fold(
             onFailure = {
-                return failure(it)
+                return@withContext failure(it)
             },
             onSuccess = {
                 it
             }
         )
 
+        withContext(Dispatchers.Main) {
+            onUpdated()
+        }
+
         gitManager.commitAll(author, commitMessage).onFailure {
-            return failure(it)
+            return@withContext failure(it)
         }
 
         // Only perform push if background git operations are disabled
@@ -460,11 +466,11 @@ class StorageManager {
             _syncState.emit(SyncState.Ok(false))
         }
 
-        return success(payload)
+        return@withContext success(payload)
     }
 
-    suspend fun getGitLog(limit: Int = 20): Result<List<GitLogEntry>> {
-        return gitManager.getGitLog(limit)
+    suspend fun getGitLog(limit: Int = 20): Result<List<GitLogEntry>> = withContext(Dispatchers.IO) {
+        gitManager.getGitLog(limit)
     }
 
     suspend fun consumeOkSyncState() {
