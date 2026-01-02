@@ -38,19 +38,67 @@ Because all apps which integrate git on Android either separate the note title f
 - [x] git log viewer
 - [x] folder display mode options
 
-<p align="center">
-  <img src="assets/grid.png" width="23%" alt="Grid view with flexible tag display"/>
-  <img src="assets/list.png" width="23%" alt="List view"/>
-  <img src="assets/tags.png" width="23%" alt="Tag filtering interface"/>
-  <img src="assets/drawer.png" width="23%" alt="Drawer navigation"/>
-  
-</p>
-
-<p align="center">
-  <img src="assets/edit.png" width="30%" alt="Edit screen"/>
-  <img src="assets/rendered.png" width="30%" alt="Markdown rendering"/>
-  <img src="assets/git_log.png" width="30%" alt="Git log viewer"/>
-</p>
+<table align="center">
+  <tr>
+    <td align="center">
+      <img src="assets/grid.png" width="180" alt="Grid view with flexible tag display"/>
+    </td>
+    <td align="center">
+      <img src="assets/list.png" width="200" alt="List view"/>
+    </td>
+    <td align="center">
+      <img src="assets/tags.png" width="180" alt="Tag filtering interface"/>
+    </td>
+    <td align="center">
+      <img src="assets/drawer.png" width="180" alt="Drawer navigation"/>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <strong>Grid View</strong><br>
+      Browse notes in a customizable grid layout with flexible tag display
+    </td>
+    <td align="center">
+      <strong>List View</strong><br>
+      Navigate through notes in a traditional list format
+    </td>
+    <td align="center">
+      <strong>Tag Filtering</strong><br>
+      Filter and organize notes using tags for better organization
+    </td>
+    <td align="center">
+      <strong>Navigation Drawer</strong><br>
+      Access repositories, settings, and navigation options
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="assets/edit.png" width="220" alt="Edit screen"/>
+    </td>
+    <td align="center">
+      <img src="assets/rendered.png" width="220" alt="Markdown rendering"/>
+    </td>
+    <td align="center">
+      <img src="assets/git_log.png" width="220" alt="Git log viewer"/>
+    </td>
+    <td align="center"></td>
+  </tr>
+  <tr>
+    <td align="center">
+      <strong>Edit Screen</strong><br>
+      Full-featured markdown editor with syntax highlighting
+    </td>
+    <td align="center">
+      <strong>Markdown Rendering</strong><br>
+      Preview rendered markdown with full formatting support
+    </td>
+    <td align="center">
+      <strong>Git Log Viewer</strong><br>
+      View commit history and track changes to your notes
+    </td>
+    <td align="center"></td>
+  </tr>
+</table>
 
 _Supported Android versions: 11 to 16_
 
