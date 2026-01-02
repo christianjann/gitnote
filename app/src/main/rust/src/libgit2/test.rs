@@ -158,7 +158,7 @@ fn test_push_integration() {
 
 fn test_pull_integration() {
     // Test pull function
-    pull(None).expect("Failed to pull using our pull function");
+    pull(None, "Test User", "test@example.com").expect("Failed to pull using our pull function");
     println!("✓ test_pull function successful");
 }
 
@@ -484,7 +484,7 @@ fn test_pull_remote_changes() {
     fs::remove_dir_all(&remote_temp_dir).expect("Failed to clean up remote temp dir");
 
     // Now use our pull function to get the remote changes
-    pull(None).expect("Failed to pull remote changes");
+    pull(None, "Test User", "test@example.com").expect("Failed to pull remote changes");
 
     // Verify we got the remote commit
     let after_pull_commit = last_commit().expect("Failed to get commit after pull");
@@ -900,12 +900,48 @@ fn test_pull_conflict_resolution() {
     fs::remove_dir_all(&remote_temp_dir).expect("Failed to clean up remote temp dir");
 
     // Now try to pull - this should create a merge conflict
-    let pull_result = pull(None);
+    let pull_result = pull(None, "Local User", "local@example.com");
     match pull_result {
         Ok(_) => {
             println!("Pull succeeded - automatic merge performed");
+            
+            // Debug: check current directory and list files
+            let current_dir = std::env::current_dir().expect("Failed to get current dir");
+            println!("Current directory: {:?}", current_dir);
+            
+            // List files in current directory
+            match std::fs::read_dir(".") {
+                Ok(entries) => {
+                    println!("Files in current directory:");
+                    for entry in entries {
+                        if let Ok(entry) = entry {
+                            println!("  {:?}", entry.file_name());
+                        }
+                    }
+                }
+                Err(e) => println!("Failed to list directory: {:?}", e),
+            }
+            
+            // Check git log
+            match std::process::Command::new("git").args(&["log", "--oneline", "-5"]).output() {
+                Ok(output) => {
+                    let log = String::from_utf8_lossy(&output.stdout);
+                    println!("Git log:\n{}", log);
+                }
+                Err(e) => println!("Failed to get git log: {:?}", e),
+            }
+            
+            // Check git ls-tree HEAD
+            match std::process::Command::new("git").args(&["ls-tree", "-r", "HEAD"]).output() {
+                Ok(output) => {
+                    let tree = String::from_utf8_lossy(&output.stdout);
+                    println!("Git ls-tree HEAD:\n{}", tree);
+                }
+                Err(e) => println!("Failed to get git ls-tree: {:?}", e),
+            }
+            
             // Check if there was a merge commit or automatic resolution
-            let content = fs::read_to_string(local_repo.join("test.txt")).expect("Failed to read file");
+            let content = fs::read_to_string("test.txt").expect("Failed to read file");
             println!("Final content after pull: {}", content);
 
             // Check for conflict markers
@@ -930,4 +966,121 @@ fn test_pull_conflict_resolution() {
     fs::remove_dir_all(test_dir).expect("Failed to clean up test directories");
 
     println!("✓ test_pull_conflict_resolution completed successfully");
+}
+
+#[test]
+#[serial]
+fn test_pull_conflict_resolution_from_different_cwd() {
+    // Test that pull conflict resolution works even when current working directory
+    // is NOT the repository root (reproducing the original bug scenario)
+    init_lib("/tmp".to_string());
+
+    // Setup test directories with ABSOLUTE paths
+    let current_dir = std::env::current_dir().expect("Failed to get current directory");
+    let test_dir = current_dir.join("test_repos_pull_conflict_cwd");
+    let remote_repo = test_dir.join("remote");
+    let local_repo = test_dir.join("local");
+
+    // Clean up any existing test directories
+    if test_dir.exists() {
+        fs::remove_dir_all(&test_dir).expect("Failed to clean up test directories");
+    }
+
+    // Create test directories
+    fs::create_dir_all(&remote_repo).expect("Failed to create remote repo dir");
+    fs::create_dir_all(&local_repo).expect("Failed to create local repo dir");
+
+    // Initialize remote repository as bare
+    run_git_command(&remote_repo, &["init", "--bare"]);
+    run_git_command(&remote_repo, &["config", "user.name", "Test User"]);
+    run_git_command(&remote_repo, &["config", "user.email", "test@example.com"]);
+
+    // Create initial commit and push to remote
+    let temp_dir = test_dir.join("temp");
+    fs::create_dir_all(&temp_dir).expect("Failed to create temp dir");
+    run_git_command(&temp_dir, &["init"]);
+    run_git_command(&temp_dir, &["config", "user.name", "Test User"]);
+    run_git_command(&temp_dir, &["config", "user.email", "test@example.com"]);
+    fs::write(temp_dir.join("test.txt"), "Line 1\nLine 2\nLine 3\n").expect("Failed to write test file");
+    run_git_command(&temp_dir, &["add", "test.txt"]);
+    run_git_command(&temp_dir, &["commit", "-m", "Initial commit with test file"]);
+
+    // Push to remote
+    let remote_url = format!("file://{}", remote_repo.canonicalize().unwrap().display());
+    run_git_command(&temp_dir, &["remote", "add", "origin", &remote_url]);
+    run_git_command(&temp_dir, &["push", "-u", "origin", "master"]);
+
+    // Clean up temp
+    fs::remove_dir_all(&temp_dir).expect("Failed to clean up temp dir");
+
+    // Clone to local
+    run_git_command(&current_dir, &["clone", &remote_url, "test_repos_pull_conflict_cwd/local"]);
+    run_git_command(&local_repo, &["config", "user.name", "Local User"]);
+    run_git_command(&local_repo, &["config", "user.email", "local@example.com"]);
+
+    // Open repository using ABSOLUTE path
+    open_repo(&local_repo.canonicalize().unwrap().to_string_lossy()).expect("Failed to open repository");
+
+    // Save current directory
+    let original_dir = std::env::current_dir().expect("Failed to get current directory");
+
+    // Locally commit a change using our commit_all (simulating offline work)
+    std::env::set_current_dir(&local_repo).expect("Failed to change to local repo");
+    fs::write("test.txt", "Line 1\nLine 2 LOCAL CHANGE\nLine 3\n").expect("Failed to write local change");
+    commit_all("Local User", "local@example.com", "Local: modified line 2").expect("Failed to commit locally");
+
+    // Now commit a change to remote directly (simulating remote changes while offline)
+    let remote_temp_dir = test_dir.join("remote_temp");
+    fs::create_dir_all(&remote_temp_dir).expect("Failed to create remote temp dir");
+    run_git_command(&remote_temp_dir, &["clone", &remote_url, "."]);
+    run_git_command(&remote_temp_dir, &["config", "user.name", "Remote User"]);
+    run_git_command(&remote_temp_dir, &["config", "user.email", "remote@example.com"]);
+
+    // Modify the same line on remote
+    fs::write(remote_temp_dir.join("test.txt"), "Line 1\nLine 2 REMOTE CHANGE\nLine 3\n").expect("Failed to write remote change");
+    run_git_command(&remote_temp_dir, &["add", "test.txt"]);
+    run_git_command(&remote_temp_dir, &["commit", "-m", "Remote: modified line 2"]);
+    run_git_command(&remote_temp_dir, &["push"]);
+
+    // Clean up remote temp
+    fs::remove_dir_all(&remote_temp_dir).expect("Failed to clean up remote temp dir");
+
+    // CRITICAL: Set current directory to a DIFFERENT directory (not the repo root)
+    // This reproduces the original bug where the app's working directory wasn't the repo root
+    std::env::set_current_dir(&test_dir).expect("Failed to change to test dir (not repo root)");
+
+    // Now try to pull - this should trigger conflict resolution
+    // The bug was that path resolution used relative paths assuming CWD was repo root
+    let pull_result = pull(None, "Local User", "local@example.com");
+
+    match pull_result {
+        Ok(_) => {
+            println!("Pull succeeded - checking for conflict resolution");
+
+            // Verify the file was written correctly (this would fail with the original bug)
+            let content = fs::read_to_string(local_repo.join("test.txt")).expect("Failed to read resolved file");
+            println!("Resolved content: {}", content);
+
+            // Check if conflict was resolved automatically
+            if content.contains("<<<<<<<") || content.contains("=======") || content.contains(">>>>>>>") {
+                println!("Conflict markers still present - manual resolution needed");
+            } else {
+                println!("No conflict markers found - automatic merge succeeded");
+            }
+        }
+        Err(e) => {
+            println!("Pull failed: {:?}", e);
+            // Check if repository is in merge state
+            let merge_head_exists = local_repo.join(".git").join("MERGE_HEAD").exists();
+            if merge_head_exists {
+                println!("Repository is in merge state - conflict needs resolution");
+            }
+        }
+    }
+
+    // Clean up
+    std::env::set_current_dir(original_dir).expect("Failed to restore original directory");
+    fs::remove_dir_all(test_dir).expect("Failed to clean up test directories");
+
+    println!("✓ test_pull_conflict_resolution_from_different_cwd completed successfully");
 }

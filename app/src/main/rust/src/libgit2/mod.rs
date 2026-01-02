@@ -439,7 +439,7 @@ pub fn sync(cred: Option<Cred>) -> Result<(), Error> {
     Ok(())
 }
 
-pub fn pull(cred: Option<Cred>) -> Result<(), Error> {
+pub fn pull(cred: Option<Cred>, name: &str, email: &str) -> Result<(), Error> {
     apply_ssh_workaround(false);
     let repo = REPO.lock().expect("repo lock");
     let repo = repo.as_ref().expect("repo");
@@ -473,7 +473,7 @@ pub fn pull(cred: Option<Cred>) -> Result<(), Error> {
         .reference_to_annotated_commit(&fetch_head)
         .map_err(|e| Error::git2(e, "reference_to_annotated_commit"))?;
 
-    merge::do_merge(repo, &branch, commit).map_err(|e| Error::git2(e, "do_merge"))?;
+    merge::do_merge(repo, &branch, commit, name, email).map_err(|e| Error::git2(e, "do_merge"))?;
 
     Ok(())
 }

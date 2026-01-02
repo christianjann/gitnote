@@ -32,8 +32,10 @@ sealed interface SyncState {
 
     object Push : SyncState
 
+    object Reloading : SyncState
+
     fun isLoading(): Boolean {
-        return this is Pull || this is Push
+        return this is Pull || this is Push || this is Reloading
     }
 }
 
@@ -60,6 +62,10 @@ class StorageManager {
     private val _syncState: MutableStateFlow<SyncState> = MutableStateFlow(SyncState.Ok(true))
     val syncState: StateFlow<SyncState> = _syncState
 
+    suspend fun setSyncState(state: SyncState) {
+        _syncState.emit(state)
+    }
+
 
     suspend fun updateDatabaseAndRepo(includeGitOperations: Boolean = true): Result<Unit> = locker.withLock {
         Log.d(TAG, "updateDatabaseAndRepo")
@@ -79,7 +85,7 @@ class StorageManager {
 
         if (includeGitOperations && remoteUrl.isNotEmpty()) {
             _syncState.emit(SyncState.Pull)
-            gitManager.pull(cred).onFailure {
+            gitManager.pull(cred, author).onFailure {
                 syncFailed = true
                 _syncState.emit(SyncState.Offline)
                 uiHelper.makeToast("${it.message}${uiHelper.getString(R.string.offline_hint)}")
@@ -112,12 +118,13 @@ class StorageManager {
         CoroutineScope(Dispatchers.IO).launch {
             locker.withLock {
                 val cred = prefs.cred()
+                val author = prefs.gitAuthor()
                 val remoteUrl = prefs.remoteUrl.get()
                 var syncFailed = false
 
                 if (remoteUrl.isNotEmpty()) {
                     _syncState.emit(SyncState.Pull)
-                    gitManager.pull(cred).onFailure {
+                    gitManager.pull(cred, author).onFailure {
                         syncFailed = true
                         _syncState.emit(SyncState.Offline)
                         // Don't show toast for background operations
@@ -421,7 +428,7 @@ class StorageManager {
         // Only perform pull/push if background git operations are disabled
         if (!backgroundGitOps && remoteUrl.isNotEmpty()) {
             _syncState.emit(SyncState.Pull)
-            gitManager.pull(cred).onFailure {
+            gitManager.pull(cred, author).onFailure {
                 syncFailed = true
                 _syncState.emit(SyncState.Offline)
             }

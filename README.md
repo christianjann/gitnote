@@ -47,6 +47,7 @@ Because all apps which integrate with Git on Android either crash, are slow, are
 - [x] frontmatter metadata support
 - [x] Git log viewer
 - [x] folder display mode options
+- [x] automatic merge conflict resolution
 
 <table align="center">
   <tr>
@@ -138,7 +139,6 @@ See [building.md](doc/building.md) for detailed build instructions.
 # Current limitation
 
 - Android does not differentiate case for file name, so if you have a folder named `A` and another folder named `a`, `a` will not be displayed.
-- A GIT conflict will make the app crash
 - Resync and reload of the database when there was an remote change by some other Git client takes forever
 - Sometimes the app is misbehaving, the only thing that helps is a reload of the database via the debug menu
 - Opening a local repository in device memory that was previously a remote cloned repo seems not to work, re-clone it
@@ -146,7 +146,7 @@ See [building.md](doc/building.md) for detailed build instructions.
 # Future direction
 - Move more of the core logic and data handling into the Rust part
 - Maybe get rid of the database caching entirely and use a more thin layer on top of the Git abstraction
-- Make it much faster and handle conflicts
+- Make it much faster
 
 # Attribution
 

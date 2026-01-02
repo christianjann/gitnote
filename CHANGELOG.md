@@ -60,6 +60,16 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - Automatic database synchronization when external commits are detected
   - Improved error handling for notes modified or deleted remotely
   - Database index automatically updates when app detects external changes
+- Reload Spinner: Visual indicator in action bar during database reload operations
+  - Shows spinning progress indicator when "Reload Database" is selected from menu
+  - Provides immediate feedback for long-running database operations
+  - Automatically disappears when operation completes or fails
+- Automatic Merge Conflict Resolution: Intelligent three-pass conflict resolution during synchronization
+  - Local-first resolution strategy preserves user changes
+  - Visual feedback with loading spinner during resolution
+  - Seamless background operation without user intervention
+  - Repository-aware path resolution for cross-platform compatibility
+
 
 ### Changed
 

@@ -362,9 +362,13 @@ pub extern "C" fn Java_io_github_christianjann_gitnotecje_manager_GitManagerKt_p
     mut env: JNIEnv<'local>,
     _class: JClass<'local>,
     cred: JString<'local>,
+    name: JString<'local>,
+    email: JString<'local>,
 ) -> jint {
     let cred = Cred::from_jni(&mut env, &cred).unwrap();
-    unwrap_or_log!(libgit2::pull(cred), "pull");
+    let name = env.get_string(&name).unwrap().to_str().unwrap().to_string();
+    let email = env.get_string(&email).unwrap().to_str().unwrap().to_string();
+    unwrap_or_log!(libgit2::pull(cred, &name, &email), "pull");
     OK
 }
 

@@ -26,13 +26,20 @@ fn normal_merge(
     repo: &Repository,
     local: &git2::AnnotatedCommit,
     remote: &git2::AnnotatedCommit,
+    name: &str,
+    email: &str,
 ) -> Result<(), git2::Error> {
-    let local_tree = repo.find_commit(local.id())?.tree()?;
-    let remote_tree = repo.find_commit(remote.id())?.tree()?;
-    let ancestor = repo
-        .find_commit(repo.merge_base(local.id(), remote.id())?)?
-        .tree()?;
-    let mut idx = repo.merge_trees(&ancestor, &local_tree, &remote_tree, None)?;
+    // Set up the merge state
+    let mut merge_options = git2::MergeOptions::new();
+    let mut checkout_options = git2::build::CheckoutBuilder::new();
+    checkout_options
+        .allow_conflicts(true)
+        .conflict_style_merge(true)
+        .force();
+    repo.merge(&[remote], Some(&mut merge_options), Some(&mut checkout_options))?;
+    
+    // Get the repository index which now has conflicts
+    let mut idx = repo.index()?;
 
     let result_tree = if idx.has_conflicts() {
         info!("Merge conflicts detected, attempting automatic resolution...");
@@ -43,10 +50,29 @@ fn normal_merge(
         
         for conflict in &conflicts {
             if let Some(our_entry) = &conflict.our {
-                // We have our version, use it
-                if let Err(e) = idx.add(our_entry) {
-                    warn!("Failed to add our entry for {:?}: {}", 
-                         String::from_utf8_lossy(&our_entry.path), e);
+                // Resolve by writing the our version to the working directory
+                let blob = repo.find_blob(our_entry.id)?;
+                let content = blob.content();
+                let path_str = std::str::from_utf8(&our_entry.path).unwrap_or("");
+                
+                // Get the full path relative to repository working directory
+                let repo_workdir = repo.workdir().ok_or_else(|| git2::Error::from_str("Repository has no working directory"))?;
+                let full_path = repo_workdir.join(path_str);
+                
+                // Ensure parent directories exist
+                if let Some(parent) = full_path.parent() {
+                    std::fs::create_dir_all(parent).map_err(|e| git2::Error::from_str(&format!("Failed to create directories: {}", e)))?;
+                }
+                
+                std::fs::write(&full_path, content).map_err(|e| git2::Error::from_str(&format!("Failed to write file: {}", e)))?;
+                
+                // Add the resolved file to the index
+                idx.add_path(&std::path::Path::new(path_str))?;
+                
+                // Mark conflict as resolved
+                let path = std::path::Path::new(path_str);
+                if let Err(e) = idx.conflict_remove(path) {
+                    warn!("Failed to remove conflict for {:?}: {}", path_str, e);
                 } else {
                     resolved_count += 1;
                     info!("Resolved conflict for file: {:?}", String::from_utf8_lossy(&our_entry.path));
@@ -59,9 +85,29 @@ fn normal_merge(
             for conflict in &conflicts {
                 if conflict.our.is_none() && conflict.their.is_some() {
                     let their_entry = conflict.their.as_ref().unwrap();
-                    if let Err(e) = idx.add(their_entry) {
-                        warn!("Failed to add their entry for {:?}: {}", 
-                             String::from_utf8_lossy(&their_entry.path), e);
+                    // Resolve by writing the their version to the working directory
+                    let blob = repo.find_blob(their_entry.id)?;
+                    let content = blob.content();
+                    let path_str = std::str::from_utf8(&their_entry.path).unwrap_or("");
+                    
+                    // Get the full path relative to repository working directory
+                    let repo_workdir = repo.workdir().ok_or_else(|| git2::Error::from_str("Repository has no working directory"))?;
+                    let full_path = repo_workdir.join(path_str);
+                    
+                    // Ensure parent directories exist
+                    if let Some(parent) = full_path.parent() {
+                        std::fs::create_dir_all(parent).map_err(|e| git2::Error::from_str(&format!("Failed to create directories: {}", e)))?;
+                    }
+                    
+                    std::fs::write(&full_path, content).map_err(|e| git2::Error::from_str(&format!("Failed to write file: {}", e)))?;
+                    
+                    // Add the resolved file to the index
+                    idx.add_path(&std::path::Path::new(path_str))?;
+                    
+                    // Mark conflict as resolved
+                    let path = std::path::Path::new(path_str);
+                    if let Err(e) = idx.conflict_remove(path) {
+                        warn!("Failed to remove conflict for {:?}: {}", path_str, e);
                     } else {
                         resolved_count += 1;
                         info!("Resolved conflict (no local version) for file: {:?}", 
@@ -76,9 +122,29 @@ fn normal_merge(
             for conflict in &conflicts {
                 if conflict.our.is_none() && conflict.their.is_none() && conflict.ancestor.is_some() {
                     let ancestor_entry = conflict.ancestor.as_ref().unwrap();
-                    if let Err(e) = idx.add(ancestor_entry) {
-                        warn!("Failed to add ancestor entry for {:?}: {}", 
-                             String::from_utf8_lossy(&ancestor_entry.path), e);
+                    // Resolve by writing the ancestor version to the working directory
+                    let blob = repo.find_blob(ancestor_entry.id)?;
+                    let content = blob.content();
+                    let path_str = std::str::from_utf8(&ancestor_entry.path).unwrap_or("");
+                    
+                    // Get the full path relative to repository working directory
+                    let repo_workdir = repo.workdir().ok_or_else(|| git2::Error::from_str("Repository has no working directory"))?;
+                    let full_path = repo_workdir.join(path_str);
+                    
+                    // Ensure parent directories exist
+                    if let Some(parent) = full_path.parent() {
+                        std::fs::create_dir_all(parent).map_err(|e| git2::Error::from_str(&format!("Failed to create directories: {}", e)))?;
+                    }
+                    
+                    std::fs::write(&full_path, content).map_err(|e| git2::Error::from_str(&format!("Failed to write file: {}", e)))?;
+                    
+                    // Add the resolved file to the index
+                    idx.add_path(&std::path::Path::new(path_str))?;
+                    
+                    // Mark conflict as resolved
+                    let path = std::path::Path::new(path_str);
+                    if let Err(e) = idx.conflict_remove(path) {
+                        warn!("Failed to remove conflict for {:?}: {}", path_str, e);
                     } else {
                         resolved_count += 1;
                         info!("Resolved conflict (using ancestor) for file: {:?}", 
@@ -119,31 +185,21 @@ fn normal_merge(
             return Err(git2::Error::from_str("Could not resolve all merge conflicts automatically"));
         }
         
+        // Write the resolved index and create tree
+        idx.write()?;
+        let tree_id = idx.write_tree()?;
+        let result_tree = repo.find_tree(tree_id)?;
+        
         result_tree
     } else {
         // No conflicts, just write the tree
-        let tree_id = idx.write_tree_to(repo)?;
-        
-        // Checkout the tree to update working directory
-        let result_tree = repo.find_tree(tree_id)?;
-        repo.checkout_tree(
-            result_tree.as_object(),
-            Some(git2::build::CheckoutBuilder::default()
-                .force()
-                .allow_conflicts(false)
-            )
-        )?;
-        
-        // Add all files to the repository index
-        let mut repo_index = repo.index()?;
-        repo_index.add_all(["*"].iter(), git2::IndexAddOption::DEFAULT, None)?;
-        repo_index.write()?;
-        
-        result_tree
+        idx.write()?;
+        let tree_id = idx.write_tree()?;
+        repo.find_tree(tree_id)?
     };
     // now create the merge commit
     let msg = format!("Merge: {} into {}", remote.id(), local.id());
-    let sig = repo.signature()?;
+    let sig = git2::Signature::now(name, email)?;
     let local_commit = repo.find_commit(local.id())?;
     let remote_commit = repo.find_commit(remote.id())?;
     // Do our merge commit and set current branch head to that commit.
@@ -156,7 +212,9 @@ fn normal_merge(
         &[&local_commit, &remote_commit],
     )?;
     // Set working tree to match head.
-    repo.checkout_head(None)?;
+    let mut checkout_opts = git2::build::CheckoutBuilder::new();
+    checkout_opts.force();
+    repo.checkout_head(Some(&mut checkout_opts))?;
     Ok(())
 }
 
@@ -164,6 +222,8 @@ pub fn do_merge<'a>(
     repo: &'a Repository,
     remote_branch: &str,
     fetch_commit: git2::AnnotatedCommit<'a>,
+    name: &str,
+    email: &str,
 ) -> Result<(), git2::Error> {
     // 1. do a merge analysis
     let analysis = repo.merge_analysis(&[&fetch_commit])?;
@@ -198,7 +258,7 @@ pub fn do_merge<'a>(
     } else if analysis.0.is_normal() {
         // do a normal merge
         let head_commit = repo.reference_to_annotated_commit(&repo.head()?)?;
-        normal_merge(repo, &head_commit, &fetch_commit)?;
+        normal_merge(repo, &head_commit, &fetch_commit, name, email)?;
     } else {
         // Nothing to do...
     }

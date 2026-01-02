@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.RadioButton
@@ -45,6 +46,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.surfaceColorAtElevation
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -460,6 +462,11 @@ private fun SyncStateIcon(
             imageVector = Icons.Default.CloudUpload,
             contentDescription = "Pushing",
             modifier = modifier,
+        )
+
+        is SyncState.Reloading -> CircularProgressIndicator(
+            modifier = Modifier.size(24.dp),
+            strokeWidth = 2.dp
         )
     }
 }

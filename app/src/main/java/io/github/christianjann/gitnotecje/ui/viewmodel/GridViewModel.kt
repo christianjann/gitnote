@@ -18,6 +18,7 @@ import io.github.christianjann.gitnotecje.helper.FrontmatterParser
 import io.github.christianjann.gitnotecje.helper.NameValidation
 import io.github.christianjann.gitnotecje.manager.GitLogEntry
 import io.github.christianjann.gitnotecje.manager.StorageManager
+import io.github.christianjann.gitnotecje.manager.SyncState
 import io.github.christianjann.gitnotecje.ui.model.FileExtension
 import io.github.christianjann.gitnotecje.ui.model.GridNote
 import io.github.christianjann.gitnotecje.ui.model.NoteViewType
@@ -349,13 +350,18 @@ class GridViewModel : ViewModel() {
 
     fun reloadDatabase() {
         CoroutineScope(Dispatchers.IO).launch {
-            uiHelper.makeToast(uiHelper.getString(R.string.reloading_database))
-            val res = storageManager.updateDatabase(force = true)
-            res.onFailure {
-                uiHelper.makeToast("${uiHelper.getString(R.string.failed_reload)}: $it")
-            }
-            res.onSuccess {
-                uiHelper.makeToast(uiHelper.getString(R.string.success_reload))
+            storageManager.setSyncState(SyncState.Reloading)
+            try {
+                uiHelper.makeToast(uiHelper.getString(R.string.reloading_database))
+                val res = storageManager.updateDatabase(force = true)
+                res.onFailure {
+                    uiHelper.makeToast("${uiHelper.getString(R.string.failed_reload)}: $it")
+                }
+                res.onSuccess {
+                    uiHelper.makeToast(uiHelper.getString(R.string.success_reload))
+                }
+            } finally {
+                storageManager.setSyncState(SyncState.Ok(false))
             }
         }
     }

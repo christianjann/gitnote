@@ -212,11 +212,11 @@ class GitManager {
 
     }
 
-    suspend fun pull(cred: Cred?): Result<Unit> = safelyAccessLibGit2 {
+    suspend fun pull(cred: Cred?, author: GitAuthor): Result<Unit> = safelyAccessLibGit2 {
         Log.d(TAG, "pull: $cred")
         if (!isRepoInitialized) throw GitException(GitExceptionType.RepoNotInit)
 
-        val res = pullLib(cred)
+        val res = pullLib(cred, author.name, author.email)
 
         if (res < 0) {
             Log.d(TAG, "pull: $res")
@@ -303,7 +303,7 @@ private external fun lastCommitLib(): String?
 private external fun commitAllLib(name: String, email: String, message: String): Int
 private external fun currentSignatureLib(): Pair<String, String>?
 private external fun pushLib(cred: Cred?): Int
-private external fun pullLib(cred: Cred?): Int
+private external fun pullLib(cred: Cred?, name: String, email: String): Int
 private external fun syncLib(cred: Cred?): Int
 
 private external fun freeLib()

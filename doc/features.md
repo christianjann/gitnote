@@ -8,9 +8,44 @@ GitNote is a Git-based note-taking app for Android that integrates seamlessly wi
 
 - **Repository Management**: Clone, pull, and push notes to Git repositories.
 - **Version Control**: Automatic commits on note changes, with conflict resolution.
+- **Automatic Merge Conflict Resolution**: Seamless handling of merge conflicts during synchronization with intelligent three-pass resolution strategy.
 - **SSH Support**: Secure authentication using SSH keys.
 - **Git Log Viewer**: Access commit history directly in the app with formatted timestamps, author information, and commit messages.
 - **External Change Detection**: Automatically detects and syncs changes made outside the app.
+
+### Automatic Merge Conflict Resolution
+
+GitNote features intelligent automatic merge conflict resolution that handles conflicts seamlessly during synchronization, eliminating the need for manual conflict resolution.
+
+#### How It Works
+
+- **Three-Pass Resolution Strategy**: When conflicts occur during pull operations, GitNote applies a deterministic three-pass approach:
+  1. **Local Priority**: Uses your local changes when available
+  2. **Remote Fallback**: Uses remote changes if no local version exists  
+  3. **Ancestor Safety**: Falls back to common ancestor version to prevent data loss
+- **Transparent Operation**: Conflicts are resolved automatically in the background without user intervention
+- **Visual Feedback**: Loading indicators show when resolution is in progress
+- **Safe Fallback**: If automatic resolution fails, operations are aborted to maintain data integrity
+
+#### Conflict Scenarios Handled
+
+- **Text File Conflicts**: Automatic resolution for conflicting changes in note files
+- **File Presence Conflicts**: Handles cases where files exist locally but not remotely, or vice versa
+- **Concurrent Edits**: Resolves conflicts when the same note is modified both locally and remotely
+
+#### User Experience
+
+- **Seamless Sync**: Pull operations complete successfully even with conflicts
+- **No Manual Intervention**: Users continue working without interruption
+- **Progress Indication**: Spinner in action bar shows when conflict resolution is active
+- **Reliable Results**: Same conflicts always resolve to the same outcome for consistency
+
+#### Technical Details
+
+- **Repository-Aware**: Path resolution works regardless of current working directory
+- **Author Attribution**: Merge commits include proper author information
+- **Index Management**: Git index is properly updated after resolution
+- **Error Handling**: Graceful degradation if automatic resolution is impossible
 
 ### Note Management
 
@@ -111,6 +146,31 @@ GitNote allows users to control whether notes from subfolders are included when 
 - **Minimal Note Width**: Adjustable minimum width for notes in grid view (100dp, 150dp, 200dp, 250dp).
 - **Offline Indicator**: Persistent icon showing when the app is offline and cannot sync.
 - **Tag Display Mode**: Control whether tags are shown in grid view, list view, both, or neither.
+- **Reload Spinner**: Visual progress indicator during database reload operations.
+
+### Reload Spinner
+
+GitNote provides visual feedback during long-running database reload operations to improve user experience.
+
+#### How It Works
+
+- **Menu Access**: Available in the debug menu (three-dot menu → "Reload Database") when debug features are enabled.
+- **Visual Indicator**: Shows a spinning circular progress indicator in the action bar next to the view toggle button.
+- **Automatic Management**: The spinner appears when the operation starts and disappears when it completes or fails.
+- **Non-blocking**: The spinner provides feedback without blocking user interaction with other parts of the app.
+
+#### Usage Tips
+
+- The reload spinner appears during database synchronization operations that may take several seconds.
+- Provides immediate visual confirmation that the reload operation has started.
+- Helps users understand that the app is actively working on their request.
+- Available only when debug features are enabled in the app settings.
+
+#### Key Benefits
+
+- **User Feedback**: Clear indication that a long-running operation is in progress.
+- **Improved UX**: Reduces user uncertainty during database operations.
+- **Professional Feel**: Provides the same level of feedback as other modern applications.
 
 ### Read-Only Mode
 
