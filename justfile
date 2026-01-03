@@ -7,6 +7,10 @@ export JAVA_HOME := `grep '^java.home=' .gradle/config.properties | cut -d'=' -f
 main:
     just --list
 
+fix-wrapper:
+    #curl -L -o gradle/wrapper/gradle-wrapper.jar https://github.com/gradle/gradle/raw/v8.13.0/gradle/wrapper/gradle-wrapper.jar
+    git lfs pull
+
 fix:
     ./gradlew lintFix
 
@@ -58,9 +62,11 @@ clean:
 clean-build:
     ./gradlew clean :app:assembleDebug
 
-fix-wrapper:
-    #curl -L -o gradle/wrapper/gradle-wrapper.jar https://github.com/gradle/gradle/raw/v8.13.0/gradle/wrapper/gradle-wrapper.jar
-    git lfs pull
+nightly-build:
+    ./gradlew :app:assembleNightly
+
+nightly-install:
+    ./gradlew :app:assembleNightly :app:installNightly
 
 generate-release-keys:
     ./generate-release-keys.sh

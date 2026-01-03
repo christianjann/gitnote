@@ -5,6 +5,23 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Changed
+
+- Default Settings: Updated default preferences for new users
+  - Scrollbars now enabled by default for better navigation
+  - Minimum note width changed to 150dp (from 200dp)
+  - Remember last opened folder enabled by default
+  - Full titles shown in list view by default
+  - Tags visible in both grid and list views by default
+  - Subfolders excluded by default in folder browsing
+  - Background Git operations enabled by default for smoother workflow
+
+### Fixed
+
+- Git Author Defaults: Added default email fallback to prevent commit failures when creating new local repositories
+  - Git author name defaults to "gitnote" when empty
+  - Git author email defaults to "gitnote@localhost" when empty
+
 ## [26.01.1]
 
 ### Added

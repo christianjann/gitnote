@@ -18,11 +18,12 @@ Android note-taking app with Git integration. A personal fork of GitNote, optimi
 
 ## Quick Start
 
-1. **Install dependencies**: Rust, Android SDK, JDK
+1. **Install dependencies**: Rust, Android Studio, Android SDK, JDK
 2. **Clone repository**: `git clone https://github.com/christianjann/gitnotecje.git`
 3. **First Android Studio build**: Open the project in Android Studio and build it once to generate `.gradle/config.properties` with the correct JBR path
-4. **Build**: `just install` (builds and installs debug APK)
-5. **Run**: Open the app and create/clone your first Git repository
+4. **Build Rust library**: `just rust-build`
+5. **Build**: `just install` (builds and installs debug APK)
+6. **Run**: Open the app and create/clone your first Git repository
 
 For development outside Android Studio, a [justfile](justfile) provides convenient commands. See [just](https://github.com/casey/just) for usage details.
 
@@ -139,7 +140,6 @@ See [building.md](doc/building.md) for detailed build instructions.
 
 - Android does not differentiate case for file name, so if you have a folder named `A` and another folder named `a`, `a` will not be displayed.
 - Resync and reload of the database when there was an remote change by some other Git client takes forever
-- Sometimes the app is misbehaving, the only thing that helps is a reload of the database via the debug menu
 - Opening a local repository in device memory that was previously a remote cloned repo seems not to work, re-clone it
 
 # Future direction

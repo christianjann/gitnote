@@ -25,6 +25,7 @@ class AppPreferences(
         val appStorageRepoPath =
             MyApp.appModule.context.filesDir.toPath().resolve("repo").pathString
         const val DEFAULT_USERNAME = "gitnote"
+        const val DEFAULT_EMAIL = "gitnote@localhost"
     }
 
     val dynamicColor = booleanPreference("dynamicColor", true)
@@ -67,7 +68,7 @@ class AppPreferences(
     suspend fun gitAuthor(): GitAuthor {
         return GitAuthor(
             name = gitAuthorName.get().ifEmpty { DEFAULT_USERNAME },
-            email = gitAuthorEmail.get()
+            email = gitAuthorEmail.get().ifEmpty { DEFAULT_EMAIL }
         )
     }
 
@@ -143,20 +144,20 @@ class AppPreferences(
     val showFullNoteHeight = booleanPreference("showFullNoteHeight", false)
     val noteViewType = enumPreference("noteViewType", NoteViewType.Grid)
 
-    val rememberLastOpenedFolder = booleanPreference("rememberLastOpenedFolder", false)
+    val rememberLastOpenedFolder = booleanPreference("rememberLastOpenedFolder", true)
     val lastOpenedFolder = stringPreference("lastOpenedFolder", "")
 
     val showFullPathOfNotes = booleanPreference("showFullPathOfNotes", false)
-    val showFullTitleInListView = booleanPreference("showFullTitleInListView", false)
-    val tagDisplayMode = enumPreference("tagDisplayMode", TagDisplayMode.None)
-    val includeSubfolders = booleanPreference("includeSubfolders", true)
+    val showFullTitleInListView = booleanPreference("showFullTitleInListView", true)
+    val tagDisplayMode = enumPreference("tagDisplayMode", TagDisplayMode.Both)
+    val includeSubfolders = booleanPreference("includeSubfolders", false)
 
     val tagIgnoresFolders = booleanPreference("tagIgnoresFolders", true)
     val searchIgnoresFilters = booleanPreference("searchIgnoresFilters", true)
 
     val defaultExtension = stringPreference("defaultExtension", "md")
     val showLinesNumber = booleanPreference("showLinesNumber", false)
-    val backgroundGitOperations = booleanPreference("backgroundGitOperations", false)
+    val backgroundGitOperations = booleanPreference("backgroundGitOperations", true)
 
     val folderFilters = setPreference(
         "folderFilters", setOf(
@@ -192,7 +193,7 @@ class AppPreferences(
 
     val debugFeaturesEnabled = booleanPreference("debugFeaturesEnabled", false)
 
-    val showScrollbars = booleanPreference("showScrollbars", false)
+    val showScrollbars = booleanPreference("showScrollbars", true)
 
     val language = enumPreference("language", Language.System)
 
