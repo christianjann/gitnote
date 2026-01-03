@@ -63,6 +63,7 @@ GitNote supports filtering notes by tags defined in the frontmatter, allowing us
 - **Drawer Navigation**: Switch between folder and tag browsing modes in the navigation drawer.
 - **Tag Selection**: Click on tags in the drawer to filter notes, or select "All notes" to show everything.
 - **Real-time Filtering**: Notes are filtered instantly when a tag is selected, showing only matching notes.
+- **Folder Context Preservation**: When using tag filtering, the current folder context is preserved in the navigation drawer for better user awareness.
 
 #### Usage Tips
 
@@ -96,6 +97,59 @@ To provide a focused view of filtered results, the navigation drawer automatical
 - **Mode Switching**: Switching between tag and folder modes clears the respective filters (tags when switching to folder mode, folder when switching to tag mode) to prevent confusion.
 
 This behavior ensures a smooth user experience by reducing the need for manual drawer management while browsing and filtering notes. Note that when moving notes, the drawer remains open during folder navigation to allow selecting the destination folder.
+
+### Advanced Filtering Options
+
+GitNote provides configurable filtering options that give users more control over how tag filtering and search behave across folder boundaries.
+
+#### Tag Filtering Ignores Folders
+
+When enabled (default), tag filtering searches across all folders in the repository instead of limiting results to the currently selected folder. This provides a global view of tagged notes regardless of their location in the folder hierarchy.
+
+##### How It Works
+
+- **Global Search**: When filtering by a tag, notes with that tag are shown from all folders, not just the current folder.
+- **Setting Location**: Configure via Settings > Filtering > "Tag filtering ignores folders"
+- **Default Behavior**: Enabled by default for broader tag discovery.
+- **Folder Context**: The current folder context is still preserved in the navigation drawer for user awareness.
+
+##### Usage Tips
+
+- Enable this setting to find all notes with a specific tag across your entire repository.
+- Disable it to limit tag filtering to the currently selected folder only.
+- Particularly useful for cross-project tags or when organizing notes by topic rather than location.
+
+##### Example Workflow
+
+1. Enable "Tag filtering ignores folders" in Settings > Filtering
+2. Navigate to any folder in your repository
+3. Switch to tag mode in the navigation drawer
+4. Select a tag - notes with that tag appear from all folders, not just the current one
+5. The drawer shows your current folder context for reference
+
+#### Search Ignores All Filters
+
+When enabled (default), search operations show results from all folders in the repository, ignoring current folder and subfolder settings. This ensures comprehensive search results across your entire note collection.
+
+##### How It Works
+
+- **Global Search**: Search queries return results from all folders regardless of current folder context.
+- **Setting Location**: Configure via Settings > Filtering > "Search ignores all filters"
+- **Default Behavior**: Enabled by default for complete search coverage.
+- **Filter Override**: Bypasses folder display mode and current folder restrictions during search.
+
+##### Usage Tips
+
+- Enable this setting to find any note in your repository through search.
+- Disable it to limit search results to the current folder and its subfolders (respecting folder display mode).
+- Ideal for finding notes when you don't remember their exact location.
+
+##### Example Workflow
+
+1. Enable "Search ignores all filters" in Settings > Filtering
+2. Navigate to a specific folder
+3. Use the search function - results appear from all folders in the repository
+4. Tap on any result to navigate to that note's location
 
 ### Folder Display Mode
 
@@ -205,6 +259,41 @@ GitNote provides custom scroll indicators for both grid and list views to improv
 - **Improved UX**: Reduces the need to scroll blindly through long lists.
 - **Visual Consistency**: Matches modern app design patterns.
 - **Accessibility**: Provides additional visual cues for content navigation.
+
+### Tag Display Mode
+
+GitNote allows users to control tag visibility across different view modes and provides improved readability for notes with multiple tags.
+
+#### How It Works
+
+- **Display Control**: Choose whether tags are shown in grid view, list view, both views, or neither view.
+- **Setting Location**: Configure via Settings > Appearance > Tag display mode.
+- **Multi-line Wrapping**: In list view, tags wrap to multiple lines for better readability when notes have many tags.
+- **Real-time Updates**: Changes take effect immediately when switching between grid and list views.
+
+#### Usage Tips
+
+- Use "Grid only" to show tags only in grid view for compact list browsing.
+- Use "List only" to show tags only in list view for detailed grid browsing.
+- Use "Both" to show tags in both views for maximum visibility.
+- Use "None" to hide tags entirely for a cleaner interface.
+- Multi-line wrapping in list view ensures all tags are visible without truncation.
+
+#### Example
+
+With multi-line wrapping enabled in list view:
+
+```
+📄 My Project Note
+🏷️ feature, android, kotlin, ui, backend
+```
+
+Without wrapping (previous behavior):
+
+```
+📄 My Project Note
+🏷️ feature, android, kotlin...
+```
 
 ### Read-Only Mode
 

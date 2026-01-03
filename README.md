@@ -33,20 +33,19 @@ Because all apps which integrate with Git on Android either crash, are slow, are
 # Features
 
 - [x] create/open/clone repositories
+- [x] private repo support (SSH and HTTPS)
 - [x] notes search (global and from specific folder)
 - [x] grid view with customizable widths
-- [x] tree view
-- [x] edit view
-- [x] private repo (SSH and HTTPS)
+- [x] list view
+- [x] markdown edit view and full markdown rendering
+- [x] clickable check boxes in markdown rendering
 - [x] remote sync
 - [x] time based sort
 - [x] multi-language support
-- [x] flexible tag display in grid view
+- [x] flexible tag display in grid and list view
 - [x] tag-based filtering and organization
-- [x] full markdown rendering
 - [x] frontmatter metadata support
-- [x] Git log viewer
-- [x] folder display mode options
+- [x] view the Git log
 - [x] automatic merge conflict resolution
 
 <table align="center">
