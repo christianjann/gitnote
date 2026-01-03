@@ -118,7 +118,7 @@ _Supported Architecture: `arm64-v8a`, `x86_64`_
 # Documentation
 
 - [Detailed features documentation](./doc/features.md)
-- [Building the app](./BUILD.md)
+- [Building the app](./doc/building.md)
 - [Markdown header format](./doc/design/markdown_header.md)
 - [Contributing](./CONTRIBUTING.md)
 
