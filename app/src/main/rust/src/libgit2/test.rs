@@ -1265,3 +1265,77 @@ fn test_pull_conflict_resolution_from_different_cwd() {
 
     println!("✓ test_pull_conflict_resolution_from_different_cwd completed successfully");
 }
+
+#[test]
+#[serial]
+fn test_clone_empty_repository() {
+    // Initialize the library first
+    init_lib("/tmp".to_string());
+
+    // Setup test directories with unique name
+    let test_dir = Path::new("test_empty_repo");
+    let empty_remote_repo = test_dir.join("empty_remote");
+    let local_repo = test_dir.join("local");
+
+    // Clean up any existing test directories
+    if test_dir.exists() {
+        fs::remove_dir_all(test_dir).expect("Failed to clean up test directories");
+    }
+
+    // Create empty remote repository as bare
+    fs::create_dir_all(&empty_remote_repo).expect("Failed to create empty remote repo dir");
+    run_git_command(&empty_remote_repo, &["init", "--bare"]);
+
+    // Create local directory
+    fs::create_dir_all(&local_repo).expect("Failed to create local repo dir");
+
+    println!("Testing empty repository setup...");
+
+    // Save current directory for cleanup
+    let original_dir = std::env::current_dir().expect("Failed to get current directory");
+
+    // Test the setup_repository_after_clone function directly
+    println!("\n=== Test: Setup empty repository ===");
+
+    // Initialize a git repository in local directory
+    let repo = git2::Repository::init(&local_repo).expect("Failed to init repo");
+
+    // Test setup_repository_after_clone with empty repo
+    let result = setup_repository_after_clone(&repo);
+    match result {
+        Ok(_) => println!("✓ Empty repository setup successfully"),
+        Err(e) => panic!("Failed to setup empty repository: {:?}", e),
+    }
+
+    // Verify that the repository was set up correctly
+    // Change to local repo directory to check
+    std::env::set_current_dir(&local_repo).expect("Failed to change to local repo directory");
+
+    // Check if .gitkeep file was created
+    assert!(Path::new(".gitkeep").exists(), ".gitkeep file should be created");
+
+    // Check if main branch exists
+    let output = Command::new("git")
+        .args(&["branch", "--show-current"])
+        .output()
+        .expect("Failed to run git branch");
+
+    let current_branch = String::from_utf8_lossy(&output.stdout).to_string();
+    let current_branch = current_branch.trim();
+    assert_eq!(current_branch, "main", "Current branch should be 'main'");
+
+    // Check if there's an initial commit
+    let output = Command::new("git")
+        .args(&["log", "--oneline", "-1"])
+        .output()
+        .expect("Failed to run git log");
+
+    let log_output = String::from_utf8_lossy(&output.stdout).to_string();
+    assert!(log_output.contains("Initial commit"), "Should have initial commit");
+
+    // Clean up
+    std::env::set_current_dir(original_dir).expect("Failed to restore original directory");
+    fs::remove_dir_all(test_dir).expect("Failed to clean up test directories");
+
+    println!("✓ test_clone_empty_repository completed successfully");
+}

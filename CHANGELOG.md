@@ -5,6 +5,15 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [26.01.2]
+
+### Added
+
+- Empty Repository Support: Git wrapper now handles cloning repositories with no commits or missing main/master branches
+  - Automatically creates initial commit when cloning empty repositories
+  - Creates main branch if neither main nor master branches exist
+  - Ensures repositories are always in a usable state after cloning
+
 ### Changed
 
 - Default Settings: Updated default preferences for new users
@@ -18,6 +27,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Fixed
 
+- Git Authentication Errors: Improved error handling for clone and push operations with specific guidance for different Git hosting providers
+  - Added provider-specific error messages for GitHub, Bitbucket, GitLab, Azure DevOps, and AWS CodeCommit
+  - Fixed "too many redirects or authentication replays; class=Http (34)" errors by providing clear instructions to use Personal Access Tokens/App Passwords instead of passwords
+  - Enhanced user experience when authentication fails during Git operations
 - Git Author Defaults: Added default email fallback to prevent commit failures when creating new local repositories
   - Git author name defaults to "gitnote" when empty
   - Git author email defaults to "gitnote@localhost" when empty

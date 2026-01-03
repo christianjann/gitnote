@@ -263,12 +263,106 @@ pub fn clone_repo(
 
     let mut builder = git2::build::RepoBuilder::new();
 
-    let repo = builder
+    let repo = match builder
         .fetch_options(fetch_options)
-        .clone(remote_url, std::path::Path::new(&repo_path))
-        .map_err(|e| Error::git2(e, "clone"))?;
+        .clone(remote_url, std::path::Path::new(&repo_path)) {
+        Ok(repo) => repo,
+        Err(e) => {
+            // Provide specific guidance for authentication errors on common Git hosting services
+            if remote_url.starts_with("http://") || remote_url.starts_with("https://") {
+                if remote_url.contains("github.com") {
+                    error!("GitHub clone failed - ensure you're using a Personal Access Token, not your password");
+                    return Err(Error::git2(e, "GitHub clone failed - check credentials (use Personal Access Token)"));
+                } else if remote_url.contains("bitbucket.org") {
+                    error!("Bitbucket clone failed - ensure you're using an App Password, not your password");
+                    return Err(Error::git2(e, "Bitbucket clone failed - check credentials (use App Password)"));
+                } else if remote_url.contains("gitlab.com") || remote_url.contains("gitlab.") {
+                    error!("GitLab clone failed - ensure you're using a Personal Access Token, not your password");
+                    return Err(Error::git2(e, "GitLab clone failed - check credentials (use Personal Access Token)"));
+                } else if remote_url.contains("azure.com") || remote_url.contains("visualstudio.com") {
+                    error!("Azure DevOps clone failed - ensure you're using a Personal Access Token");
+                    return Err(Error::git2(e, "Azure DevOps clone failed - check credentials (use Personal Access Token)"));
+                } else if remote_url.contains("codecommit.") {
+                    error!("AWS CodeCommit clone failed - check IAM permissions and credentials");
+                    return Err(Error::git2(e, "AWS CodeCommit clone failed - check IAM permissions"));
+                } else {
+                    error!("HTTP clone failed - check credentials for {}", remote_url);
+                    return Err(Error::git2(e, "HTTP clone failed - check credentials"));
+                }
+            } else {
+                return Err(Error::git2(e, "clone"));
+            }
+        }
+    };
+
+    // Handle empty repositories or missing main/master branch
+    setup_repository_after_clone(&repo)?;
 
     REPO.lock().unwrap().replace(repo);
+
+    Ok(())
+}
+
+fn setup_repository_after_clone(repo: &Repository) -> Result<(), Error> {
+    // Check if repository has any commits
+    let has_commits = repo.head().is_ok();
+
+    if !has_commits {
+        // Repository is empty, create initial commit and branch
+        create_initial_commit_and_branch(repo)?;
+    } else {
+        // Repository has commits, but check if main/master branch exists
+        let has_main_branch = repo.find_branch("main", git2::BranchType::Local).is_ok();
+        let has_master_branch = repo.find_branch("master", git2::BranchType::Local).is_ok();
+
+        if !has_main_branch && !has_master_branch {
+            // No main or master branch, create master branch from current HEAD
+            let head_commit = repo.head()?.peel_to_commit()?;
+            repo.branch("master", &head_commit, false)?;
+            repo.set_head("refs/heads/master")?;
+        }
+    }
+
+    Ok(())
+}
+
+fn create_initial_commit_and_branch(repo: &Repository) -> Result<(), Error> {
+    // Create a .gitkeep file to have something to commit
+    let gitkeep_path = repo.path().parent().unwrap().join(".gitkeep");
+    fs::write(&gitkeep_path, "").map_err(|e| {
+        error!("Failed to write .gitkeep file: {}", e);
+        git2::Error::from_str(&format!("IO error: {}", e))
+    })?;
+
+    // Add .gitkeep to index
+    let mut index = repo.index().map_err(|e| Error::git2(e, "index"))?;
+    index.add_path(Path::new(".gitkeep")).map_err(|e| Error::git2(e, "add_path"))?;
+    index.write().map_err(|e| Error::git2(e, "write index"))?;
+
+    // Create tree
+    let tree_oid = index.write_tree().map_err(|e| Error::git2(e, "write_tree"))?;
+    let tree = repo.find_tree(tree_oid).map_err(|e| Error::git2(e, "find_tree"))?;
+
+    // Create signature
+    let sig = Signature::now("GitNoteCJE", "gitnote@localhost").map_err(|e| Error::git2(e, "Signature::now"))?;
+
+    // Create initial commit
+    repo.commit(Some("HEAD"), &sig, &sig, "Initial commit", &tree, &[])
+        .map_err(|e| Error::git2(e, "initial commit"))?;
+
+    // Create main branch
+    let head_commit = repo.head()?.peel_to_commit()?;
+    match repo.branch("master", &head_commit, false) {
+        Ok(_) => {}
+        Err(e) if e.raw_code() == -4 => {
+            // Branch already exists, update it to point to the new commit
+            if let Ok(mut branch) = repo.find_branch("master", git2::BranchType::Local) {
+                branch.get_mut().set_target(head_commit.id(), "Update master branch to initial commit")?;
+            }
+        }
+        Err(e) => return Err(Error::git2(e, "create master branch")),
+    }
+    repo.set_head("refs/heads/master").map_err(|e| Error::git2(e, "set head to master"))?;
 
     Ok(())
 }
@@ -351,6 +445,28 @@ pub fn push(cred: Option<Cred>) -> Result<(), Error> {
         .find_remote(REMOTE)
         .map_err(|e| Error::git2(e, "find_remote"))?;
 
+    error!("Push: remote URL: {:?}", remote.url());
+    error!("Push: cred provided: {}", cred.is_some());
+
+    // Check if remote URL is HTTP and no credentials provided
+    if let Some(url) = remote.url() {
+        if url.starts_with("http://") || url.starts_with("https://") {
+            if cred.is_none() {
+                error!("HTTP push attempted without credentials for URL: {}", url);
+                return Err(Error::git2(
+                    git2::Error::from_str("HTTP push requires credentials"),
+                    "push",
+                ));
+            } else {
+                error!("HTTP push with credentials for URL: {}", url);
+            }
+        } else {
+            error!("Non-HTTP push for URL: {}", url);
+        }
+    } else {
+        error!("Could not get remote URL for push");
+    }
+
     let branch = current_branch(repo)?;
 
     // Try normal push first
@@ -374,7 +490,30 @@ pub fn push(cred: Option<Cred>) -> Result<(), Error> {
             warn!("Push failed with non-fast-forward - app should sync first");
             Err(Error::git2(e, "push needs sync"))
         }
-        Err(e) => Err(Error::git2(e, "push")),
+        Err(e) => {
+            if let Some(url) = remote.url() {
+                if url.contains("github.com") {
+                    error!("GitHub push failed - ensure you're using a Personal Access Token, not your password");
+                    Err(Error::git2(e, "GitHub push failed - check credentials (use Personal Access Token)"))
+                } else if url.contains("bitbucket.org") {
+                    error!("Bitbucket push failed - ensure you're using an App Password, not your password");
+                    Err(Error::git2(e, "Bitbucket push failed - check credentials (use App Password)"))
+                } else if url.contains("gitlab.com") || url.contains("gitlab.") {
+                    error!("GitLab push failed - ensure you're using a Personal Access Token, not your password");
+                    Err(Error::git2(e, "GitLab push failed - check credentials (use Personal Access Token)"))
+                } else if url.contains("azure.com") || url.contains("visualstudio.com") {
+                    error!("Azure DevOps push failed - ensure you're using a Personal Access Token");
+                    Err(Error::git2(e, "Azure DevOps push failed - check credentials (use Personal Access Token)"))
+                } else if url.contains("codecommit.") {
+                    error!("AWS CodeCommit push failed - check IAM permissions and credentials");
+                    Err(Error::git2(e, "AWS CodeCommit push failed - check IAM permissions"))
+                } else {
+                    Err(Error::git2(e, "push"))
+                }
+            } else {
+                Err(Error::git2(e, "push"))
+            }
+        }
     }
 }
 
@@ -485,13 +624,35 @@ pub fn pull(cred: Option<Cred>, name: &str, email: &str) -> Result<(), Error> {
     fetch_options.remote_callbacks(callbacks);
 
     let branch = current_branch(repo)?;
+    
+    // Remove FETCH_HEAD file to avoid corruption issues
+    if let Ok(git_dir) = repo.path().canonicalize() {
+        let fetch_head_path = git_dir.join("FETCH_HEAD");
+        let _ = std::fs::remove_file(&fetch_head_path);
+    }
+    
     remote
         .fetch(&[] as &[&str], Some(&mut fetch_options), None)
         .map_err(|e| Error::git2(e, "fetch"))?;
 
-    let fetch_head = repo
-        .find_reference("FETCH_HEAD")
-        .map_err(|e| Error::git2(e, "find_reference"))?;
+    let fetch_head = match repo.find_reference("FETCH_HEAD") {
+        Ok(r) => r,
+        Err(_) => {
+            // Try to delete corrupted FETCH_HEAD and refetch
+            if let Ok(git_dir) = repo.path().canonicalize() {
+                let fetch_head_path = git_dir.join("FETCH_HEAD");
+                let _ = std::fs::remove_file(&fetch_head_path);
+            }
+            warn!("FETCH_HEAD was corrupted, attempting to refetch...");
+            
+            // Refetch
+            remote.fetch(&[] as &[&str], Some(&mut fetch_options), None)
+                .map_err(|e| Error::git2(e, "refetch after corruption"))?;
+            
+            repo.find_reference("FETCH_HEAD")
+                .map_err(|e| Error::git2(e, "find_reference after refetch"))?
+        }
+    };
 
     let commit = repo
         .reference_to_annotated_commit(&fetch_head)
