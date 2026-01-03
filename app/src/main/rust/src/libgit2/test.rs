@@ -1312,7 +1312,10 @@ fn test_clone_empty_repository() {
     std::env::set_current_dir(&local_repo).expect("Failed to change to local repo directory");
 
     // Check if .gitkeep file was created
-    assert!(Path::new(".gitkeep").exists(), ".gitkeep file should be created");
+    assert!(
+        Path::new(".gitkeep").exists(),
+        ".gitkeep file should be created"
+    );
 
     // Check if main branch exists
     let output = Command::new("git")
@@ -1331,7 +1334,10 @@ fn test_clone_empty_repository() {
         .expect("Failed to run git log");
 
     let log_output = String::from_utf8_lossy(&output.stdout).to_string();
-    assert!(log_output.contains("Initial commit"), "Should have initial commit");
+    assert!(
+        log_output.contains("Initial commit"),
+        "Should have initial commit"
+    );
 
     // Clean up
     std::env::set_current_dir(original_dir).expect("Failed to restore original directory");

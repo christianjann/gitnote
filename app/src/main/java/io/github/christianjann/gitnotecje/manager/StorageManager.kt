@@ -170,6 +170,10 @@ class StorageManager {
         val databaseCommit = prefs.databaseCommit.get()
 
         Log.d(TAG, "fsCommit: $fsCommit, databaseCommit: $databaseCommit")
+        if (fsCommit == null) {
+            Log.d(TAG, "Repository is in invalid state, skipping database update")
+            return success(Unit)
+        }
         if (!force && fsCommit == databaseCommit) {
             Log.d(TAG, "last commit is already loaded in data base")
             return success(Unit)

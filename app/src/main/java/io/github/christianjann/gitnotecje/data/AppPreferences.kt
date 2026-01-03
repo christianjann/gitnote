@@ -197,6 +197,8 @@ class AppPreferences(
 
     val language = enumPreference("language", Language.System)
 
+    val lastDatabaseSyncTime = longPreference("lastDatabaseSyncTime", 0L)
+
 }
 
 

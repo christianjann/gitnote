@@ -11,6 +11,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -35,6 +36,8 @@ abstract class PreferencesManager(private val context: Context, name: String) {
         BooleanPreference(dataStore, key, default)
 
     protected fun intPreference(key: String, default: Int) = IntPreference(dataStore, key, default)
+
+    protected fun longPreference(key: String, default: Long) = LongPreference(dataStore, key, default)
 
     protected fun floatPreference(key: String, default: Float) =
         FloatPreference(dataStore, key, default)
@@ -139,6 +142,14 @@ class IntPreference(
     default: Int
 ) : BasePreference<Int>(dataStore, default) {
     override val key = intPreferencesKey(key)
+}
+
+class LongPreference(
+    dataStore: DataStore<Preferences>,
+    key: String,
+    default: Long
+) : BasePreference<Long>(dataStore, default) {
+    override val key = longPreferencesKey(key)
 }
 
 class FloatPreference(

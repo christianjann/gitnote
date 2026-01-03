@@ -5,6 +5,22 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Fixed
+
+- App Crash on Screen Rotation: Fixed crash that occurred when rotating the device screen twice
+  - Added repository validity checks in Rust code to prevent accessing invalid repository state during Activity recreation
+  - Functions like `get_timestamps()`, `last_commit()`, `signature()`, `commit_all()`, `push()`, `pull()`, `sync()`, `is_change()`, and `get_git_log()` now gracefully handle cases where the repository becomes invalid after screen rotation
+  - Prevents "panic occurred: unknown" and SIGABRT crashes during device rotation
+- Database Sync Optimization: Improved database synchronization to prevent excessive syncing during Activity recreation
+  - Moved database sync logic from individual ViewModels to MainViewModel after repository initialization
+  - Prevents race conditions where Git operations occur before repository is fully opened during Activity recreation
+  - Added timing-based throttling to database sync operations - sync only occurs if more than 5 minutes have passed since the last sync
+  - Maintains database freshness while reducing resource usage and preventing crashes
+  - Modified tryInit to handle already initialized repositories without failing
+  - Added check to skip database update if repository is in invalid state
+  - Database sync runs asynchronously in the background to avoid blocking app startup
+  - Prevents multiple concurrent sync jobs from being launched
+
 ## [26.01.2]
 
 ### Added
