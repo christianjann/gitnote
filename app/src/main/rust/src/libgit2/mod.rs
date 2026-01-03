@@ -6,7 +6,7 @@ use std::{
     sync::{LazyLock, Mutex, OnceLock},
 };
 
-use chrono::DateTime;
+use chrono::{DateTime, Local};
 
 use git2::{
     CertificateCheckStatus, FetchOptions, IndexAddOption, Progress, PushOptions, RemoteCallbacks,
@@ -919,10 +919,11 @@ pub fn get_git_log(limit: usize) -> Result<Vec<GitLogEntry>, Error> {
         let message = commit.message().unwrap_or("").to_string();
         let author = commit.author().name().unwrap_or("").to_string();
 
-        // Format date as readable string
+        // Format date as readable string in local timezone
         let time = commit.time();
         let datetime = DateTime::from_timestamp(time.seconds(), 0).unwrap_or(DateTime::UNIX_EPOCH);
-        let date = datetime.format("%Y-%m-%d %H:%M:%S").to_string();
+        let local_datetime = datetime.with_timezone(&Local);
+        let date = local_datetime.format("%Y-%m-%d %H:%M:%S").to_string();
 
         entries.push(GitLogEntry {
             hash,
