@@ -1,5 +1,6 @@
 package io.github.christianjann.gitnotecje.ui.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import io.github.christianjann.gitnotecje.MyApp
 import io.github.christianjann.gitnotecje.data.AppPreferences
@@ -16,6 +17,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 class MainViewModel : ViewModel() {
+
+    companion object {
+        private const val TAG = "MainViewModel"
+    }
 
     val prefs: AppPreferences = MyApp.appModule.appPreferences
     private val gitManager = MyApp.appModule.gitManager
@@ -77,11 +82,24 @@ class MainViewModel : ViewModel() {
                 val currentTime = System.currentTimeMillis()
                 val timeSinceLastSync = currentTime - lastSyncTime
 
-                // Only sync if it's been more than 5 minutes since last sync
-                if (timeSinceLastSync > 300_000L) {
+                Log.d(TAG, "Sync check: lastSyncTime=$lastSyncTime, currentTime=$currentTime, timeSinceLastSync=$timeSinceLastSync")
+
+                // Always perform sync on app start to ensure data is up to date
+                // Users expect the app to be current when they open it
+                Log.d(TAG, "Starting sync operations on app start")
+                
+                // Perform background git operations to sync with remote
+                // This will automatically update the database after completion
+                val backgroundGitOps = prefs.backgroundGitOperations.getBlocking()
+                Log.d(TAG, "Background git ops enabled: $backgroundGitOps")
+                if (backgroundGitOps) {
+                    storageManager.performBackgroundGitOperations()
+                } else {
+                    // If background git ops are disabled, still update database
                     storageManager.updateDatabaseIfNeeded()
-                    prefs.lastDatabaseSyncTime.update(currentTime)
                 }
+                
+                prefs.lastDatabaseSyncTime.update(currentTime)
             }
         }
 

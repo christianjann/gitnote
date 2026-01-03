@@ -119,6 +119,7 @@ class StorageManager {
      * Perform git pull and push operations in the background
      */
     fun performBackgroundGitOperations() {
+        Log.d(TAG, "performBackgroundGitOperations called")
         CoroutineScope(Dispatchers.IO).launch {
             locker.withLock {
                 val cred = prefs.cred()
@@ -126,16 +127,23 @@ class StorageManager {
                 val remoteUrl = prefs.remoteUrl.get()
                 var syncFailed = false
 
+                Log.d(TAG, "Remote URL: $remoteUrl")
+
                 if (remoteUrl.isNotEmpty()) {
+                    Log.d(TAG, "Starting pull operation")
                     _syncState.emit(SyncState.Pull)
                     gitManager.pull(cred, author).onFailure {
+                        Log.e(TAG, "Pull failed: ${it.message}")
                         syncFailed = true
                         _syncState.emit(SyncState.Offline)
                         // Don't show toast for background operations
+                    }.onSuccess {
+                        Log.d(TAG, "Pull succeeded")
                     }
                 }
 
                 if (remoteUrl.isNotEmpty()) {
+                    Log.d(TAG, "Starting push operation")
                     _syncState.emit(SyncState.Push)
                     gitManager.push(cred).onFailure {
                         syncFailed = true
@@ -146,6 +154,8 @@ class StorageManager {
 
                 if (!syncFailed) {
                     _syncState.emit(SyncState.Ok(false))
+                    // Update database after successful git operations
+                    updateDatabaseIfNeeded()
                 }
             }
         }
@@ -170,7 +180,7 @@ class StorageManager {
         val databaseCommit = prefs.databaseCommit.get()
 
         Log.d(TAG, "fsCommit: $fsCommit, databaseCommit: $databaseCommit")
-        if (fsCommit == null) {
+        if (fsCommit.isEmpty()) {
             Log.d(TAG, "Repository is in invalid state, skipping database update")
             return success(Unit)
         }
@@ -219,6 +229,7 @@ class StorageManager {
      * Update database if it's out of sync, best effort
      */
     suspend fun updateDatabaseIfNeeded() {
+        Log.d(TAG, "updateDatabaseIfNeeded called")
         try {
             if (isDatabaseOutOfSync()) {
                 Log.d(TAG, "Database is out of sync, updating...")
@@ -236,6 +247,8 @@ class StorageManager {
                         uiHelper.makeToast(uiHelper.getString(R.string.sync_success))
                     }
                 }
+            } else {
+                Log.d(TAG, "Database is already in sync")
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error checking database sync status: ${e.message}", e)
