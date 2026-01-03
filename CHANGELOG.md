@@ -5,28 +5,17 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [26.01.3]
+
 ### Fixed
 
-- App Crash on Screen Rotation: Fixed crash that occurred when rotating the device screen twice
-  - Added repository validity checks in Rust code to prevent accessing invalid repository state during Activity recreation
-  - Functions like `get_timestamps()`, `last_commit()`, `signature()`, `commit_all()`, `push()`, `pull()`, `sync()`, `is_change()`, and `get_git_log()` now gracefully handle cases where the repository becomes invalid after screen rotation
-  - Prevents "panic occurred: unknown" and SIGABRT crashes during device rotation
-- Database Sync Optimization: Improved database synchronization to prevent excessive syncing during Activity recreation
-  - Moved database sync logic from individual ViewModels to MainViewModel after repository initialization
-  - Prevents race conditions where Git operations occur before repository is fully opened during Activity recreation
-  - Added timing-based throttling to database sync operations - sync only occurs if more than 5 minutes have passed since the last sync
-  - Maintains database freshness while reducing resource usage and preventing crashes
-  - Modified tryInit to handle already initialized repositories without failing
-  - Added check to skip database update if repository is in invalid state
-  - Database sync runs asynchronously in the background to avoid blocking app startup
-  - Prevents multiple concurrent sync jobs from being launched
-  - **App Startup Sync**: Modified app startup to always perform sync operations when the app is opened, ensuring users see current data regardless of when they last used the app
-  - **Database Update After Git Operations**: Fixed issue where database was updated before git operations completed, ensuring UI reflects the latest remote changes- **User Feedback for Repo Opening**: Added loading indicator when opening existing repositories to prevent user confusion during the database sync process
-- **Empty State Guidance**: Added helpful hint when the notes list is empty, guiding users to open the drawer and select a folder to get started- Timestamp Calculation Performance: Dramatically improved database resync performance from minutes to seconds
-  - Optimized timestamp calculation algorithm from O(files × commits) to O(commits × modified_files)
-  - Changed from per-file commit traversal to processing commits in chronological order and updating all modified files
-  - Reduced excessive logging and eliminated hanging issues during timestamp calculation
-  - Maintains accurate file modification timestamps while providing massive performance improvement
+- App Crash on Screen Rotation: Fixed crashes that occurred when rotating the device screen
+- Database Sync Optimization: Improved synchronization performance and reliability
+  - Faster app startup with background sync operations
+  - Prevents excessive syncing during screen rotation
+- User Feedback for Repo Opening: Added loading indicator when opening repositories
+- Empty State Guidance: Added helpful hint when the notes list is empty, guiding users to open the drawer and select a folder to get started
+- Timestamp Calculation Performance: Dramatically improved database resync performance from minutes to seconds
 
 ## [26.01.2]
 
