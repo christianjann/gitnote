@@ -6,7 +6,7 @@ import io.github.christianjann.gitnotecje.R
 import io.github.christianjann.gitnotecje.data.AppPreferences
 import io.github.christianjann.gitnotecje.data.room.Note
 import io.github.christianjann.gitnotecje.data.room.NoteFolder
-import io.github.christianjann.gitnotecje.data.room.RepoDatabase
+import io.github.christianjann.gitnotecje.data.NoteRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -51,11 +51,9 @@ class StorageManager {
 
 
     val prefs: AppPreferences = MyApp.appModule.appPreferences
-    private val db: RepoDatabase = MyApp.appModule.repoDatabase
+    private val noteRepository: NoteRepository = MyApp.appModule.noteRepository
 
     private val uiHelper = MyApp.appModule.uiHelper
-
-    private val dao = this.db.repoDatabaseDao
 
     private val gitManager: GitManager = MyApp.appModule.gitManager
 
@@ -199,7 +197,7 @@ class StorageManager {
         progressCb?.invoke(Progress.Timestamps)
         val timestamps = gitManager.getTimestamps().getOrThrow()
 
-        dao.clearAndInit(repoPath, timestamps, progressCb)
+        noteRepository.clearAndInit(repoPath, timestamps, progressCb)
         prefs.databaseCommit.update(fsCommit)
 
         return success(Unit)
@@ -275,8 +273,8 @@ class StorageManager {
             commitMessage = "gitnote changed ${previous.relativePath}",
             onUpdated = onUpdated
         ) {
-            dao.removeNote(previous)
-            dao.insertNote(new)
+            noteRepository.removeNote(previous)
+            noteRepository.insertNote(new)
 
             val rootPath = prefs.repoPath()
             val previousFile = previous.toFileFs(rootPath)
@@ -331,7 +329,7 @@ class StorageManager {
         update(
             commitMessage = "gitnote created ${note.relativePath}"
         ) {
-            dao.insertNote(note)
+            noteRepository.insertNote(note)
 
             val file = note.toFileFs(prefs.repoPath())
 
@@ -357,7 +355,7 @@ class StorageManager {
         update(
             commitMessage = "gitnote deleted ${note.relativePath}"
         ) {
-            dao.removeNote(note)
+            noteRepository.removeNote(note)
 
             val file = note.toFileFs(prefs.repoPath())
             file.delete().onFailure {
@@ -377,7 +375,7 @@ class StorageManager {
         ) {
             // optimization because we only see the db state on screen
             notes.forEach { note ->
-                dao.removeNote(note)
+                noteRepository.removeNote(note)
             }
 
             val repoPath = prefs.repoPath()
@@ -403,7 +401,7 @@ class StorageManager {
         update(
             commitMessage = "gitnote created folder ${noteFolder.relativePath}"
         ) {
-            dao.insertNoteFolder(noteFolder)
+            noteRepository.insertNoteFolder(noteFolder)
 
             val folder = noteFolder.toFolderFs(prefs.repoPath())
             folder.create().onFailure {
@@ -422,7 +420,7 @@ class StorageManager {
         update(
             commitMessage = "gitnote deleted folder ${noteFolder.relativePath}"
         ) {
-            dao.deleteNoteFolder(noteFolder)
+            noteRepository.deleteNoteFolder(noteFolder)
 
             val folder = noteFolder.toFolderFs(prefs.repoPath())
             folder.delete().onFailure {
@@ -438,7 +436,7 @@ class StorageManager {
     suspend fun closeRepo() = locker.withLock {
         prefs.closeRepo()
         gitManager.closeRepo()
-        dao.clearDatabase()
+        noteRepository.clearDatabase()
     }
 
 

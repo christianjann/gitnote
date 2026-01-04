@@ -17,13 +17,15 @@ The app follows MVVM architecture with the following layers:
 ### Key Components
 
 - **Repository**: Git repository for version-controlled notes
+- **NoteRepository**: Centralized data access layer providing reactive Flows for notes and folders
 - **Database**: Room database storing note metadata and content
 - **MainViewModel**: App-level state management and synchronization
-- **GridViewModel**: Grid display logic with paging
+- **GridViewModel**: Grid display logic with paging, observes NoteRepository Flows
 - **GridScreen**: Compose UI for note grid display
 - **ListView**: Reusable Compose component for displaying notes in list format
 - **EditScreen**: Compose UI for viewing and editing individual notes
 - **EditViewModel**: Manages note editing state and operations
+- **StorageManager**: Handles Git operations and database updates via NoteRepository
 
 ## Component Architecture Diagram
 
@@ -62,6 +64,14 @@ classDiagram
         +MarkdownPreview
         +SaveButton
     }
+    class NoteRepository {
+        +getAllNotes(): Flow~List~Note~~
+        +getNoteByRelativePath(path): Flow~Note?~
+        +getGridNotes(...): PagingSource
+        +insertNote(note)
+        +updateNote(note)
+        +deleteNote(note)
+    }
     class StorageManager {
         +performBackgroundGitOperations()
         +updateDatabaseIfNeeded()
@@ -89,14 +99,14 @@ classDiagram
     MainActivity --> EditScreen
     GridScreen --> GridViewModel
     EditScreen --> EditViewModel
+    GridViewModel --> NoteRepository
     GridViewModel --> StorageManager
-    GridViewModel --> RepoDatabase
     EditViewModel --> StorageManager
-    EditViewModel --> RepoDatabase
     MainViewModel --> StorageManager
     MainViewModel --> GitManager
+    StorageManager --> NoteRepository
     StorageManager --> GitManager
-    StorageManager --> RepoDatabase
+    NoteRepository --> RepoDatabase
     RepoDatabase --> NoteDao
 ```
 
@@ -111,20 +121,22 @@ flowchart TD
     D --> F[EditViewModel]
     E --> G{Action Type}
     F --> H{Save Action}
-    G -->|Read| I[RepoDatabase]
+    G -->|Read| I[NoteRepository]
     G -->|Write| J[StorageManager]
     H --> J
-    J --> K[GitManager]
-    J --> L[RepoDatabase]
-    K --> M[Git Repository]
-    L --> N[Room Database]
-    I --> O[UI Update]
-    N --> P[Database Change]
-    P --> Q[Flow Emission]
-    Q --> R[GridViewModel]
-    R --> S[UI Refresh]
-    Q --> T[EditViewModel]
-    T --> U[Edit UI Update]
+    J --> K[NoteRepository]
+    K --> L[GitManager]
+    J --> M[NoteRepository]
+    M --> N[RepoDatabase]
+    L --> O[Git Repository]
+    N --> P[Room Database]
+    I --> Q[UI Update]
+    P --> R[Database Change]
+    R --> S[Flow Emission]
+    S --> T[GridViewModel]
+    T --> U[UI Refresh]
+    S --> V[EditViewModel]
+    V --> W[Edit UI Update]
 ```
 
 ## App Startup Flow
@@ -137,18 +149,27 @@ flowchart TD
 ## Component Descriptions
 
 ### Repository (Git)
+
 - **Purpose**: Version-controlled storage for note files
 - **Technology**: libgit2 via Rust JNI
 - **Operations**: Commit, pull, push, status checks
 - **Integration**: Managed by GitManager
 
+### NoteRepository
+
+- **Purpose**: Centralized data access layer for all note and folder operations
+- **Methods**: Reactive Flows for notes, paging sources, CRUD operations
+- **Integration**: Used by ViewModels and StorageManager for consistent data access
+
 ### Database (Room)
+
 - **Purpose**: Local cache of note metadata and content
 - **Tables**: Notes (id, path, content, timestamps)
 - **Queries**: Paginated note lists, individual note retrieval
 - **Updates**: Triggered by Git operations via StorageManager
 
 ### MainViewModel
+
 - **Responsibilities**:
   - App initialization and repository opening
   - Background synchronization scheduling
@@ -159,16 +180,19 @@ flowchart TD
 - **State**: `isRepoReady` Flow controls UI visibility
 
 ### GridViewModel
+
 - **Responsibilities**:
   - Grid display logic and pagination
   - Multi-select mode management
   - Note operations (create, update, delete)
 - **Key Flows**:
-  - `pagingFlow`: Paginated note data from database
+  - `pagingFlow`: Paginated note data from NoteRepository
   - Selection state management
+- **Data Access**: Observes NoteRepository Flows for reactive UI updates
 - **Interactions**: Calls StorageManager for data changes
 
 ### GridScreen
+
 - **Purpose**: Main note browsing interface in grid layout
 - **Components**:
   - LazyVerticalGrid for note cards
@@ -177,11 +201,13 @@ flowchart TD
 - **State**: Collects from GridViewModel, triggers actions
 
 ### ListView
+
 - **Purpose**: Reusable Compose component for displaying notes in vertical list format
 - **Features**: Lazy loading, item selection, swipe actions
 - **Usage**: Can be used in different screens for list-based note display (alternative to grid)
 
 ### EditScreen
+
 - **Purpose**: Interface for viewing and editing individual notes
 - **Components**:
   - TextField for note content editing
@@ -191,6 +217,7 @@ flowchart TD
 - **State**: Collects from EditViewModel, handles save operations
 
 ### EditViewModel
+
 - **Responsibilities**:
   - Load note content for editing
   - Manage editing state (unsaved changes, etc.)
@@ -204,21 +231,25 @@ flowchart TD
 ## MVVM Implementation
 
 ### Model Layer
+
 - **Data Classes**: `Note`, `StorageConfiguration`, `Signature`
-- **Repositories**: Git repository, Room database
+- **Repositories**: `NoteRepository` provides centralized reactive data access
 - **Managers**: `GitManager`, `StorageManager` handle business logic
 
 ### ViewModel Layer
+
 - **State Management**: MutableStateFlow for reactive UI updates
 - **Data Transformation**: Converts database entities to UI models
 - **Action Handling**: Processes user intents, coordinates with managers
 
 ### View Layer
+
 - **Compose Components**: Stateless, receive state and event handlers
 - **State Collection**: `collectAsState()` for reactive updates
 - **Event Propagation**: Lambda callbacks to ViewModels
 
 ### Data Update Flow
+
 1. **User Action**: Click, swipe, or input in UI component
    - **Grid/List View**: Select note → navigate to EditScreen
    - **Edit View**: Type text → update noteContent state
@@ -228,9 +259,9 @@ flowchart TD
    - EditViewModel: `onSave()` → validate and persist
 3. **Data Modification**: ViewModel calls Manager/Service methods
    - EditViewModel → StorageManager.updateNote()
-   - StorageManager → GitManager.commitAll() + RepoDatabase.updateNote()
+   - StorageManager → NoteRepository.insertNote() + GitManager.commitAll()
 4. **Persistence**: Updates database and/or Git repository
-   - Room: Insert/update note entity
+   - NoteRepository: Insert/update note entity
    - Git: Stage, commit changes to files
 5. **State Update**: ViewModel emits new state via Flow
    - GridViewModel: pagingFlow emits updated data
@@ -242,22 +273,26 @@ flowchart TD
 ## Refresh Mechanisms
 
 ### Database-Driven Refresh
+
 - **Trigger**: Git operations update database via StorageManager
-- **Mechanism**: Room's `Flow` emissions notify ViewModels
+- **Mechanism**: NoteRepository's `Flow` emissions notify ViewModels
 - **Propagation**: ViewModel transforms data, emits UI state
 - **UI Update**: Compose `collectAsState()` triggers recomposition
 
 ### Manual Refresh
+
 - **Trigger**: User pull-to-refresh or sync button
 - **Mechanism**: ViewModel calls `refresh()` on paging source
 - **Implementation**: `Pager` invalidates data, refetches from database
 
 ### Sync-Based Refresh
+
 - **Trigger**: Background sync completes
-- **Mechanism**: StorageManager updates database, triggers Flow emissions
+- **Mechanism**: StorageManager updates database via NoteRepository, triggers Flow emissions
 - **Scope**: Affects all open screens displaying note data
 
 ### State Flow Updates
+
 - **ViewModel State**: `MutableStateFlow` for loading, selection, error states
 - **UI Collection**: `collectAsState()` in Composable functions
 - **Recomposition**: Automatic when state changes
@@ -265,13 +300,15 @@ flowchart TD
 ## Potential Design Issues
 
 ### Identified Concerns
+
 1. **State Consistency**: Multiple ViewModels may observe stale data during sync
 2. **Error Handling**: Git failures may leave UI in inconsistent state
 3. **Memory Usage**: Large note content in memory during editing
 4. **Async Initialization**: Repository opening happens in background after UI loads
 
 ### Recommended Improvements
-1. **Centralized State**: Single source of truth for note data across ViewModels
+
+1. **Centralized State**: ✅ Implemented - NoteRepository provides single source of truth for note data across ViewModels
 2. **Offline Mode**: Graceful degradation when Git operations fail
 3. **Pagination Optimization**: Load note content on-demand, not metadata only
 

@@ -112,6 +112,9 @@ interface RepoDatabaseDao {
     @Query("SELECT * FROM Notes")
     fun allNotes(): Flow<List<Note>>
 
+    @Query("SELECT * FROM Notes WHERE relativePath = :relativePath")
+    fun getNoteByRelativePath(relativePath: String): Flow<Note?>
+
     @RawQuery(observedEntities = [Note::class])
     fun gridNotesRaw(query: SupportSQLiteQuery): PagingSource<Int, GridNote>
 

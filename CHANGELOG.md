@@ -6,12 +6,19 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 
 ### Added
+
 - Repository Opening Indicator: Added visual feedback in the top grid when the Git repository is being opened on app startup
   - Shows folder open icon with pulsing animation during repository initialization
   - Provides clear indication that the app is loading and accessing the repository
   - Differentiates from other sync states with unique visual styling
+- Centralized State Management: Implemented single source of truth for note data across all ViewModels
+  - Created NoteRepository as centralized data access layer with reactive Flows
+  - All database operations now go through NoteRepository for consistent data access
+  - Automatic UI refresh when database updates through Flow emissions
+  - Eliminates stale data issues during sync operations across ViewModels
 
 ### Performance
+
 - App Launch Time: Optimized repository synchronization timing for faster release build startup
 
 ### Fixed
@@ -23,6 +30,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [26.01.5]
 
 ### Fixed
+
 - Multi-Select Mode Crash: Fixed crash when entering multi-select mode by clicking "select multiple notes"
   - Resolved "Attempt to collect twice" error with granular paging flow caching
   - App no longer crashes when entering selection mode

@@ -115,12 +115,7 @@ internal fun NoteListView(
     onEditClick: (Note, EditType) -> Unit,
     vm: GridViewModel,
     showScrollbars: Boolean,
-    refreshSignal: Int,
-    keyVersion: Int,
 ) {
-    LaunchedEffect(refreshSignal) {
-        // No additional action needed, refreshSignal change forces key recomposition
-    }
 
     Box(modifier = modifier) {
         if (gridNotes.itemCount == 0) {
@@ -158,15 +153,15 @@ internal fun NoteListView(
                     key = { index -> 
                         val note = gridNotes[index]?.note
                         if (note != null) {
-                            "${note.id}_${note.content.hashCode()}_${keyVersion}"
+                            "${note.id}_${note.content.hashCode()}"
                         } else {
-                            "${index}_${keyVersion}"
+                            index.toString()
                         }
                     }
                 ) { index ->
                     val gridNote = gridNotes[index]
                     if (gridNote != null) {
-                        Log.d(TAG, "Recomposing list item for note ${gridNote.note.id} with content hash ${gridNote.note.content.hashCode()}")
+                        //Log.d(TAG, "Recomposing list item for note ${gridNote.note.id} with content hash ${gridNote.note.content.hashCode()}")
                         NoteListRow(
                             gridNote = gridNote,
                             vm = vm,

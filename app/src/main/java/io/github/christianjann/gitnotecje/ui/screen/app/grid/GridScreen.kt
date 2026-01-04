@@ -190,7 +190,7 @@ fun GridScreen(
                 openFolder = vm::openFolder,
                 deleteFolder = vm::deleteFolder,
                 createNoteFolder = vm::createNoteFolder,
-                allTags = vm.allTags.collectAsState<List<String>>().value,
+                allTags = vm.allTags.collectAsState().value,
                 selectedTag = vm.selectedTag.collectAsState<String?>().value,
                 onTagSelected = { vm.selectTag(it) },
                 noteBeingMoved = vm.noteBeingMoved.collectAsState().value,
@@ -240,14 +240,6 @@ fun GridScreen(
         val showLanguageDialog = remember { mutableStateOf(false) }
         val currentLanguage by vm.prefs.language.getAsState()
 
-        val refreshSignal by vm.refreshSignal.collectAsStateWithLifecycle()
-
-        val keyVersion = remember { mutableIntStateOf(0) }
-
-        LaunchedEffect(refreshSignal) {
-            keyVersion.value++
-        }
-
         val nestedScrollConnection = rememberNestedScrollConnection(
             offset = offset,
             fabExpanded = fabExpanded,
@@ -279,8 +271,6 @@ fun GridScreen(
                 padding = padding,
                 noteViewType = noteViewType,
                 tagDisplayMode = tagDisplayMode,
-                refreshSignal = refreshSignal,
-                keyVersion = keyVersion.value,
             )
 
             TopBar(
@@ -426,17 +416,9 @@ private fun GridView(
     padding: PaddingValues,
     noteViewType: NoteViewType,
     tagDisplayMode: TagDisplayMode,
-    refreshSignal: Int,
-    keyVersion: Int,
 ) {
     val gridNotes = vm.gridNotes.collectAsLazyPagingItems<GridNote>()
     val query = vm.query.collectAsState()
-
-    // Force refresh LazyPagingItems when refreshSignal changes
-    LaunchedEffect(refreshSignal) {
-        Log.d(TAG, "LaunchedEffect: refreshSignal changed to $refreshSignal, calling gridNotes.refresh()")
-        gridNotes.refresh()
-    }
 
     val isRefreshing by vm.isRefreshing.collectAsStateWithLifecycle()
     val pullRefreshState = rememberPullRefreshState(isRefreshing, {
@@ -478,7 +460,6 @@ private fun GridView(
                     onEditClick = onEditClick,
                     vm = vm,
                     showScrollbars = showScrollbars.value,
-                    keyVersion = keyVersion,
                 )
             }
 
@@ -501,8 +482,6 @@ private fun GridView(
                     onEditClick = onEditClick,
                     vm = vm,
                     showScrollbars = showScrollbars.value,
-                    refreshSignal = refreshSignal,
-                    keyVersion = keyVersion,
                 )
             }
         }
@@ -535,7 +514,6 @@ private fun GridNotesView(
     onEditClick: (Note, EditType) -> Unit,
     vm: GridViewModel,
     showScrollbars: Boolean,
-    keyVersion: Int,
 ) {
 
 
@@ -580,9 +558,9 @@ private fun GridNotesView(
                     key = { index -> 
                         val note = gridNotes[index]?.note
                         if (note != null) {
-                            "${note.id}_${note.content.hashCode()}_${keyVersion}"
+                            "${note.id}_${note.content.hashCode()}"
                         } else {
-                            "${index}_${keyVersion}"
+                            index.toString()
                         }
                     }
                 ) { index ->

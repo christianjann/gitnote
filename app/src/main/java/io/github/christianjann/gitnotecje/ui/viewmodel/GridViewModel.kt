@@ -13,7 +13,7 @@ import io.github.christianjann.gitnotecje.R
 import io.github.christianjann.gitnotecje.data.AppPreferences
 import io.github.christianjann.gitnotecje.data.room.Note
 import io.github.christianjann.gitnotecje.data.room.NoteFolder
-import io.github.christianjann.gitnotecje.data.room.RepoDatabase
+import io.github.christianjann.gitnotecje.data.NoteRepository
 import io.github.christianjann.gitnotecje.helper.FrontmatterParser
 import io.github.christianjann.gitnotecje.helper.NameValidation
 import io.github.christianjann.gitnotecje.manager.GitLogEntry
@@ -49,8 +49,7 @@ class GridViewModel : ViewModel() {
     private val storageManager: StorageManager = MyApp.appModule.storageManager
 
     val prefs: AppPreferences = MyApp.appModule.appPreferences
-    private val db: RepoDatabase = MyApp.appModule.repoDatabase
-    private val dao = db.repoDatabaseDao
+    private val noteRepository: NoteRepository = MyApp.appModule.noteRepository
     val uiHelper = MyApp.appModule.uiHelper
 
     init {
@@ -61,7 +60,6 @@ class GridViewModel : ViewModel() {
         storageManager.onDatabaseUpdated = {
             Log.d(TAG, "onDatabaseUpdated callback triggered, refreshing UI")
             _refreshTrigger.value = _refreshTrigger.value + 1
-            _refreshSignal.value = _refreshSignal.value + 1
         }
     }
 
@@ -70,9 +68,6 @@ class GridViewModel : ViewModel() {
 
     private val _refreshTrigger = MutableStateFlow(0)
     val refreshTrigger: StateFlow<Int> = _refreshTrigger
-
-    private val _refreshSignal = MutableStateFlow(0)
-    val refreshSignal: StateFlow<Int> = _refreshSignal
 
     private val refreshCounter = MutableStateFlow(0)
 
@@ -215,7 +210,7 @@ class GridViewModel : ViewModel() {
 
     suspend fun refreshSelectedNotes() {
         selectedNotes.value.filter { selectedNote ->
-            dao.isNoteExist(selectedNote.relativePath)
+            noteRepository.isNoteExist(selectedNote.relativePath)
         }.let { newSelectedNotes ->
             _selectedNotes.emit(newSelectedNotes)
         }
@@ -371,39 +366,39 @@ class GridViewModel : ViewModel() {
             selectedTag,
             refreshTrigger
         ) { currentNoteFolderRelativePath, sortOrder, query, selectedTag, refreshTriggerValue ->
-            Log.d(TAG, "pagingFlow: creating new Pager, refreshTrigger = $refreshTriggerValue")
+            //Log.d(TAG, "pagingFlow: creating new Pager, refreshTrigger = $refreshTriggerValue")
             Pager(
                 config = PagingConfig(pageSize = 50),
                 pagingSourceFactory = {
-                    Log.d(TAG, "pagingFlow: creating new paging source, refreshTrigger = $refreshTriggerValue")
+                    //Log.d(TAG, "pagingFlow: creating new paging source, refreshTrigger = $refreshTriggerValue")
                     if (query.isEmpty()) {
-                        dao.gridNotes(currentNoteFolderRelativePath, sortOrder, includeSubfolders, selectedTag, tagIgnoresFolders)
+                        noteRepository.getGridNotes(currentNoteFolderRelativePath, sortOrder, includeSubfolders, selectedTag, tagIgnoresFolders)
                     } else {
-                        dao.gridNotesWithQuery(currentNoteFolderRelativePath, sortOrder, query, includeSubfolders, selectedTag, tagIgnoresFolders, searchIgnoresFilters)
+                        noteRepository.getGridNotesWithQuery(currentNoteFolderRelativePath, sortOrder, query, includeSubfolders, selectedTag, tagIgnoresFolders, searchIgnoresFilters)
                     }
                 }
             ).flow.cachedIn(viewModelScope)
         }
     }.flatMapLatest { it }
 
-    val gridNotes = combine(refreshTrigger, refreshSignal) { _, _ -> Unit }.flatMapLatest { _ ->
+    val gridNotes = refreshTrigger.flatMapLatest { _ ->
         combine(
             pagingFlow,
             selectedNotes
         ) { pagingData: PagingData<GridNote>, selectedNotes: List<Note> ->
-            Log.d(TAG, "gridNotes combine: creating new PagingData, selectedNotes count = ${selectedNotes.size}")
+            //Log.d(TAG, "gridNotes combine: creating new PagingData, selectedNotes count = ${selectedNotes.size}")
             pagingData.map { gridNote ->
                 val updatedGridNote = gridNote.copy(
                     selected = selectedNotes.contains(gridNote.note),
                     completed = FrontmatterParser.parseCompletedOrNull(gridNote.note.content)
                 )
-                Log.d(TAG, "gridNotes map: note ${gridNote.note.id}, content hash = ${gridNote.note.content.hashCode()}, tags = ${FrontmatterParser.parseTags(gridNote.note.content)}")
+                //Log.d(TAG, "gridNotes map: note ${gridNote.note.id}, content hash = ${gridNote.note.content.hashCode()}, tags = ${FrontmatterParser.parseTags(gridNote.note.content)}")
                 updatedGridNote
             }
         }
     }.flowOn(Dispatchers.Main)
 
-    val allTags = dao.allNotes().flowMap { notes: List<Note> ->
+    val allTags = noteRepository.getAllNotes().flowMap { notes: List<Note> ->
         notes.flatMap { note: Note ->
             FrontmatterParser.parseTags(note.content)
         }.distinct().sorted()
@@ -420,7 +415,7 @@ class GridViewModel : ViewModel() {
         Pair(currentNoteFolderRelativePath, sortOrder)
     }.flatMapLatest { pair ->
         val (currentNoteFolderRelativePath, sortOrder) = pair
-        dao.drawerFolders(currentNoteFolderRelativePath, sortOrder)
+        noteRepository.getDrawerFolders(currentNoteFolderRelativePath, sortOrder)
     }.stateIn(
         CoroutineScope(Dispatchers.Main), SharingStarted.WhileSubscribed(5000), emptyList()
     )

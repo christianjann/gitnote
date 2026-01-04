@@ -12,8 +12,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.christianjann.gitnotecje.MyApp
 import io.github.christianjann.gitnotecje.R
+import io.github.christianjann.gitnotecje.data.NoteRepository
 import io.github.christianjann.gitnotecje.data.room.Note
-import io.github.christianjann.gitnotecje.data.room.RepoDatabase
 import io.github.christianjann.gitnotecje.helper.FrontmatterParser
 import io.github.christianjann.gitnotecje.helper.NameValidation
 import io.github.christianjann.gitnotecje.helper.NoteSaver
@@ -324,10 +324,9 @@ open class TextVM() : ViewModel() {
     private val storageManager: StorageManager = MyApp.appModule.storageManager
     private val uiHelper: UiHelper = MyApp.appModule.uiHelper
     val prefs = MyApp.appModule.appPreferences
-    private val db: RepoDatabase = MyApp.appModule.repoDatabase
-    private val dao = db.repoDatabaseDao
+    private val noteRepository: NoteRepository = MyApp.appModule.noteRepository
 
-    val allTags = dao.allNotes().flowMap { notes: List<Note> ->
+    val allTags = noteRepository.getAllNotes().flowMap { notes: List<Note> ->
         notes.flatMap { note: Note ->
             FrontmatterParser.parseTags(note.content)
         }.distinct().sorted()
