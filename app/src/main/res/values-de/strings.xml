@@ -120,7 +120,7 @@
     <string name="use_app_storage">App-Speicher verwenden</string>
     <string name="error_need_storage_permission">Die Anwendung benötigt diese Berechtigung, um auf den Speicher zuzugreifen</string>
     <string name="use_device_storage">Gerätespeicher verwenden</string>
-    <string name="use_device_storage_info">Erfordert Berechtigung für den vollständigen Gerätespeicher. Sie können anschließend auf das Repository von Ihrem Computer aus zugreifen.</string>
+    <string name="use_device_storage_info">Erfordert Berechtigung für den vollständigen Gerätespeicher. Sie können anschließend auf das Repository von Ihrem Computer aus zugreifen.\n\n⚠️ WARNUNG: Gerätespeicher ist deutlich langsamer als App-Speicher. Operationen können bis zu 20 Sekunden dauern. Siehe Dokumentation für Details.</string>
     <string name="create_repo_explorer">Repository in diesem Ordner erstellen</string>
     <string name="open_repo_explorer">Dieses Repository öffnen</string>
     <string name="clone_repo_explorer">Repository in diesem Ordner klonen</string>

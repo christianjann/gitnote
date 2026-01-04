@@ -97,7 +97,7 @@
     <string name="use_app_storage">Utiliser la mémoire de l\'app</string>
     <string name="error_need_storage_permission">L\'application a besoin de cette permission pour accéder au stockage</string>
     <string name="use_device_storage">Utiliser la mémoire de l\'appareil</string>
-    <string name="use_device_storage_info">Requiert une autorisation d\'accès au stockage complet de l\'appareil. Vous aurez la possibilité d\'accéder au dépôt sur votre ordinateur par la suite.</string>
+    <string name="use_device_storage_info">Requiert une autorisation d\'accès au stockage complet de l\'appareil. Vous aurez la possibilité d\'accéder au dépôt sur votre ordinateur par la suite.\n\n⚠️ AVERTISSEMENT: Le stockage de l\'appareil est significativement plus lent que le stockage de l\'app. Les opérations peuvent prendre jusqu\'à 20 secondes. Voir la documentation pour plus de détails.</string>
     <string name="create_repo_explorer">Créer un dépôt dans ce dossier</string>
     <string name="open_repo_explorer">Ouvrir ce dépôt</string>
     <string name="clone_repo_explorer">Cloner le dépôt dans ce dossier</string>

@@ -153,6 +153,7 @@ See [building.md](doc/building.md) for detailed build instructions.
 # Current limitation
 
 - Android does not differentiate case for file name, so if you have a folder named `A` and another folder named `a`, `a` will not be displayed.
+- Device memory storage is significantly slower than app memory (up to 200x). See [Storage Options and Performance](./doc/features.md#storage-options-and-performance) for details. Use app memory where possible.
 
 # Future direction
 

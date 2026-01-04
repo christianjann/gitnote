@@ -89,7 +89,7 @@
     <string name="use_app_storage">Usar armazenamento do aplicativo</string>
     <string name="error_need_storage_permission">O aplicativo precisa desta permissão para acessar o armazenamento</string>
     <string name="use_device_storage">Usar armazenamento do dispositivo</string>
-    <string name="use_device_storage_info">Requer permissão para acessar todo o armazenamento do dispositivo. Você poderá acessar o repositório pelo computador após esse passo.</string>
+    <string name="use_device_storage_info">Requer permissão para acessar todo o armazenamento do dispositivo. Você poderá acessar o repositório pelo computador após esse passo.\n\n⚠️ AVISO: O armazenamento do dispositivo é significativamente mais lento que o armazenamento do app. As operações podem levar até 20 segundos. Veja a documentação para detalhes.</string>
     <string name="create_repo_explorer">Criar repositório nessa pasta</string>
     <string name="open_repo_explorer">Abrir este repositório</string>
     <string name="clone_repo_explorer">Clonar repositório nesta pasta</string>

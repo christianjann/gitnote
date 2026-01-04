@@ -53,6 +53,23 @@ GitNote features intelligent automatic merge conflict resolution that handles co
 - **Frontmatter Metadata**: YAML headers for titles, timestamps, completion status, tags, and authors.
 - **File-Based Storage**: Notes are stored as Markdown files in the repository.
 
+### Storage Options and Performance
+
+GitNote supports two storage locations with dramatically different performance characteristics:
+
+| Operation | App Memory | Device Memory |
+|-----------|------------|---------------|
+| Opening Repository | <1 second | ~7 seconds |
+| Checkbox Toggle | Instant | Up to 20 seconds |
+| Note Editing | Instant | Up to 20 seconds |
+| File Operations | Instant | Up to 20 seconds |
+
+**⚠️ Performance Warning**: Device memory operations are up to 200x slower than app memory operations. Always prefer app memory unless you have insufficient storage space in the app's allocated memory.
+
+**Storage Location Selection**:
+- **App Memory** (Recommended): Faster performance, suitable for most users
+- **Device Memory**: Slower but allows access to the full device storage when app memory is insufficient
+
 ### Tag Filtering
 
 GitNote supports filtering notes by tags defined in the frontmatter, allowing users to quickly find related notes.

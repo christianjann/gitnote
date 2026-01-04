@@ -85,7 +85,7 @@
     <string name="use_app_storage">Použít úložiště aplikace</string>
     <string name="error_need_storage_permission">Aplikace potřebuje toto oprávnění pro přístup k úložišti</string>
     <string name="use_device_storage">Použít úložiště zařízení</string>
-    <string name="use_device_storage_info">Vyžaduje oprávnění pro přístup k úplnému úložišti zařízení. Poté budete mít přístup k úložišti ve svém zařízení.</string>
+    <string name="use_device_storage_info">Vyžaduje oprávnění pro přístup k úplnému úložišti zařízení. Poté budete mít přístup k úložišti ve svém zařízení.\n\n⚠️ VAROVÁNÍ: Úložiště zařízení je výrazně pomalejší než úložiště aplikace. Operace mohou trvat až 20 sekund. Podrobnosti viz dokumentace.</string>
     <string name="create_repo_explorer">Vytvořit repozitář v této složce</string>
     <string name="open_repo_explorer">Otevřít tento repozitář</string>
     <string name="clone_repo_explorer">Klonovat repozitář v této složce</string>
