@@ -163,6 +163,8 @@
     <string name="sync_failed">Nepodařilo se synchronizovat se vzdáleným repozitářem</string>
     <string name="background_git_operations">Operace Git na pozadí</string>
     <string name="background_git_operations_subtitle">Provádět git pull/push na pozadí během obnovení, aby se zabránilo blokování UI</string>
+    <string name="background_git_delay_seconds">Zpoždění operací Git na pozadí (sekundy)</string>
+    <string name="background_git_delay_seconds_subtitle">Zpoždění před provedením operací Git na pozadí pro sdružení více změn (0 = okamžitě)</string>
     <string name="include_subfolders">Zahrnout podsložky</string>
     <string name="include_subfolders_subtitle">Zobrazit poznámky z podsložek při procházení složky</string>
     <string name="tag_display_mode">Režim zobrazení štítků</string>

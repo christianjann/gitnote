@@ -57,6 +57,8 @@
     <string name="search_ignores_filters_subtitle">When searching, show results from all folders regardless of current folder and subfolder settings</string>
     <string name="background_git_operations">Background git operations</string>
     <string name="background_git_operations_subtitle">Perform git pull/push in background during refresh to avoid blocking UI</string>
+    <string name="background_git_delay_seconds">Background git delay (seconds)</string>
+    <string name="background_git_delay_seconds_subtitle">Delay before performing background git operations to batch multiple changes (0 = immediate)</string>
     <string name="folder_filters">Folder filters</string>
     <string name="folder_filters_subtitle">Define regex to filter folders of the repository</string>
     <string name="edit">Edit</string>

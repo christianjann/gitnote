@@ -215,6 +215,21 @@ fun SettingsScreen(
                 }
             )
 
+            val backgroundGitDelaySeconds by vm.prefs.backgroundGitDelaySeconds.getAsState()
+            StringSettings(
+                title = stringResource(R.string.background_git_delay_seconds),
+                subtitle = stringResource(R.string.background_git_delay_seconds_subtitle) + " (currently: ${backgroundGitDelaySeconds}s)",
+                stringValue = backgroundGitDelaySeconds.toString(),
+                keyboardType = KeyboardType.Number,
+                onChange = { value ->
+                    value.toIntOrNull()?.let { seconds ->
+                        if (seconds >= 0) {
+                            vm.update { vm.prefs.backgroundGitDelaySeconds.update(seconds) }
+                        }
+                    }
+                }
+            )
+
 
             val defaultPathForNewNote by vm.prefs.defaultPathForNewNote.getAsState()
             val pickFolderDialogExpanded = rememberSaveable { mutableStateOf(false) }

@@ -155,6 +155,8 @@
     <string name="sync_failed">Falha ao sincronizar com repositório remoto</string>
     <string name="background_git_operations">Operações Git em segundo plano</string>
     <string name="background_git_operations_subtitle">Executar git pull/push em segundo plano durante a atualização para evitar bloquear a interface</string>
+    <string name="background_git_delay_seconds">Atraso operações Git segundo plano (segundos)</string>
+    <string name="background_git_delay_seconds_subtitle">Atraso antes de executar operações Git em segundo plano para agrupar múltiplas alterações (0 = imediato)</string>
     <string name="include_subfolders">Incluir subpastas</string>
     <string name="include_subfolders_subtitle">Mostrar notas de subpastas ao navegar em uma pasta</string>
     <string name="tag_display_mode">Modo de exibição de tags</string>

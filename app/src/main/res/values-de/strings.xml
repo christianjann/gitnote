@@ -57,6 +57,8 @@
     <string name="search_ignores_filters_subtitle">Bei der Suche Ergebnisse aus allen Ordnern anzeigen, unabhängig von aktuellen Ordner- und Unterordner-Einstellungen</string>
     <string name="background_git_operations">Hintergrund-GIT-Operationen</string>
     <string name="background_git_operations_subtitle">GIT-Pull/Push im Hintergrund während der Aktualisierung ausführen, um die Benutzeroberfläche nicht zu blockieren</string>
+    <string name="background_git_delay_seconds">Hintergrund-GIT-Verzögerung (Sekunden)</string>
+    <string name="background_git_delay_seconds_subtitle">Verzögerung vor der Ausführung von Hintergrund-GIT-Operationen, um mehrere Änderungen zu bündeln (0 = sofort)</string>
     <string name="folder_filters">Ordnerfilter</string>
     <string name="folder_filters_subtitle">Regex definieren, um Ordner des Repositorys zu filtern</string>
     <string name="edit">Bearbeiten</string>

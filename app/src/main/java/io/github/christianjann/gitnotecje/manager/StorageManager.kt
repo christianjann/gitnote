@@ -9,12 +9,16 @@ import io.github.christianjann.gitnotecje.data.room.NoteFolder
 import io.github.christianjann.gitnotecje.data.NoteRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExecutorCoroutineDispatcher
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import java.util.concurrent.Executors
 import kotlin.Result.Companion.failure
 import kotlin.Result.Companion.success
 
@@ -58,6 +62,11 @@ class StorageManager {
     private val gitManager: GitManager = MyApp.appModule.gitManager
 
     private val locker = Mutex()
+    private var executingGitJob: kotlinx.coroutines.Job? = null
+    private var waitingGitJob: kotlinx.coroutines.Job? = null
+
+    // Custom dispatcher for git operations to avoid blocking Dispatchers.IO
+    private val gitDispatcher: ExecutorCoroutineDispatcher = Executors.newFixedThreadPool(2).asCoroutineDispatcher()
 
     private val _syncState: MutableStateFlow<SyncState> = MutableStateFlow(SyncState.Ok(true))
     val syncState: StateFlow<SyncState> = _syncState
@@ -119,47 +128,109 @@ class StorageManager {
 
     /**
      * Perform git pull and push operations in the background
+     * Uses a two-job system: one executing and one waiting
      */
     fun performBackgroundGitOperations() {
         Log.d(TAG, "performBackgroundGitOperations called")
-        CoroutineScope(Dispatchers.IO).launch {
-            locker.withLock {
-                val cred = prefs.cred()
-                val author = prefs.gitAuthor()
-                val remoteUrl = prefs.remoteUrl.get()
-                var syncFailed = false
-
-                Log.d(TAG, "Remote URL: $remoteUrl")
-
-                if (remoteUrl.isNotEmpty()) {
-                    Log.d(TAG, "Starting pull operation")
-                    _syncState.emit(SyncState.Pull)
-                    gitManager.pull(cred, author).onFailure {
-                        Log.e(TAG, "Pull failed: ${it.message}")
-                        syncFailed = true
-                        _syncState.emit(SyncState.Offline)
-                        // Don't show toast for background operations
-                    }.onSuccess {
-                        Log.d(TAG, "Pull succeeded")
-                    }
-                }
-
-                if (remoteUrl.isNotEmpty()) {
-                    Log.d(TAG, "Starting push operation")
-                    _syncState.emit(SyncState.Push)
-                    gitManager.push(cred).onFailure {
-                        syncFailed = true
-                        _syncState.emit(SyncState.Offline)
-                        // Don't show toast for background operations
-                    }
-                }
-
-                if (!syncFailed) {
-                    _syncState.emit(SyncState.Ok(false))
-                    // Update database after successful git operations
-                    updateDatabaseIfNeeded()
+        
+        when {
+            // No jobs running - start executing job
+            executingGitJob == null && waitingGitJob == null -> {
+                Log.d(TAG, "Starting new executing job")
+                startExecutingJob()
+            }
+            
+            // Executing job running, no waiting job - start waiting job
+            executingGitJob != null && waitingGitJob == null -> {
+                Log.d(TAG, "Starting new waiting job")
+                startWaitingJob()
+            }
+            
+            // Both jobs running - do nothing, waiting job will handle when executing finishes
+            else -> {
+                Log.d(TAG, "Both executing and waiting jobs running, ignoring request")
+            }
+        }
+    }
+    
+    private fun startExecutingJob() {
+        executingGitJob = CoroutineScope(gitDispatcher).launch {
+            try {
+                performGitOperations()
+            } finally {
+                executingGitJob = null
+                // If there's a waiting job, promote it to executing
+                waitingGitJob?.let { waiting ->
+                    Log.d(TAG, "Promoting waiting job to executing")
+                    waitingGitJob = null
+                    executingGitJob = waiting
+                    // The waiting job will now run its operations
                 }
             }
+        }
+    }
+    
+    private fun startWaitingJob() {
+        waitingGitJob = CoroutineScope(gitDispatcher).launch {
+            try {
+                // Wait for the executing job to finish
+                executingGitJob?.join()
+                // Now perform our operations
+                performGitOperations()
+            } finally {
+                waitingGitJob = null
+            }
+        }
+    }
+    
+    private suspend fun performGitOperations() {
+        // Add configurable delay to batch operations
+        val delaySeconds = prefs.backgroundGitDelaySeconds.getBlocking()
+        if (delaySeconds > 0) {
+            Log.d(TAG, "Delaying background git operations for $delaySeconds seconds")
+            delay(delaySeconds * 1000L)
+        }
+
+        val cred = prefs.cred()
+        val author = prefs.gitAuthor()
+        val remoteUrl = prefs.remoteUrl.get()
+        var syncFailed = false
+
+        Log.d(TAG, "Remote URL: $remoteUrl")
+
+        // Commit any pending changes before syncing
+        gitManager.commitAll(author, "commit from gitnote background sync").onFailure {
+            Log.e(TAG, "Failed to commit pending changes: ${it.message}")
+            // Continue with sync even if commit fails
+        }
+
+        if (remoteUrl.isNotEmpty()) {
+            Log.d(TAG, "Starting pull operation")
+            _syncState.emit(SyncState.Pull)
+            gitManager.pull(cred, author).onFailure {
+                Log.e(TAG, "Pull failed: ${it.message}")
+                syncFailed = true
+                _syncState.emit(SyncState.Offline)
+                // Don't show toast for background operations
+            }.onSuccess {
+                Log.d(TAG, "Pull succeeded")
+            }
+        }
+
+        if (remoteUrl.isNotEmpty()) {
+            Log.d(TAG, "Starting push operation")
+            _syncState.emit(SyncState.Push)
+            gitManager.push(cred).onFailure {
+                syncFailed = true
+                _syncState.emit(SyncState.Offline)
+                // Don't show toast for background operations
+            }
+        }
+
+        if (!syncFailed) {
+            _syncState.emit(SyncState.Ok(false))
+            // Update database after successful git operations
+            updateDatabaseIfNeeded()
         }
     }
 
@@ -451,16 +522,21 @@ class StorageManager {
         val author = prefs.gitAuthor()
         val backgroundGitOps = prefs.backgroundGitOperations.getBlocking()
 
+        Log.d(TAG, "update: backgroundGitOps = $backgroundGitOps, remoteUrl = $remoteUrl")
+
         var syncFailed = false
 
-        gitManager.commitAll(
-            author,
-            "commit from gitnote, before doing a change"
-        ).onFailure {
-            return@withContext failure(it)
+        // Only commit pending changes before making new changes if background git ops are disabled
+        if (!backgroundGitOps) {
+            gitManager.commitAll(
+                author,
+                "commit from gitnote, before doing a change"
+            ).onFailure {
+                return@withContext failure(it)
+            }
         }
 
-        // Only perform pull/push if background git operations are disabled
+        // Only perform pull/push synchronously if background git operations are disabled
         if (!backgroundGitOps && remoteUrl.isNotEmpty()) {
             _syncState.emit(SyncState.Pull)
             gitManager.pull(cred, author).onFailure {
@@ -482,11 +558,14 @@ class StorageManager {
             onUpdated()
         }
 
-        gitManager.commitAll(author, commitMessage).onFailure {
-            return@withContext failure(it)
+        // Only commit changes synchronously if background git ops are disabled
+        if (!backgroundGitOps) {
+            gitManager.commitAll(author, commitMessage).onFailure {
+                return@withContext failure(it)
+            }
         }
 
-        // Only perform push if background git operations are disabled
+        // Only perform push synchronously if background git operations are disabled
         if (!backgroundGitOps && remoteUrl.isNotEmpty()) {
             _syncState.emit(SyncState.Push)
             gitManager.push(cred).onFailure {

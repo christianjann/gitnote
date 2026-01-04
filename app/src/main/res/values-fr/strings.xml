@@ -174,6 +174,8 @@
     <string name="sync_failed">Échec de la synchronisation avec le dépôt distant</string>
     <string name="background_git_operations">Opérations Git en arrière-plan</string>
     <string name="background_git_operations_subtitle">Effectuer git pull/push en arrière-plan pendant l\'actualisation pour éviter de bloquer l\'interface</string>
+    <string name="background_git_delay_seconds">Délai opérations Git arrière-plan (secondes)</string>
+    <string name="background_git_delay_seconds_subtitle">Délai avant d\'effectuer les opérations Git en arrière-plan pour regrouper plusieurs modifications (0 = immédiat)</string>
     <string name="include_subfolders">Inclure les sous-dossiers</string>
     <string name="include_subfolders_subtitle">Afficher les notes des sous-dossiers lors de la navigation dans un dossier</string>
     <string name="tag_display_mode">Mode d\'affichage des tags</string>

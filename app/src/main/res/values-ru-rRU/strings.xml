@@ -131,6 +131,8 @@
     <string name="sync_failed">Не удалось синхронизировать с удалённым репозиторием</string>
     <string name="background_git_operations">Фоновые операции Git</string>
     <string name="background_git_operations_subtitle">Выполнять git pull/push в фоне во время обновления, чтобы избежать блокировки интерфейса</string>
+    <string name="background_git_delay_seconds">Задержка фоновых операций Git (секунды)</string>
+    <string name="background_git_delay_seconds_subtitle">Задержка перед выполнением фоновых операций Git для группировки нескольких изменений (0 = немедленно)</string>
     <string name="include_subfolders">Включать подпапки</string>
     <string name="include_subfolders_subtitle">Показывать заметки из подпапок при просмотре папки</string>
     <string name="tag_display_mode">Режим отображения тегов</string>

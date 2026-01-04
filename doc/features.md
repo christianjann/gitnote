@@ -12,6 +12,36 @@ GitNote is a Git-based note-taking app for Android that integrates seamlessly wi
 - **SSH Support**: Secure authentication using SSH keys.
 - **Git Log Viewer**: Access commit history directly in the app with formatted timestamps, author information, and commit messages.
 - **External Change Detection**: Automatically detects and syncs changes made outside the app.
+- **Background Git Operations**: Intelligent background synchronization with configurable batching.
+
+### Background Git Operations
+
+GitNote features a sophisticated background synchronization system that prevents UI blocking during rapid successive changes while ensuring data consistency.
+
+#### How It Works
+
+- **Two-Job System**: Maintains at most one executing job and one waiting job
+  - Executing job performs actual git operations (pull/push)
+  - Waiting job queues up when executing job is busy
+  - Waiting job automatically promotes to executing when current job completes
+- **Configurable Delay**: Default 5-second delay batches multiple rapid changes
+  - Reduces unnecessary git operations during quick successive edits
+  - Configurable in Settings > Git > Background git delay
+- **UI Responsiveness**: All git operations run in background, never blocking the UI
+- **Performance Optimization**: Dedicated thread pool prevents git I/O from interfering with other app operations
+- **Concurrent Editing**: Note updates work seamlessly during background synchronization
+- **Smart Batching**: Multiple changes within the delay window are consolidated
+
+#### Usage Scenarios
+
+- **Rapid Editing**: Making multiple changes quickly (checkbox toggles, text edits) gets batched
+- **Successive Updates**: No UI freezing during intensive note-taking sessions
+- **Network Optimization**: Reduces network requests by batching operations
+
+#### Configuration
+
+- **Background Git Operations**: Enable/disable background sync (enabled by default)
+- **Background Git Delay**: Set delay in seconds (0 = immediate, default = 5)
 
 ### Automatic Merge Conflict Resolution
 
@@ -57,16 +87,17 @@ GitNote features intelligent automatic merge conflict resolution that handles co
 
 GitNote supports two storage locations with dramatically different performance characteristics:
 
-| Operation | App Memory | Device Memory |
-|-----------|------------|---------------|
-| Opening Repository | <1 second | ~7 seconds |
-| Checkbox Toggle | Instant | Up to 20 seconds |
-| Note Editing | Instant | Up to 20 seconds |
-| File Operations | Instant | Up to 20 seconds |
+| Operation          | App Memory | Device Memory    |
+| ------------------ | ---------- | ---------------- |
+| Opening Repository | <1 second  | ~7 seconds       |
+| Checkbox Toggle    | Instant    | Up to 20 seconds |
+| Note Editing       | Instant    | Up to 20 seconds |
+| File Operations    | Instant    | Up to 20 seconds |
 
 **⚠️ Performance Warning**: Device memory operations are up to 200x slower than app memory operations. Always prefer app memory unless you have insufficient storage space in the app's allocated memory.
 
 **Storage Location Selection**:
+
 - **App Memory** (Recommended): Faster performance, suitable for most users
 - **Device Memory**: Slower but allows access to the full device storage when app memory is insufficient
 
@@ -655,29 +686,37 @@ Cut Off At The End Of The Line
 
 ## Background Git Operations
 
-GitNote allows users to perform git synchronization operations asynchronously to prevent UI blocking during all note operations, not just refreshes.
+GitNote features a sophisticated background synchronization system that prevents UI blocking during rapid successive changes while ensuring data consistency.
 
 ### How It Works
 
-- **Setting Toggle**: Enable "Background git operations" in Settings > Git
-- **Non-blocking Operations**: When enabled, git pull/push operations run asynchronously after any note modification (create, update, delete, convert)
-- **Immediate Commits**: Changes are committed immediately for data integrity, then sync operations happen in the background
-- **UI Responsiveness**: The app remains responsive during all operations, allowing continued note editing
-- **Status Updates**: Sync state indicators still update to show current operation status
-- **Default Behavior**: Disabled by default to maintain immediate sync feedback
+- **Two-Job System**: Maintains at most one executing job and one waiting job
+  - Executing job performs actual git operations (pull/push) after configurable delay
+  - Waiting job queues up when executing job is busy
+  - Waiting job automatically promotes to executing when current job completes
+- **Configurable Delay**: Default 5-second delay batches multiple rapid changes
+  - Reduces unnecessary git operations during quick successive edits
+  - Set to 0 for immediate operations
+- **UI Responsiveness**: All git operations run in background, never blocking the UI
+- **Smart Batching**: Multiple changes within the delay window are consolidated
+
+### Configuration
+
+- **Setting Toggle**: Enable "Background git operations" in Settings > Git (enabled by default)
+- **Delay Setting**: Configure "Background git delay" in Settings > Git (default: 5 seconds)
 
 ### Usage Tips
 
-- Enable this setting if you work alone and want uninterrupted note editing during any operation
-- The setting is ideal for users who perform frequent note operations and prefer responsiveness over immediate sync feedback
-- Disable it if you need to know immediately when sync operations complete or fail
-- Background operations don't show error toasts to avoid interrupting your workflow
-- Applies to all note operations: creating, editing, deleting, converting between tasks/notes, moving notes
+- Enable background operations for uninterrupted note editing during intensive sessions
+- The 5-second delay is ideal for batching rapid changes (checkbox toggles, quick edits)
+- Set delay to 0 if you prefer immediate sync but still want background processing
+- Background operations don't show error toasts to avoid interrupting workflow
+- Applies to all note operations: creating, editing, deleting, converting, moving
 
 ### Example Workflow
 
 1. Open Settings > Git and enable "Background git operations"
-2. Edit notes, convert tasks, create new notes - all operations complete immediately
-3. Check sync status indicators to monitor background operations
-4. Continue working without waiting for git synchronization
-5. Disable the setting if you need blocking sync behavior for collaboration workflows
+2. Set "Background git delay" to 5 seconds (or your preferred delay)
+3. Edit notes rapidly - operations are batched and don't block UI
+4. Check sync status indicators to monitor background operations
+5. Continue working without waiting for git synchronization

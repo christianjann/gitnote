@@ -158,6 +158,7 @@ class AppPreferences(
     val defaultExtension = stringPreference("defaultExtension", "md")
     val showLinesNumber = booleanPreference("showLinesNumber", false)
     val backgroundGitOperations = booleanPreference("backgroundGitOperations", true)
+    val backgroundGitDelaySeconds = intPreference("backgroundGitDelaySeconds", 5)
 
     val folderFilters = setPreference(
         "folderFilters", setOf(

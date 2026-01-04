@@ -5,6 +5,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [26.01.6]
+
 ### Added
 
 - Repository Opening Indicator: Added visual feedback in the top grid when the Git repository is being opened on app startup
@@ -16,10 +18,33 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - All database operations now go through NoteRepository for consistent data access
   - Automatic UI refresh when database updates through Flow emissions
   - Eliminates stale data issues during sync operations across ViewModels
+- Background Git Operations Delay: Added configurable delay for background git synchronization
+  - Default 5-second delay to batch multiple rapid changes into single operations
+  - Prevents UI blocking during successive note edits
+  - Configurable in Settings > Git > Background git delay
+- Performance Optimization: Dedicated thread pool for git operations
+  - Custom dispatcher prevents git I/O from blocking other app operations
+  - Eliminates UI freezing during pull/push operations
+  - Improved responsiveness during rapid note edits
+- Concurrent Operations: Note updates no longer blocked during git synchronization
+  - Removed unnecessary locking that prevented concurrent database operations
+  - Users can continue editing notes while background git operations run
+  - Maintains data consistency through proper serialization at the git level
+- Two-Job Background System: Implemented intelligent background job management
+  - Maximum one executing job and one waiting job to handle rapid successive changes
+  - Waiting job automatically promotes to executing when current job completes
+  - Eliminates UI blocking during multiple quick edits
+- Storage Performance Warnings: Added comprehensive performance documentation
+  - Device memory operations are up to 200x slower than app memory
+  - Clear warnings in setup UI when selecting device storage
+  - Performance comparison table in documentation
 
 ### Performance
 
 - App Launch Time: Optimized repository synchronization timing for faster release build startup
+- Background Git Operations: Eliminated UI blocking during rapid successive changes
+  - Two-job system prevents multiple concurrent background operations
+  - Configurable batching delay reduces unnecessary git operations
 
 ### Fixed
 
