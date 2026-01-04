@@ -114,8 +114,10 @@ import io.github.christianjann.gitnotecje.ui.model.TagDisplayMode
 import io.github.christianjann.gitnotecje.ui.screen.app.DrawerScreen
 import io.github.christianjann.gitnotecje.ui.viewmodel.GridViewModel
 import io.github.christianjann.gitnotecje.manager.SyncState
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 
+@OptIn(ExperimentalCoroutinesApi::class)
 private const val TAG = "GridScreen"
 
 private const val maxOffset = -500f

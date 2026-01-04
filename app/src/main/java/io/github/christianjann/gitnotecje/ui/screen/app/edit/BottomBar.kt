@@ -32,11 +32,12 @@ import androidx.compose.ui.unit.dp
 import io.github.christianjann.gitnotecje.R
 import io.github.christianjann.gitnotecje.ui.viewmodel.edit.TextVM
 import io.github.christianjann.gitnotecje.utils.getParentPath
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 val bottomBarHeight = 50.dp
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalCoroutinesApi::class)
 @Composable
 fun DefaultRow(
     vm: TextVM,

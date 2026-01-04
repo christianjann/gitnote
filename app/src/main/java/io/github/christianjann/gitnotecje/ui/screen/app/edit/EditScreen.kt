@@ -58,12 +58,13 @@ import io.github.christianjann.gitnotecje.ui.viewmodel.edit.MarkDownVM
 import io.github.christianjann.gitnotecje.ui.viewmodel.edit.TextVM
 import io.github.christianjann.gitnotecje.ui.viewmodel.edit.newEditViewModel
 import io.github.christianjann.gitnotecje.ui.viewmodel.edit.newMarkDownVM
-
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 private const val TAG = "EditScreen"
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalCoroutinesApi::class)
 @Composable
 fun EditScreen(
     editParams: EditParams,

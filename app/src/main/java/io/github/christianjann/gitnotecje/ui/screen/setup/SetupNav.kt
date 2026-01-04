@@ -25,7 +25,9 @@ import io.github.christianjann.gitnotecje.ui.viewmodel.FileExplorerViewModel
 import io.github.christianjann.gitnotecje.ui.viewmodel.SetupViewModel
 import io.github.christianjann.gitnotecje.ui.viewmodel.viewModelFactory
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
+@OptIn(ExperimentalCoroutinesApi::class)
 private const val TAG = "SetupNav"
 
 @Composable

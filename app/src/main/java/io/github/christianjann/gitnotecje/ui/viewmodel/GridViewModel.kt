@@ -38,7 +38,7 @@ import kotlinx.coroutines.flow.map as flowMap
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-@ExperimentalCoroutinesApi
+@OptIn(ExperimentalCoroutinesApi::class)
 class GridViewModel : ViewModel() {
 
     companion object {

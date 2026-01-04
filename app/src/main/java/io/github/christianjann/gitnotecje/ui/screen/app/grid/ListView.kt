@@ -58,7 +58,9 @@ import io.github.christianjann.gitnotecje.ui.viewmodel.GridViewModel
 import java.text.DateFormat
 import java.util.Date
 import android.util.Log
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
+@OptIn(ExperimentalCoroutinesApi::class)
 private const val TAG = "ListView"
 
 // Custom scrollbar implementation since VerticalScrollbar is not available in current Compose version

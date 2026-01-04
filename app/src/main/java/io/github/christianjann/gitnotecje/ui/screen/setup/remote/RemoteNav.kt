@@ -27,8 +27,10 @@ import io.github.christianjann.gitnotecje.ui.model.StorageConfiguration
 import io.github.christianjann.gitnotecje.ui.screen.settings.LogsScreen
 import io.github.christianjann.gitnotecje.ui.utils.slide
 import io.github.christianjann.gitnotecje.ui.viewmodel.SetupViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 
+@OptIn(ExperimentalCoroutinesApi::class)
 private const val TAG = "RemoteScreen"
 
 
