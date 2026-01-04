@@ -5,11 +5,17 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Fixed
+
+- Multi-Select Mode Performance: Optimized paging flow caching to maintain fast UI updates
+  - Refined caching strategy to avoid performance degradation from over-caching
+  - UI remains responsive when entering/exiting multi-select mode
+
 ## [26.01.5]
 
 ### Fixed
 - Multi-Select Mode Crash: Fixed crash when entering multi-select mode by clicking "select multiple notes"
-  - Added proper caching to paging flow to prevent "Attempt to collect twice" error
+  - Resolved "Attempt to collect twice" error with granular paging flow caching
   - App no longer crashes when entering selection mode
 
 ## [26.01.4]

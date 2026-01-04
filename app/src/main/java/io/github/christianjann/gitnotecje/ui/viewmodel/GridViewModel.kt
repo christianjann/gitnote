@@ -382,9 +382,9 @@ class GridViewModel : ViewModel() {
                         dao.gridNotesWithQuery(currentNoteFolderRelativePath, sortOrder, query, includeSubfolders, selectedTag, tagIgnoresFolders, searchIgnoresFilters)
                     }
                 }
-            ).flow
+            ).flow.cachedIn(viewModelScope)
         }
-    }.flatMapLatest { it }.cachedIn(viewModelScope)
+    }.flatMapLatest { it }
 
     val gridNotes = combine(refreshTrigger, refreshSignal) { _, _ -> Unit }.flatMapLatest { _ ->
         combine(
