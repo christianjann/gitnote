@@ -5,6 +5,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [26.01.5]
+
+### Fixed
+- Multi-Select Mode Crash: Fixed crash when entering multi-select mode by clicking "select multiple notes"
+  - Added proper caching to paging flow to prevent "Attempt to collect twice" error
+  - App no longer crashes when entering selection mode
+
 ## [26.01.4]
 
 ### Added

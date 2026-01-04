@@ -384,7 +384,7 @@ class GridViewModel : ViewModel() {
                 }
             ).flow
         }
-    }.flatMapLatest { it }
+    }.flatMapLatest { it }.cachedIn(viewModelScope)
 
     val gridNotes = combine(refreshTrigger, refreshSignal) { _, _ -> Unit }.flatMapLatest { _ ->
         combine(
