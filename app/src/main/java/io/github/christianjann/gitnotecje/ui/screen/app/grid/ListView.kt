@@ -31,6 +31,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -54,6 +57,9 @@ import io.github.christianjann.gitnotecje.ui.model.TagDisplayMode
 import io.github.christianjann.gitnotecje.ui.viewmodel.GridViewModel
 import java.text.DateFormat
 import java.util.Date
+import android.util.Log
+
+private const val TAG = "ListView"
 
 // Custom scrollbar implementation since VerticalScrollbar is not available in current Compose version
 @Composable
@@ -107,7 +113,12 @@ internal fun NoteListView(
     onEditClick: (Note, EditType) -> Unit,
     vm: GridViewModel,
     showScrollbars: Boolean,
+    refreshSignal: Int,
+    keyVersion: Int,
 ) {
+    LaunchedEffect(refreshSignal) {
+        // No additional action needed, refreshSignal change forces key recomposition
+    }
 
     Box(modifier = modifier) {
         if (gridNotes.itemCount == 0) {
@@ -131,6 +142,7 @@ internal fun NoteListView(
                 )
             }
         } else {
+
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 state = listState
@@ -141,10 +153,18 @@ internal fun NoteListView(
 
                 items(
                     count = gridNotes.itemCount,
-                    key = { index -> gridNotes[index]?.note?.id ?: index }
+                    key = { index -> 
+                        val note = gridNotes[index]?.note
+                        if (note != null) {
+                            "${note.id}_${note.content.hashCode()}_${keyVersion}"
+                        } else {
+                            "${index}_${keyVersion}"
+                        }
+                    }
                 ) { index ->
                     val gridNote = gridNotes[index]
                     if (gridNote != null) {
+                        Log.d(TAG, "Recomposing list item for note ${gridNote.note.id} with content hash ${gridNote.note.content.hashCode()}")
                         NoteListRow(
                             gridNote = gridNote,
                             vm = vm,
@@ -287,14 +307,15 @@ private fun NoteListRow(
                     }
 
                     if (shouldShowTags) {
-                        val tags = FrontmatterParser.parseTags(gridNote.note.content)
-                        if (tags.isNotEmpty()) {
+                        val currentTagsMap = vm.currentTags.collectAsState()
+                        val currentTags = currentTagsMap.value[gridNote.note.id] ?: FrontmatterParser.parseTags(gridNote.note.content)
+                        if (currentTags.isNotEmpty()) {
                             FlowRow(
                                 modifier = Modifier.padding(vertical = 4.dp),
                                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                                 verticalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
-                                tags.forEach { tag ->
+                                currentTags.forEach { tag ->
                                     Surface(
                                         shape = RoundedCornerShape(12.dp),
                                         color = MaterialTheme.colorScheme.secondaryContainer,

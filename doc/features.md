@@ -98,6 +98,43 @@ To provide a focused view of filtered results, the navigation drawer automatical
 
 This behavior ensures a smooth user experience by reducing the need for manual drawer management while browsing and filtering notes. Note that when moving notes, the drawer remains open during folder navigation to allow selecting the destination folder.
 
+### Tag Editing
+
+GitNote provides an intuitive tag editing interface that allows you to manage tags directly from the note grid and list views, with real-time synchronization to ensure the tag editor always shows current tags.
+
+#### How It Works
+
+- **Tag Editor Dialog**: Access tag editing through the note actions menu (long-press a note and select "Edit tags").
+- **Current Tags Display**: The dialog shows currently assigned tags for the selected note.
+- **Available Tags List**: Browse and select from all tags used across your repository.
+- **Search Functionality**: Filter available tags using the search box within the dialog.
+
+#### Usage Tips
+
+- Long-press any note in grid or list view to access the "Edit tags" option.
+- The dialog shows tags in two sections: current tags (assigned to this note) and available tags (used elsewhere).
+- Use the search box to quickly find specific tags from the available list.
+- Changes are applied immediately when you save the dialog.
+- The tag editor reflects any recent tag changes made to the note.
+
+#### Example Workflow
+
+1. Long-press a note in the grid or list view.
+2. Select "Edit tags" from the context menu.
+3. View current tags assigned to the note in the "Current tags" section.
+4. Browse or search available tags in the "Available tags" section.
+5. Select/deselect tags as needed.
+6. Tap "Save" to apply changes.
+7. Reopen the tag editor anytime to see updated tags reflecting your changes.
+
+#### State Synchronization
+
+The tag editor maintains perfect synchronization with the note's current state:
+
+- **Immediate Updates**: Tag changes are reflected instantly in the list/grid view.
+- **Persistent State**: Reopening the tag editor shows the latest tags, not stale data.
+- **Cross-Session Consistency**: Tag state persists correctly across app sessions and screen rotations.
+
 ### Advanced Filtering Options
 
 GitNote provides configurable filtering options that give users more control over how tag filtering and search behave across folder boundaries.

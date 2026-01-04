@@ -71,6 +71,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -102,8 +103,10 @@ import io.github.christianjann.gitnotecje.data.room.Note
 import io.github.christianjann.gitnotecje.helper.FrontmatterParser
 import io.github.christianjann.gitnotecje.ui.component.CustomDropDown
 import io.github.christianjann.gitnotecje.ui.component.CustomDropDownModel
+import io.github.christianjann.gitnotecje.ui.component.EditTagsDialog
 import io.github.christianjann.gitnotecje.ui.model.EditType
 import io.github.christianjann.gitnotecje.ui.model.FileExtension
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import io.github.christianjann.gitnotecje.ui.model.GridNote
 import io.github.christianjann.gitnotecje.ui.model.NoteViewType
@@ -235,6 +238,14 @@ fun GridScreen(
         val showLanguageDialog = remember { mutableStateOf(false) }
         val currentLanguage by vm.prefs.language.getAsState()
 
+        val refreshSignal by vm.refreshSignal.collectAsStateWithLifecycle()
+
+        val keyVersion = remember { mutableIntStateOf(0) }
+
+        LaunchedEffect(refreshSignal) {
+            keyVersion.value++
+        }
+
         val nestedScrollConnection = rememberNestedScrollConnection(
             offset = offset,
             fabExpanded = fabExpanded,
@@ -267,6 +278,8 @@ fun GridScreen(
                 padding = padding,
                 noteViewType = noteViewType,
                 tagDisplayMode = tagDisplayMode,
+                refreshSignal = refreshSignal,
+                keyVersion = keyVersion.value,
             )
 
             TopBar(
@@ -363,6 +376,37 @@ fun GridScreen(
                 showLanguageDialog.value = false
             }
         )
+
+        // Edit Tags Dialog
+        val showEditTagsDialog by vm.showEditTagsDialog.collectAsState()
+        val noteBeingEditedTags by vm.noteBeingEditedTags.collectAsState()
+        val allTags by vm.allTags.collectAsState()
+        val currentTagsMap by vm.currentTags.collectAsState()
+
+        val editTagsExpanded = remember { mutableStateOf(false) }
+        
+        // Sync dialog state
+        LaunchedEffect(showEditTagsDialog) {
+            editTagsExpanded.value = showEditTagsDialog
+        }
+
+        // Handle external dialog dismissal
+        LaunchedEffect(editTagsExpanded.value) {
+            if (!editTagsExpanded.value && showEditTagsDialog) {
+                vm.cancelEditTags()
+            }
+        }
+
+        if (showEditTagsDialog && noteBeingEditedTags != null) {
+            EditTagsDialog(
+                expanded = editTagsExpanded,
+                currentTags = currentTagsMap[noteBeingEditedTags!!.id] ?: FrontmatterParser.parseTags(noteBeingEditedTags!!.content),
+                availableTags = allTags,
+                onConfirm = { newTags ->
+                    vm.updateNoteTags(noteBeingEditedTags!!, newTags)
+                }
+            )
+        }
     }
 }
 
@@ -381,10 +425,17 @@ private fun GridView(
     padding: PaddingValues,
     noteViewType: NoteViewType,
     tagDisplayMode: TagDisplayMode,
+    refreshSignal: Int,
+    keyVersion: Int,
 ) {
     val gridNotes = vm.gridNotes.collectAsLazyPagingItems<GridNote>()
     val query = vm.query.collectAsState()
 
+    // Force refresh LazyPagingItems when refreshSignal changes
+    LaunchedEffect(refreshSignal) {
+        Log.d(TAG, "LaunchedEffect: refreshSignal changed to $refreshSignal, calling gridNotes.refresh()")
+        gridNotes.refresh()
+    }
 
     val isRefreshing by vm.isRefreshing.collectAsStateWithLifecycle()
     val pullRefreshState = rememberPullRefreshState(isRefreshing, {
@@ -426,6 +477,7 @@ private fun GridView(
                     onEditClick = onEditClick,
                     vm = vm,
                     showScrollbars = showScrollbars.value,
+                    keyVersion = keyVersion,
                 )
             }
 
@@ -448,6 +500,8 @@ private fun GridView(
                     onEditClick = onEditClick,
                     vm = vm,
                     showScrollbars = showScrollbars.value,
+                    refreshSignal = refreshSignal,
+                    keyVersion = keyVersion,
                 )
             }
         }
@@ -480,6 +534,7 @@ private fun GridNotesView(
     onEditClick: (Note, EditType) -> Unit,
     vm: GridViewModel,
     showScrollbars: Boolean,
+    keyVersion: Int,
 ) {
 
 
@@ -508,6 +563,7 @@ private fun GridNotesView(
                 )
             }
         } else {
+
             LazyVerticalStaggeredGrid(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(horizontal = 3.dp),
@@ -520,10 +576,18 @@ private fun GridNotesView(
 
                 items(
                     count = gridNotes.itemCount,
-                    key = { index -> gridNotes[index]?.note?.id ?: index }
+                    key = { index -> 
+                        val note = gridNotes[index]?.note
+                        if (note != null) {
+                            "${note.id}_${note.content.hashCode()}_${keyVersion}"
+                        } else {
+                            "${index}_${keyVersion}"
+                        }
+                    }
                 ) { index ->
                     val gridNote = gridNotes[index]
                     if (gridNote != null) {
+                        Log.d(TAG, "Recomposing grid item for note ${gridNote.note.id} with content hash ${gridNote.note.content.hashCode()}")
                         NoteCard(
                             gridNote = gridNote,
                             vm = vm,
@@ -679,14 +743,15 @@ private fun NoteCard(
                 }
 
                 if (shouldShowTags) {
-                    val tags = FrontmatterParser.parseTags(gridNote.note.content)
-                    if (tags.isNotEmpty()) {
+                    val currentTagsMap = vm.currentTags.collectAsState<Map<Int, List<String>>>()
+                    val currentTags = currentTagsMap.value[gridNote.note.id] ?: FrontmatterParser.parseTags(gridNote.note.content)
+                    if (currentTags.isNotEmpty()) {
                         FlowRow(
                             modifier = Modifier.padding(bottom = 6.dp),
                             horizontalArrangement = Arrangement.spacedBy(4.dp),
                             verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
-                            tags.forEach { tag ->
+                            currentTags.forEach { tag ->
                                 Surface(
                                     shape = RoundedCornerShape(12.dp),
                                     color = MaterialTheme.colorScheme.secondaryContainer,
@@ -759,6 +824,9 @@ internal fun NoteActionsDropdown(
                     onClick = { vm.convertToNote(gridNote.note) }) else CustomDropDownModel(
                     text = stringResource(R.string.convert_to_task),
                     onClick = { vm.convertToTask(gridNote.note) }),
+                CustomDropDownModel(
+                    text = stringResource(R.string.edit_tags),
+                    onClick = { vm.startEditTags(gridNote.note) }),
             ),
             clickPosition = clickPosition
         )

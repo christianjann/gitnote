@@ -213,4 +213,15 @@
     <string name="offline_hint">, sind wir offline?</string>
     <string name="no_notes_found">Keine Notizen gefunden</string>
     <string name="empty_state_hint">Öffnen Sie die Schublade und wählen Sie einen Ordner aus, um zu beginnen</string>
+    <string name="edit_tags">Tags bearbeiten</string>
+    <string name="current_tags">Aktuelle Tags</string>
+    <string name="available_tags">Verfügbare Tags</string>
+    <string name="no_tags_selected">Keine Tags ausgewählt</string>
+    <string name="all_tags_selected">Alle Tags ausgewählt</string>
+    <string name="confirm">Bestätigen</string>
+    <string name="no_available_tags">Keine verfügbaren Tags</string>
+    <string name="add_new_tag">Neuen Tag hinzufügen</string>
+    <string name="add">Hinzufügen</string>
+    <string name="search_or_add_tag">Tag suchen oder hinzufügen</string>
+    <string name="no_tags_match_search">Keine Tags entsprechen Ihrer Suche</string>
 </resources>

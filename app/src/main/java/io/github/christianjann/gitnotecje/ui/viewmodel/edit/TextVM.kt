@@ -13,6 +13,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.christianjann.gitnotecje.MyApp
 import io.github.christianjann.gitnotecje.R
 import io.github.christianjann.gitnotecje.data.room.Note
+import io.github.christianjann.gitnotecje.data.room.RepoDatabase
+import io.github.christianjann.gitnotecje.helper.FrontmatterParser
 import io.github.christianjann.gitnotecje.helper.NameValidation
 import io.github.christianjann.gitnotecje.helper.NoteSaver
 import io.github.christianjann.gitnotecje.helper.UiHelper
@@ -24,9 +26,13 @@ import io.github.christianjann.gitnotecje.ui.viewmodel.viewModelFactory
 import io.github.christianjann.gitnotecje.utils.endsWith
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map as flowMap
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.zip.DataFormatException
 import kotlin.Result.Companion.failure
@@ -78,6 +84,9 @@ open class TextVM() : ViewModel() {
 
     val shouldForceNotReadOnlyMode: MutableState<Boolean> = mutableStateOf(false)
 
+    private val _showEditTagsDialog = MutableStateFlow(false)
+    val showEditTagsDialog: StateFlow<Boolean> = _showEditTagsDialog.asStateFlow()
+
     constructor(editType: EditType, previousNote: Note) : this() {
 
         shouldForceNotReadOnlyMode.value = editType == EditType.Create
@@ -89,8 +98,26 @@ open class TextVM() : ViewModel() {
             mutableStateOf(TextFieldValue(it, selection = TextRange(it.length)))
         }
 
+        val contentText = if (editType == EditType.Update) {
+            // For updates, read the latest content from the file to ensure we have the most recent version
+            val rootPath = MyApp.appModule.appPreferences.repoPathSafely()
+            val file = previousNote.toFileFs(rootPath)
+            if (file.exist()) {
+                try {
+                    file.readText()
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to read file ${file.path}, using note content", e)
+                    previousNote.content
+                }
+            } else {
+                previousNote.content
+            }
+        } else {
+            previousNote.content
+        }
+
         val textFieldValue = TextFieldValue(
-            previousNote.content,
+            contentText,
             selection = TextRange(0)
         )
 
@@ -273,9 +300,40 @@ open class TextVM() : ViewModel() {
         }
     }
 
+    fun startEditTags() {
+        viewModelScope.launch {
+            _showEditTagsDialog.emit(true)
+        }
+    }
+
+    fun cancelEditTags() {
+        viewModelScope.launch {
+            _showEditTagsDialog.emit(false)
+        }
+    }
+
+    fun updateNoteTags(newTags: List<String>) {
+        viewModelScope.launch {
+            val updatedContent = FrontmatterParser.updateTags(content.value.text, newTags)
+            val newTextFieldValue = content.value.copy(text = updatedContent)
+            onValueChange(newTextFieldValue)
+            cancelEditTags()
+        }
+    }
+
     private val storageManager: StorageManager = MyApp.appModule.storageManager
     private val uiHelper: UiHelper = MyApp.appModule.uiHelper
     val prefs = MyApp.appModule.appPreferences
+    private val db: RepoDatabase = MyApp.appModule.repoDatabase
+    private val dao = db.repoDatabaseDao
+
+    val allTags = dao.allNotes().flowMap { notes: List<Note> ->
+        notes.flatMap { note: Note ->
+            FrontmatterParser.parseTags(note.content)
+        }.distinct().sorted()
+    }.stateIn(
+        CoroutineScope(Dispatchers.Main), SharingStarted.WhileSubscribed(), emptyList()
+    )
 
     fun save(onSuccess: () -> Unit = {}) {
 
@@ -422,6 +480,11 @@ open class TextVM() : ViewModel() {
                 && previousNote.content == content.value.text
 
     override fun onCleared() {
+        // Reset dialog state when ViewModel is cleared
+        viewModelScope.launch {
+            _showEditTagsDialog.emit(false)
+        }
+        
         NoteSaver.save(
             shouldSave = shouldSaveWhenQuitting && !isPreviousNoteTheSame(),
             name = name.value.text,

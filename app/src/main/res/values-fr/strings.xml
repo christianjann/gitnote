@@ -193,4 +193,15 @@
     <string name="search_ignores_filters_subtitle">Lors de la recherche, afficher les résultats de tous les dossiers indépendamment des paramètres du dossier actuel et des sous-dossiers</string>
     <string name="no_notes_found">Aucune note trouvée</string>
     <string name="empty_state_hint">Ouvrez le tiroir et sélectionnez un dossier pour commencer</string>
+    <string name="edit_tags">Modifier les tags</string>
+    <string name="current_tags">Tags actuels</string>
+    <string name="available_tags">Tags disponibles</string>
+    <string name="no_tags_selected">Aucun tag sélectionné</string>
+    <string name="all_tags_selected">Tous les tags sélectionnés</string>
+    <string name="confirm">Confirmer</string>
+    <string name="no_available_tags">Aucun tag disponible</string>
+    <string name="add_new_tag">Ajouter un nouveau tag</string>
+    <string name="add">Ajouter</string>
+    <string name="search_or_add_tag">Rechercher ou ajouter un tag</string>
+    <string name="no_tags_match_search">Aucun tag ne correspond à votre recherche</string>
 </resources>

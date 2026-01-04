@@ -62,6 +62,8 @@ class StorageManager {
     private val _syncState: MutableStateFlow<SyncState> = MutableStateFlow(SyncState.Ok(true))
     val syncState: StateFlow<SyncState> = _syncState
 
+    var onDatabaseUpdated: (suspend () -> Unit)? = null
+
     suspend fun setSyncState(state: SyncState) {
         _syncState.emit(state)
     }
@@ -262,7 +264,7 @@ class StorageManager {
         Log.d(TAG, "updateNote: previous = $previous")
         Log.d(TAG, "updateNote: new = $new")
 
-        update(
+        val result = update(
             commitMessage = "gitnote changed ${previous.relativePath}",
             onUpdated = onUpdated
         ) {
@@ -303,6 +305,13 @@ class StorageManager {
 
             success(Unit)
         }
+
+        // Call the global callback after database/git operations complete
+        result.onSuccess {
+            onDatabaseUpdated?.invoke()
+        }
+
+        return result
 
     }
 
@@ -453,10 +462,6 @@ class StorageManager {
                 syncFailed = true
                 _syncState.emit(SyncState.Offline)
             }
-        }
-
-        updateDatabaseWithoutLocker().onFailure {
-            return@withContext failure(it)
         }
 
         val payload = f().fold(

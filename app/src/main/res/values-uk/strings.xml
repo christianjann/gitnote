@@ -150,4 +150,10 @@
     <string name="search_ignores_filters_subtitle">При пошуку показувати результати з усіх папок незалежно від налаштувань поточної папки та підпапок</string>
     <string name="no_notes_found">Нотатки не знайдено</string>
     <string name="empty_state_hint">Відкрийте панель і виберіть папку, щоб розпочати</string>
+    <string name="edit_tags">Редагувати теги</string>
+    <string name="current_tags">Поточні теги</string>
+    <string name="available_tags">Доступні теги</string>
+    <string name="no_tags_selected">Теги не вибрано</string>
+    <string name="all_tags_selected">Усі теги вибрано</string>
+    <string name="confirm">Підтвердити</string>
 </resources>

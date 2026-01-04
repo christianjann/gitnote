@@ -92,7 +92,9 @@ Because all apps which integrate with Git on Android either crash, are slow, are
     <td align="center">
       <img src="assets/git_log.png" width="220" alt="Git log viewer"/>
     </td>
-    <td align="center"></td>
+    <td align="center">
+      <img src="assets/tag_editor.png" width="220" alt="Tag editor"/>
+    </td>
   </tr>
   <tr>
     <td align="center">
@@ -107,7 +109,10 @@ Because all apps which integrate with Git on Android either crash, are slow, are
       <strong>Git Log Viewer</strong><br>
       View commit history and track changes to your notes
     </td>
-    <td align="center"></td>
+    <td align="center">
+      <strong>Tag Editor</strong><br>
+      Edit and organize note tags with an intuitive interface
+    </td>
   </tr>
 </table>
 
@@ -145,7 +150,6 @@ See [building.md](doc/building.md) for detailed build instructions.
 - Move more of the core logic and data handling into the Rust part
 - Maybe get rid of the database caching entirely and use a more thin layer on top of the Git abstraction
 - Make it much faster
-- Add tag editing UI support
 - Extend and cleanup frontmatter support (use title etc...)
 
 # Attribution

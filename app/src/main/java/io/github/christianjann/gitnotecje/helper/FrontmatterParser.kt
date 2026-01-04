@@ -164,4 +164,63 @@ object FrontmatterParser {
         }
         return tags
     }
+
+    fun updateTags(content: String, newTags: List<String>): String {
+        val lines = content.lines()
+        if (lines.isEmpty() || !lines[0].trim().startsWith("---")) {
+            // No frontmatter, add it if we have tags
+            if (newTags.isNotEmpty()) {
+                val currentTime = updatedFormatter.format(Instant.now())
+                val title = "title: ${lines.firstOrNull()?.take(50) ?: "Untitled"}"
+                val tagsSection = if (newTags.isNotEmpty()) {
+                    listOf("tags:") + newTags.map { "  - $it" }
+                } else emptyList()
+                val newFrontmatter = listOf(title, "updated: $currentTime", "created: $currentTime") + tagsSection
+                return (listOf("---") + newFrontmatter + listOf("---") + lines).joinToString("\n")
+            }
+            return content
+        }
+
+        val endIndex = lines.drop(1).indexOfFirst { it.trim().startsWith("---") }
+        if (endIndex == -1) return content
+
+        val frontmatterLines = lines.subList(1, endIndex + 1).toMutableList()
+        val bodyLines = if (endIndex + 2 < lines.size) lines.subList(endIndex + 2, lines.size) else emptyList()
+
+        val currentTime = updatedFormatter.format(Instant.now())
+
+        // Find existing tags section
+        val tagsIndex = frontmatterLines.indexOfFirst { it.trim().startsWith("tags:") }
+
+        // Remove existing tags section
+        if (tagsIndex != -1) {
+            var removeEnd = tagsIndex + 1
+            while (removeEnd < frontmatterLines.size) {
+                val line = frontmatterLines[removeEnd].trim()
+                if (line.startsWith("- ") || line.isEmpty()) {
+                    removeEnd++
+                } else {
+                    break
+                }
+            }
+            for (i in (tagsIndex until removeEnd).reversed()) {
+                frontmatterLines.removeAt(i)
+            }
+        }
+
+        // Update updated timestamp
+        val updatedIndex = frontmatterLines.indexOfFirst { it.trim().startsWith("updated:") }
+        if (updatedIndex != -1) {
+            frontmatterLines[updatedIndex] = "updated: $currentTime"
+        }
+
+        // Add new tags section if we have tags
+        if (newTags.isNotEmpty()) {
+            val insertIndex = frontmatterLines.indexOfFirst { it.trim().startsWith("title:") }.takeIf { it >= 0 }?.plus(1) ?: frontmatterLines.size
+            val tagsSection = listOf("tags:") + newTags.map { "  - $it" }
+            frontmatterLines.addAll(insertIndex, tagsSection)
+        }
+
+        return (listOf("---") + frontmatterLines + listOf("---") + bodyLines).joinToString("\n")
+    }
 }

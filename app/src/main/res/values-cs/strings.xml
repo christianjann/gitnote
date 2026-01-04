@@ -182,4 +182,15 @@
     <string name="search_ignores_filters_subtitle">Při hledání zobrazit výsledky ze všech složek bez ohledu na nastavení aktuální složky a podsložek</string>
     <string name="no_notes_found">Nebyly nalezeny žádné poznámky</string>
     <string name="empty_state_hint">Otevřete zásuvku a vyberte složku pro začátek</string>
+    <string name="edit_tags">Upravit štítky</string>
+    <string name="current_tags">Aktuální štítky</string>
+    <string name="available_tags">Dostupné štítky</string>
+    <string name="no_tags_selected">Žádné štítky nevybrány</string>
+    <string name="all_tags_selected">Všechny štítky vybrány</string>
+    <string name="confirm">Potvrdit</string>
+    <string name="no_available_tags">Žádné dostupné štítky</string>
+    <string name="add_new_tag">Přidat nový štítek</string>
+    <string name="add">Přidat</string>
+    <string name="search_or_add_tag">Hledat nebo přidat štítek</string>
+    <string name="no_tags_match_search">Žádné štítky nevyhovují vašemu hledání</string>
 </resources>

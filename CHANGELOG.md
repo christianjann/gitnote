@@ -5,6 +5,15 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added
+
+- Tag Editing Interface: Added intuitive tag editing dialog accessible from note context menus
+  - Edit tags directly from grid and list views via long-press menu
+  - Real-time synchronization ensures tag editor always shows current tags
+  - Search functionality within the dialog to filter available tags
+  - Keyboard-friendly interface with proper focus management
+  - Supports all languages with complete translations
+
 ## [26.01.3]
 
 ### Fixed

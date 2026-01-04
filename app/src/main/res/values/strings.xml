@@ -206,11 +206,22 @@
     <string name="load_from_file">Load from file</string>
     <string name="private_key">Private key</string>
     <string name="private_key_password">Private key password</string>
-    <string name="cancel">Cancel</string>
     <string name="go_back">Go back</string>
     <string name="tags">Tags</string>
     <string name="all_notes">All notes</string>
     <string name="offline_hint">, are we offline?</string>
     <string name="no_notes_found">No notes found</string>
     <string name="empty_state_hint">Open the drawer and select a folder to get started</string>
+    <string name="edit_tags">Edit tags</string>
+    <string name="current_tags">Current tags</string>
+    <string name="available_tags">Available tags</string>
+    <string name="no_tags_selected">No tags selected</string>
+    <string name="all_tags_selected">All tags selected</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="no_available_tags">No available tags</string>
+    <string name="add_new_tag">Add new tag</string>
+    <string name="add">Add</string>
+    <string name="search_or_add_tag">Search or add tag</string>
+    <string name="no_tags_match_search">No tags match your search</string>
 </resources>

@@ -15,6 +15,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
+import androidx.compose.material.icons.filled.Tag
 import androidx.compose.material.icons.filled.TextFormat
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -39,12 +40,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import io.github.christianjann.gitnotecje.R
+import io.github.christianjann.gitnotecje.helper.FrontmatterParser
 import io.github.christianjann.gitnotecje.manager.ExtensionType
 import io.github.christianjann.gitnotecje.manager.extensionType
+import io.github.christianjann.gitnotecje.ui.component.EditTagsDialog
 import io.github.christianjann.gitnotecje.ui.component.SimpleIcon
 import io.github.christianjann.gitnotecje.ui.destination.EditParams
 import io.github.christianjann.gitnotecje.ui.model.EditType
@@ -152,6 +158,13 @@ fun EditScreen(
                     )
                 },
                 actions = {
+                    IconButton(
+                        onClick = { vm.startEditTags() },
+                    ) {
+                        SimpleIcon(
+                            imageVector = Icons.Default.Tag,
+                        )
+                    }
                     IconButton(
                         colors = IconButtonDefaults.iconButtonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
@@ -276,6 +289,31 @@ fun EditScreen(
         }
 
 
+    }
+
+    val showEditTagsDialog by vm.showEditTagsDialog.collectAsState()
+    val editTagsExpanded = remember { mutableStateOf(false) }
+    
+    // Sync the dialog state with ViewModel state
+    LaunchedEffect(showEditTagsDialog) {
+        editTagsExpanded.value = showEditTagsDialog
+    }
+
+    // Handle external dialog dismissal
+    LaunchedEffect(editTagsExpanded.value) {
+        if (!editTagsExpanded.value && showEditTagsDialog) {
+            vm.cancelEditTags()
+        }
+    }
+    
+    if (showEditTagsDialog) {
+        val allTags by vm.allTags.collectAsState()
+        EditTagsDialog(
+            expanded = editTagsExpanded,
+            currentTags = FrontmatterParser.parseTags(vm.content.value.text),
+            availableTags = allTags,
+            onConfirm = { newTags -> vm.updateNoteTags(newTags) }
+        )
     }
 }
 

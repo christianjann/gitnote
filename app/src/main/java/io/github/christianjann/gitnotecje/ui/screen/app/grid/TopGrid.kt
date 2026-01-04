@@ -86,6 +86,7 @@ import kotlin.math.roundToInt
 
 private const val TAG = "TopGridScreen"
 
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 @Composable
 fun TopBar(
     vm: GridViewModel,
@@ -127,6 +128,7 @@ fun TopBar(
 }
 
 
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 @Composable
 private fun SearchBar(
     padding: PaddingValues,
@@ -310,6 +312,7 @@ private fun SearchBar(
 
 }
 
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 @Composable
 private fun SelectableTopBar(
     padding: PaddingValues,
@@ -392,6 +395,7 @@ private fun SelectableTopBar(
 }
 
 
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 @Composable
 private fun SyncStateIcon(
     state: SyncState,
@@ -472,6 +476,7 @@ private fun SyncStateIcon(
 }
 
 
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 @Composable
 fun LanguageSelectionDialog(
     showDialog: Boolean,

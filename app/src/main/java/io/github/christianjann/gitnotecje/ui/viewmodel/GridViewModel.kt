@@ -33,10 +33,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map as flowMap
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+@ExperimentalCoroutinesApi
 class GridViewModel : ViewModel() {
 
     companion object {
@@ -54,10 +56,23 @@ class GridViewModel : ViewModel() {
     init {
         // Database sync is now handled by MainViewModel after repository initialization
         // to avoid race conditions during Activity recreation
+        
+        // Set up global refresh callback for database updates
+        storageManager.onDatabaseUpdated = {
+            Log.d(TAG, "onDatabaseUpdated callback triggered, refreshing UI")
+            _refreshTrigger.value = _refreshTrigger.value + 1
+            _refreshSignal.value = _refreshSignal.value + 1
+        }
     }
 
     private val _query = MutableStateFlow("")
     val query: StateFlow<String> = _query
+
+    private val _refreshTrigger = MutableStateFlow(0)
+    val refreshTrigger: StateFlow<Int> = _refreshTrigger
+
+    private val _refreshSignal = MutableStateFlow(0)
+    val refreshSignal: StateFlow<Int> = _refreshSignal
 
     private val refreshCounter = MutableStateFlow(0)
 
@@ -105,6 +120,16 @@ class GridViewModel : ViewModel() {
     private val _noteBeingMoved = MutableStateFlow<Note?>(null)
     val noteBeingMoved: StateFlow<Note?> = _noteBeingMoved.asStateFlow()
 
+    private val _showEditTagsDialog = MutableStateFlow(false)
+    val showEditTagsDialog: StateFlow<Boolean> = _showEditTagsDialog.asStateFlow()
+
+    private val _noteBeingEditedTags = MutableStateFlow<Note?>(null)
+    val noteBeingEditedTags: StateFlow<Note?> = _noteBeingEditedTags.asStateFlow()
+
+    // Direct tag state for immediate UI updates
+    private val _currentTags = MutableStateFlow<Map<Int, List<String>>>(emptyMap())
+    val currentTags: StateFlow<Map<Int, List<String>>> = _currentTags.asStateFlow()
+
     fun startMoveNote(note: Note) {
         viewModelScope.launch {
             _noteBeingMoved.emit(note)
@@ -120,6 +145,51 @@ class GridViewModel : ViewModel() {
     fun cancelMoveNote() {
         viewModelScope.launch {
             _noteBeingMoved.emit(null)
+        }
+    }
+
+    fun startEditTags(note: Note) {
+        viewModelScope.launch {
+            _noteBeingEditedTags.emit(note)
+            _showEditTagsDialog.emit(true)
+        }
+    }
+
+    fun cancelEditTags() {
+        viewModelScope.launch {
+            _showEditTagsDialog.emit(false)
+            _noteBeingEditedTags.emit(null)
+        }
+    }
+
+    // Get current tags for a note - checks direct state first, then parses from content
+    fun getCurrentTagsForNote(note: Note): List<String> {
+        return _currentTags.value[note.id] ?: FrontmatterParser.parseTags(note.content)
+    }
+
+    fun updateNoteTags(note: Note, newTags: List<String>) {
+        viewModelScope.launch {
+            Log.d(TAG, "updateNoteTags: updating note ${note.id} with tags $newTags")
+
+            // Update UI immediately with new tags
+            _currentTags.value = _currentTags.value + (note.id to newTags)
+
+            val updatedContent = FrontmatterParser.updateTags(note.content, newTags)
+            val updatedNote = note.copy(
+                content = updatedContent,
+                lastModifiedTimeMillis = System.currentTimeMillis()
+            )
+            val result = storageManager.updateNote(updatedNote, note) {
+                // Wait a bit to ensure database transaction completes
+                kotlinx.coroutines.delay(50)
+                // Note: Keep the direct tag state since it matches the updated content
+            }
+            result.onFailure { e ->
+                // Revert the UI update on failure
+                _currentTags.value = _currentTags.value - note.id
+                uiHelper.makeToast("Failed to update note tags: $e")
+            }
+            cancelEditTags()
         }
     }
 
@@ -298,41 +368,47 @@ class GridViewModel : ViewModel() {
             currentNoteFolderRelativePath,
             prefs.sortOrder.getFlow(),
             query,
-            selectedTag
-        ) { currentNoteFolderRelativePath, sortOrder, query, selectedTag ->
+            selectedTag,
+            refreshTrigger
+        ) { currentNoteFolderRelativePath, sortOrder, query, selectedTag, refreshTriggerValue ->
+            Log.d(TAG, "pagingFlow: creating new Pager, refreshTrigger = $refreshTriggerValue")
             Pager(
                 config = PagingConfig(pageSize = 50),
                 pagingSourceFactory = {
+                    Log.d(TAG, "pagingFlow: creating new paging source, refreshTrigger = $refreshTriggerValue")
                     if (query.isEmpty()) {
                         dao.gridNotes(currentNoteFolderRelativePath, sortOrder, includeSubfolders, selectedTag, tagIgnoresFolders)
                     } else {
                         dao.gridNotesWithQuery(currentNoteFolderRelativePath, sortOrder, query, includeSubfolders, selectedTag, tagIgnoresFolders, searchIgnoresFilters)
                     }
                 }
-            ).flow.cachedIn(viewModelScope)
+            ).flow
         }
     }.flatMapLatest { it }
 
-    val gridNotes = combine(
-        pagingFlow,
-        selectedNotes
-    ) { pagingData: PagingData<GridNote>, selectedNotes: List<Note> ->
-        pagingData.map { gridNote ->
-            gridNote.copy(
-                selected = selectedNotes.contains(gridNote.note),
-                completed = FrontmatterParser.parseCompletedOrNull(gridNote.note.content)
-            )
+    val gridNotes = combine(refreshTrigger, refreshSignal) { _, _ -> Unit }.flatMapLatest { _ ->
+        combine(
+            pagingFlow,
+            selectedNotes
+        ) { pagingData: PagingData<GridNote>, selectedNotes: List<Note> ->
+            Log.d(TAG, "gridNotes combine: creating new PagingData, selectedNotes count = ${selectedNotes.size}")
+            pagingData.map { gridNote ->
+                val updatedGridNote = gridNote.copy(
+                    selected = selectedNotes.contains(gridNote.note),
+                    completed = FrontmatterParser.parseCompletedOrNull(gridNote.note.content)
+                )
+                Log.d(TAG, "gridNotes map: note ${gridNote.note.id}, content hash = ${gridNote.note.content.hashCode()}, tags = ${FrontmatterParser.parseTags(gridNote.note.content)}")
+                updatedGridNote
+            }
         }
-    }.stateIn(
-        CoroutineScope(Dispatchers.Main), SharingStarted.WhileSubscribed(5000), PagingData.empty()
-    )
+    }.flowOn(Dispatchers.Main)
 
     val allTags = dao.allNotes().flowMap { notes: List<Note> ->
         notes.flatMap { note: Note ->
             FrontmatterParser.parseTags(note.content)
         }.distinct().sorted()
     }.stateIn(
-        CoroutineScope(Dispatchers.Main), SharingStarted.WhileSubscribed(5000), emptyList()
+        CoroutineScope(Dispatchers.Main), SharingStarted.WhileSubscribed(), emptyList()
     )
 
     // todo: use pager

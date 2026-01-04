@@ -174,4 +174,15 @@
     <string name="search_ignores_filters_subtitle">Ao pesquisar, mostrar resultados de todas as pastas independentemente das configurações da pasta atual e subpastas</string>
     <string name="no_notes_found">Nenhuma nota encontrada</string>
     <string name="empty_state_hint">Abra a gaveta e selecione uma pasta para começar</string>
+    <string name="edit_tags">Editar tags</string>
+    <string name="current_tags">Tags atuais</string>
+    <string name="available_tags">Tags disponíveis</string>
+    <string name="no_tags_selected">Nenhuma tag selecionada</string>
+    <string name="all_tags_selected">Todas as tags selecionadas</string>
+    <string name="confirm">Confirmar</string>
+    <string name="no_available_tags">Nenhuma tag disponível</string>
+    <string name="add_new_tag">Adicionar nova tag</string>
+    <string name="add">Adicionar</string>
+    <string name="search_or_add_tag">Buscar ou adicionar tag</string>
+    <string name="no_tags_match_search">Nenhuma tag corresponde à sua busca</string>
 </resources>
