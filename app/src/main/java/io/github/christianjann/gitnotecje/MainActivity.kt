@@ -11,6 +11,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import java.util.Locale
 import dev.olshevski.navigation.reimagined.AnimatedNavHost
@@ -118,6 +119,18 @@ class MainActivity : ComponentActivity() {
                     } else Destination.Setup(SetupDestination.Main)
                 }
 
+                if (startDestination is Destination.App) {
+                    Log.i(TAG, "Starting sync from MainActivity")
+                    vm.startSync()
+                }
+
+                LaunchedEffect(startDestination) {
+                    if (startDestination is Destination.App) {
+                        Log.i(TAG, "Starting sync from MainActivity LaunchedEffect")
+                        // vm.startSync() // already called above
+                    }
+                }
+
 
                 val navController =
                     rememberNavController(startDestination = startDestination)
@@ -145,6 +158,7 @@ class MainActivity : ComponentActivity() {
 
 
                         is Destination.App -> AppScreen(
+                            vm = vm,
                             appDestination = destination.appDestination,
                             onCloseRepo = {
                                 navController.popAll()

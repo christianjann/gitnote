@@ -5,6 +5,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Performance
+- App Launch Time: Optimized repository synchronization timing for faster release build startup
+
 ### Fixed
 
 - Multi-Select Mode Performance: Optimized paging flow caching to maintain fast UI updates

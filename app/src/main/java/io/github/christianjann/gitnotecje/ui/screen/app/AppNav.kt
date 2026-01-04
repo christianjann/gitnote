@@ -3,6 +3,7 @@ package io.github.christianjann.gitnotecje.ui.screen.app
 import androidx.compose.animation.ContentTransform
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import dev.olshevski.navigation.reimagined.AnimatedNavHost
 import dev.olshevski.navigation.reimagined.NavAction
 import dev.olshevski.navigation.reimagined.NavBackHandler
@@ -18,6 +19,7 @@ import io.github.christianjann.gitnotecje.ui.screen.app.edit.EditScreen
 import io.github.christianjann.gitnotecje.ui.screen.app.grid.GridScreen
 import io.github.christianjann.gitnotecje.ui.screen.settings.SettingsNav
 import io.github.christianjann.gitnotecje.ui.utils.crossFade
+import io.github.christianjann.gitnotecje.ui.viewmodel.MainViewModel
 import io.github.christianjann.gitnotecje.ui.utils.slide
 
 
@@ -26,6 +28,7 @@ private const val TAG = "AppScreen"
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppScreen(
+    vm: MainViewModel,
     appDestination: AppDestination,
     onCloseRepo: () -> Unit,
 ) {

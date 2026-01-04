@@ -1,0 +1,37 @@
+# Baseline profile for GitNote app
+# This file contains classes that should be optimized for better performance
+
+# Application class
+Lio/github/christianjann/gitnotecje/MyApp;
+
+# Main Activity
+Lio/github/christianjann/gitnotecje/MainActivity;
+
+# Navigation (maybe remove?)
+Lio/github/christianjann/gitnotecje/ui/screen/app/AppNav;
+Lio/github/christianjann/gitnotecje/ui/screen/app/AppScreen;
+
+# Screens (maybe remove?)
+Lio/github/christianjann/gitnotecje/ui/screen/app/grid/GridScreen;
+Lio/github/christianjann/gitnotecje/ui/screen/settings/SettingsNav;
+
+# Git Manager and related classes
+Lio/github/christianjann/gitnotecje/manager/GitManager;
+HSPLio/github/christianjann/gitnotecje/manager/GitManager;-><init>()V
+HSPLio/github/christianjann/gitnotecje/manager/GitManager;->openRepo(Ljava/lang/String;)Lio/github/christianjann/gitnotecje/manager/Result;
+HSPLio/github/christianjann/gitnotecje/manager/GitManager;->currentSignature()Lio/github/christianjann/gitnotecje/data/Signature;
+
+# StorageManager
+Lio/github/christianjann/gitnotecje/manager/StorageManager;
+HSPLio/github/christianjann/gitnotecje/manager/StorageManager;->performBackgroundGitOperations()V
+
+# ViewModels
+Lio/github/christianjann/gitnotecje/ui/viewmodel/GridViewModel;
+Lio/github/christianjann/gitnotecje/ui/viewmodel/MainViewModel;
+
+# Data classes
+Lio/github/christianjann/gitnotecje/data/model/Note;
+Lio/github/christianjann/gitnotecje/ui/model/GridNote;
+
+# Room database
+Lio/github/christianjann/gitnotecje/data/room/RepoDatabase;

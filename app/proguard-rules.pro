@@ -22,3 +22,9 @@
 
 -keep class io.github.christianjann.gitnotecje.ui.model.Cred { *; }
 -keep class io.github.christianjann.gitnotecje.ui.model.Cred$* { *; }
+
+# Keep GitManager and related classes to prevent ProGuard from breaking git operations
+#-keep class io.github.christianjann.gitnotecje.manager.GitManager { *; }
+
+# Keep JNI-related classes
+#-keep class io.github.christianjann.gitnotecje.** { *; }

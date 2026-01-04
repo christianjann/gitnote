@@ -64,34 +64,50 @@ class MainViewModel : ViewModel() {
             return false
         }
 
-        val openResult = gitManager.openRepo(storageConfig.repoPath())
-        if (openResult.isFailure) {
-            val exception = openResult.exceptionOrNull()
-            if (exception !is GitException || exception.type != GitExceptionType.RepoAlreadyInit) {
-                return false
-            }
-            // If already initialized, continue
-        }
-        prefs.applyGitAuthorDefaults(null, gitManager.currentSignature())
+        // Note: Repo opening is deferred to startSync() to speed up app startup
 
-        // Perform initial database sync after repository is opened
-        // This ensures database is up to date when the app starts
+        return true
+    }
+
+    fun startSync() {
+        Log.i(TAG, "startSync called")
         if (syncJob?.isActive != true) {
-            syncJob = CoroutineScope(Dispatchers.IO).launch {
+            syncJob = CoroutineScope(Dispatchers.IO).launch { //maybe set to Dispatchers.Default
+                // Open the repository first
+                val storageConfig = when (prefs.storageConfig.get()) {
+                    StorageConfig.App -> {
+                        StorageConfiguration.App
+                    }
+
+                    StorageConfig.Device -> {
+                        StorageConfiguration.Device(prefs.repoPath())
+                    }
+                }
+
+                Log.i(TAG, "About to open repo: ${storageConfig.repoPath()}")
+                val openResult = gitManager.openRepo(storageConfig.repoPath())
+                if (openResult.isFailure) {
+                    val exception = openResult.exceptionOrNull()
+                    Log.e(TAG, "Failed to open repo: $exception")
+                    return@launch
+                }
+                Log.i(TAG, "Repo opened successfully")
+                prefs.applyGitAuthorDefaults(null, gitManager.currentSignature())
+
                 val lastSyncTime = prefs.lastDatabaseSyncTime.get()
                 val currentTime = System.currentTimeMillis()
                 val timeSinceLastSync = currentTime - lastSyncTime
 
-                Log.d(TAG, "Sync check: lastSyncTime=$lastSyncTime, currentTime=$currentTime, timeSinceLastSync=$timeSinceLastSync")
+                Log.i(TAG, "Sync check: lastSyncTime=$lastSyncTime, currentTime=$currentTime, timeSinceLastSync=$timeSinceLastSync")
 
                 // Always perform sync on app start to ensure data is up to date
                 // Users expect the app to be current when they open it
-                Log.d(TAG, "Starting sync operations on app start")
+                Log.i(TAG, "Starting sync operations on app start")
                 
                 // Perform background git operations to sync with remote
                 // This will automatically update the database after completion
                 val backgroundGitOps = prefs.backgroundGitOperations.getBlocking()
-                Log.d(TAG, "Background git ops enabled: $backgroundGitOps")
+                Log.i(TAG, "Background git ops enabled: $backgroundGitOps")
                 if (backgroundGitOps) {
                     storageManager.performBackgroundGitOperations()
                 } else {
@@ -102,8 +118,6 @@ class MainViewModel : ViewModel() {
                 prefs.lastDatabaseSyncTime.update(currentTime)
             }
         }
-
-        return true
     }
 
 }

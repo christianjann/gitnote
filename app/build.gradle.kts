@@ -152,6 +152,7 @@ dependencies {
     implementation(libs.lifecycle.runtime.compose)
     implementation(libs.activity.compose)
     implementation(libs.datastore.preferences)
+    implementation(libs.profileinstaller)
 
     val composeBom = platform(libs.compose.bom)
 
