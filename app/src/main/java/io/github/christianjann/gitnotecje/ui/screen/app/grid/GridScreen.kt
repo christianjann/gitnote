@@ -177,7 +177,7 @@ fun GridScreen(
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val drawerScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     ModalNavigationDrawer(drawerState = drawerState, drawerContent = {
         ModalDrawerSheet {
@@ -195,7 +195,7 @@ fun GridScreen(
                 onMoveNoteToFolder = { vm.moveNoteToFolder(it) },
                 onCancelMove = { vm.cancelMoveNote() },
                 syncState = vm.syncState.collectAsState().value,
-                scrollBehavior = scrollBehavior,
+                scrollBehavior = drawerScrollBehavior,
             )
         }
     }) {
@@ -249,7 +249,6 @@ fun GridScreen(
         val nestedScrollConnection = rememberNestedScrollConnection(
             offset = offset,
             fabExpanded = fabExpanded,
-            scrollBehavior = scrollBehavior,
         )
 
         Scaffold(
@@ -842,7 +841,7 @@ internal fun NoteActionsDropdown(
 private fun rememberNestedScrollConnection(
     offset: MutableFloatState,
     fabExpanded: MutableState<Boolean>,
-    scrollBehavior: TopAppBarScrollBehavior,
+    scrollBehavior: TopAppBarScrollBehavior? = null,
 ): NestedScrollConnection {
 
 
@@ -889,32 +888,32 @@ private fun rememberNestedScrollConnection(
         // Combine FAB connection with TopAppBar scroll behavior connection
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                // Call TopAppBar connection first
-                val topBarConsumed = scrollBehavior.nestedScrollConnection.onPreScroll(available, source)
+                // Call TopAppBar connection first (if exists)
+                val topBarConsumed = scrollBehavior?.nestedScrollConnection?.onPreScroll(available, source) ?: Offset.Zero
                 // Then call FAB connection with remaining
                 val fabConsumed = fabConnection.onPreScroll(available - topBarConsumed, source)
                 return topBarConsumed + fabConsumed
             }
 
             override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
-                // Call TopAppBar connection first
-                val topBarConsumed = scrollBehavior.nestedScrollConnection.onPostScroll(consumed, available, source)
+                // Call TopAppBar connection first (if exists)
+                val topBarConsumed = scrollBehavior?.nestedScrollConnection?.onPostScroll(consumed, available, source) ?: Offset.Zero
                 // Then call FAB connection with remaining
                 val fabConsumed = fabConnection.onPostScroll(consumed, available - topBarConsumed, source)
                 return topBarConsumed + fabConsumed
             }
 
             override suspend fun onPreFling(available: Velocity): Velocity {
-                // Call TopAppBar connection first
-                val topBarConsumed = scrollBehavior.nestedScrollConnection.onPreFling(available)
+                // Call TopAppBar connection first (if exists)
+                val topBarConsumed = scrollBehavior?.nestedScrollConnection?.onPreFling(available) ?: Velocity.Zero
                 // Then call FAB connection with remaining
                 val fabConsumed = fabConnection.onPreFling(available - topBarConsumed)
                 return topBarConsumed + fabConsumed
             }
 
             override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
-                // Call TopAppBar connection first
-                val topBarConsumed = scrollBehavior.nestedScrollConnection.onPostFling(consumed, available)
+                // Call TopAppBar connection first (if exists)
+                val topBarConsumed = scrollBehavior?.nestedScrollConnection?.onPostFling(consumed, available) ?: Velocity.Zero
                 // Then call FAB connection with remaining
                 val fabConsumed = fabConnection.onPostFling(consumed, available - topBarConsumed)
                 return topBarConsumed + fabConsumed

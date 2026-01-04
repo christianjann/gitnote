@@ -14,6 +14,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - Keyboard-friendly interface with proper focus management
   - Supports all languages with complete translations
 
+### Fixed
+
+- Drawer Action Bar Visibility: Fixed issue where drawer action bar became invisible when main view was scrolled down
+  - Separated scroll behaviors for main content and drawer to prevent interference
+  - Main view scrolling now works independently of drawer state
+  - Drawer maintains its own scroll state and action bar remains visible
+
 ## [26.01.3]
 
 ### Fixed
