@@ -7,7 +7,7 @@ export JAVA_HOME := `grep '^java.home=' .gradle/config.properties | cut -d'=' -f
 main:
     just --list
 
-fix-wrapper:
+get-wrapper:
     #curl -L -o gradle/wrapper/gradle-wrapper.jar https://github.com/gradle/gradle/raw/v8.13.0/gradle/wrapper/gradle-wrapper.jar
     git lfs pull
 
