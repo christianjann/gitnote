@@ -187,6 +187,7 @@ dependencies {
 
     // unit test
     testImplementation(kotlin("test"))
+    testImplementation(libs.kotlinx.coroutines.test)
 
     // integration test
     androidTestImplementation(composeBom)

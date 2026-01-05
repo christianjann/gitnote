@@ -37,6 +37,13 @@ test:
     # Run all Rust tests (including integration tests)
     cd app/src/main/rust && cargo test
 
+test-all:
+    # Run all tests: Rust and Android
+    echo "Running Rust tests..."
+    cd app/src/main/rust && cargo test
+    echo "Running Android unit tests..."
+    ./gradlew testDebugUnitTest
+
 sort-supported-extension:
     #!/usr/bin/env bash
     extension_dir=app/src/main/rust/supported_extensions
@@ -76,6 +83,9 @@ setup-release-env:
 
 release-build:
     #!/usr/bin/env bash
+    echo "Running all tests before release build..."
+    just test-all
+    echo "✅ All tests passed!"
     echo "Setting up release environment..."
     source ./setup-release-env.sh
     echo "Building release APK..."
@@ -100,6 +110,10 @@ release-install:
 
 release-package:
     #!/usr/bin/env bash
+    echo "Running all tests before creating release package..."
+    just test-all
+    echo "✅ All tests passed!"
+
     echo "Checking if git is clean..."
     if ! git diff --quiet || ! git diff --staged --quiet; then
         echo "❌ Git is not clean. Please commit or stash changes."
