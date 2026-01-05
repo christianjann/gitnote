@@ -214,7 +214,7 @@ flowchart TD
 - **Key Methods**:
   - `startSync()`: Opens repo and starts background sync (only performs expensive operations once per app session)
   - `tryInit()`: Checks if app is configured
-- **State**: 
+- **State**:
   - `isRepoReady` Flow controls UI visibility
   - `initialSyncCompleted` flag prevents duplicate background sync operations during screen rotation
 - **Lifecycle**: Cancels sync operations in `onCleared()` to prevent resource leaks
@@ -347,20 +347,3 @@ flowchart TD
 - **ViewModel State**: `MutableStateFlow` for loading, selection, error states
 - **UI Collection**: `collectAsState()` in Composable functions
 - **Recomposition**: Automatic when state changes
-
-## Potential Design Issues
-
-### Identified Concerns
-
-1. **State Consistency**: Multiple ViewModels may observe stale data during sync
-2. **Error Handling**: Git failures may leave UI in inconsistent state
-3. **Memory Usage**: Large note content in memory during editing
-4. **Async Initialization**: Repository opening happens in background after UI loads
-
-### Recommended Improvements
-
-1. **Centralized State**: ✅ Implemented - NoteRepository provides single source of truth for note data across ViewModels
-2. **Offline Mode**: Graceful degradation when Git operations fail
-3. **Pagination Optimization**: Load note content on-demand, not metadata only
-
-This design provides a solid foundation for a responsive, data-consistent note-taking app with Git integration.
