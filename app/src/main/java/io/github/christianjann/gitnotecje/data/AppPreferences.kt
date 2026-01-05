@@ -149,6 +149,7 @@ class AppPreferences(
 
     val showFullPathOfNotes = booleanPreference("showFullPathOfNotes", false)
     val showFullTitleInListView = booleanPreference("showFullTitleInListView", true)
+    val preferFrontmatterTitle = booleanPreference("preferFrontmatterTitle", false)
     val tagDisplayMode = enumPreference("tagDisplayMode", TagDisplayMode.Both)
     val includeSubfolders = booleanPreference("includeSubfolders", false)
 

@@ -684,6 +684,48 @@ My Very Long Note Title That Gets
 Cut Off At The End Of The Line
 ```
 
+## Frontmatter Title Display
+
+GitNote allows users to display frontmatter titles instead of filenames in note cards, providing more meaningful and descriptive note titles.
+
+### How It Works
+
+- **Opt-in Setting**: Enable "Prefer frontmatter titles" in Settings > Appearance (disabled by default)
+- **Title Priority**: When enabled, uses the `title:` field from YAML frontmatter; falls back to filename if no title exists
+- **Fallback Behavior**: If frontmatter title is empty or missing, displays the filename without extension
+- **Performance Optimized**: Titles are parsed on-demand with minimal performance impact
+
+### Usage Tips
+
+- Enable this setting if your notes use descriptive frontmatter titles
+- Particularly useful for notes with generic filenames but meaningful titles
+- The setting applies to both grid and list views
+- Frontmatter titles provide better context when browsing notes
+- Allows special characters in titles (colons, slashes, quotes) that are forbidden in filesystem paths
+
+### Example
+
+For a note file named `meeting-2024-01-15.md` with frontmatter:
+
+```yaml
+---
+title: "Q1 Planning Meeting: Product Roadmap Discussion / Sprint Review"
+tags: - meeting - planning - q1
+---
+```
+
+- **With setting disabled**: Shows "meeting-2024-01-15"
+- **With setting enabled**: Shows "Q1 Planning Meeting: Product Roadmap Discussion / Sprint Review"
+
+This allows titles with special characters like colons (:) and slashes (/) that cannot be used in filenames.
+
+### Technical Details
+
+- **Parsing**: Extracts title from YAML frontmatter using regex-based parsing
+- **Caching**: No additional caching needed due to lightweight parsing operations
+- **Compatibility**: Works with existing frontmatter structure (title, tags, completed, etc.)
+- **Special Characters**: Frontmatter titles can contain characters forbidden in filenames (colons, slashes, quotes, etc.)
+
 ## Background Git Operations
 
 GitNote features a sophisticated background synchronization system that prevents UI blocking during rapid successive changes while ensuring data consistency.

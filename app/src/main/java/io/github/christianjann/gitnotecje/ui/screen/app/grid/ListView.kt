@@ -110,6 +110,7 @@ internal fun NoteListView(
     selectedNotes: List<Note>,
     showFullPathOfNotes: Boolean,
     showFullTitleInListView: Boolean,
+    preferFrontmatterTitle: Boolean,
     tagDisplayMode: TagDisplayMode,
     noteViewType: NoteViewType,
     onEditClick: (Note, EditType) -> Unit,
@@ -169,6 +170,7 @@ internal fun NoteListView(
                             selectedNotes = selectedNotes,
                             showFullPathOfNotes = showFullPathOfNotes,
                             showFullTitleInListView = showFullTitleInListView,
+                            preferFrontmatterTitle = preferFrontmatterTitle,
                             tagDisplayMode = tagDisplayMode,
                             noteViewType = noteViewType,
                         )
@@ -198,6 +200,7 @@ private fun NoteListRow(
     selectedNotes: List<Note>,
     showFullPathOfNotes: Boolean,
     showFullTitleInListView: Boolean,
+    preferFrontmatterTitle: Boolean,
     tagDisplayMode: TagDisplayMode,
     noteViewType: NoteViewType,
 ) {
@@ -212,7 +215,11 @@ private fun NoteListRow(
     val title = if (showFullPathOfNotes || !gridNote.isUnique) {
         gridNote.note.relativePath
     } else {
-        gridNote.note.nameWithoutExtension()
+        if (preferFrontmatterTitle) {
+            FrontmatterParser.parseTitle(gridNote.note.content)?.takeIf { it.isNotBlank() } ?: gridNote.note.nameWithoutExtension()
+        } else {
+            gridNote.note.nameWithoutExtension()
+        }
     }
 
     val rowBackground =

@@ -165,6 +165,16 @@ fun SettingsScreen(
                 }
             )
 
+            val preferFrontmatterTitle by vm.prefs.preferFrontmatterTitle.getAsState()
+            ToggleableSettings(
+                title = stringResource(R.string.prefer_frontmatter_title),
+                subtitle = stringResource(R.string.prefer_frontmatter_title_subtitle),
+                checked = preferFrontmatterTitle,
+                onCheckedChange = {
+                    vm.update { vm.prefs.preferFrontmatterTitle.update(it) }
+                }
+            )
+
             val tagDisplayMode by vm.prefs.tagDisplayMode.getAsState()
             MultipleChoiceSettings(
                 title = stringResource(R.string.tag_display_mode),

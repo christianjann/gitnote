@@ -12,6 +12,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - Improves app responsiveness and user experience on unreliable networks
   - Applied globally through libgit2 configuration during initialization
 
+- **Frontmatter Title Preference**: Added user setting to prefer frontmatter titles over filenames
+  - New "Prefer frontmatter title" toggle in settings (disabled by default - opt-in)
+  - When enabled, note titles in list and grid views use the `title` field from frontmatter instead of filename
+  - Falls back to filename if no frontmatter title is present
+  - Allows special characters in note titles (colons, slashes, etc.) that are forbidden in filesystem paths
+  - Improves note organization and readability for users who maintain frontmatter metadata
+
 ### Fixed
 
 - **Text Selection Handle Positioning**: Fixed incorrect positioning of text selection handles in Compose BOM 2025.12.01

@@ -44,6 +44,8 @@
     <string name="show_the_full_notes_path_subtitle">Beachten Sie, dass das Standardverhalten den Pfad nur anzeigt, wenn mehr als zwei Notizen den gleichen Namen haben</string>
     <string name="show_full_title_in_list_view">Vollständigen Titel in Listenansicht anzeigen</string>
     <string name="show_full_title_in_list_view_subtitle">Erlauben Sie, dass Notiztitel in mehrere Zeilen umbrechen, anstatt abgeschnitten zu werden</string>
+    <string name="prefer_frontmatter_title">Frontmatter-Titel bevorzugen</string>
+    <string name="prefer_frontmatter_title_subtitle">Verwenden Sie den Titel aus dem Frontmatter der Notiz anstelle des Dateinamens, wenn verfügbar</string>
     <string name="tag_display_mode">Tag-Anzeigemodus</string>
     <string name="tag_display_none">Keine</string>
     <string name="tag_display_list_only">Nur Listenansicht</string>

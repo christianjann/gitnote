@@ -36,6 +36,8 @@
     <string name="show_the_full_notes_path_subtitle">За замовчуванням шлях відображається лише якщо більше двох нотаток мають однакову назву</string>
     <string name="show_full_title_in_list_view">Показувати повну назву у списку</string>
     <string name="show_full_title_in_list_view_subtitle">Дозволити назвам нотаток переноситися на кілька рядків замість скорочення</string>
+    <string name="prefer_frontmatter_title">Переважати назву з frontmatter</string>
+    <string name="prefer_frontmatter_title_subtitle">Використовувати назву з frontmatter нотатки замість імені файлу, якщо доступно</string>
     <string name="folder_filters">Фільтри папок</string>
     <string name="folder_filters_subtitle">Задайте регулярні вирази для фільтрації папок репозиторію</string>
     <string name="edit">Редагувати</string>

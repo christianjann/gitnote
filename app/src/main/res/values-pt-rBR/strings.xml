@@ -34,6 +34,8 @@
     <string name="show_the_full_notes_path_subtitle">Note que o comportamento padrão irá apenas mostrar o caminho se duas ou mais notas tiverem o mesmo nome</string>
     <string name="show_full_title_in_list_view">Mostrar título completo na visualização em lista</string>
     <string name="show_full_title_in_list_view_subtitle">Permitir que os títulos das notas quebrem em várias linhas em vez de serem truncados</string>
+    <string name="prefer_frontmatter_title">Preferir título do frontmatter</string>
+    <string name="prefer_frontmatter_title_subtitle">Usar o título do frontmatter da nota em vez do nome do arquivo quando disponível</string>
     <string name="za_sort_order">Z-A</string>
     <string name="most_recent_sort_order">Mais recente</string>
     <string name="sort_order_folder">Organizar ordem das pastas</string>

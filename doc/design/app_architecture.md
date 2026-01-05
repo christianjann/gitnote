@@ -96,6 +96,7 @@ classDiagram
     class AppPreferences {
         +repoPath: String
         +backgroundGitOperations: Boolean
+        +preferFrontmatterTitle: Boolean
     }
 
     MainActivity --> MainViewModel

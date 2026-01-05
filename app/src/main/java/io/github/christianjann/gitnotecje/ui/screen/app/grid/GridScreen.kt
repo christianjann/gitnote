@@ -428,6 +428,7 @@ private fun GridView(
 
     val showFullPathOfNotes = vm.prefs.showFullPathOfNotes.getAsState()
     val showFullTitleInListView = vm.prefs.showFullTitleInListView.getAsState()
+    val preferFrontmatterTitle = vm.prefs.preferFrontmatterTitle.getAsState()
     val showScrollbars = vm.prefs.showScrollbars.getAsState()
 
     Box {
@@ -455,6 +456,7 @@ private fun GridView(
                     modifier = commonModifier,
                     selectedNotes = selectedNotes,
                     showFullPathOfNotes = showFullPathOfNotes.value,
+                    preferFrontmatterTitle = preferFrontmatterTitle.value,
                     tagDisplayMode = currentTagDisplayMode,
                     noteViewType = noteViewType,
                     onEditClick = onEditClick,
@@ -477,6 +479,7 @@ private fun GridView(
                     selectedNotes = selectedNotes,
                     showFullPathOfNotes = showFullPathOfNotes.value,
                     showFullTitleInListView = showFullTitleInListView.value,
+                    preferFrontmatterTitle = preferFrontmatterTitle.value,
                     tagDisplayMode = currentTagDisplayMode,
                     noteViewType = noteViewType,
                     onEditClick = onEditClick,
@@ -509,6 +512,7 @@ private fun GridNotesView(
     modifier: Modifier = Modifier,
     selectedNotes: List<Note>,
     showFullPathOfNotes: Boolean,
+    preferFrontmatterTitle: Boolean,
     tagDisplayMode: TagDisplayMode,
     noteViewType: NoteViewType,
     onEditClick: (Note, EditType) -> Unit,
@@ -574,6 +578,7 @@ private fun GridNotesView(
                             selectedNotes = selectedNotes,
                             showFullPathOfNotes = showFullPathOfNotes,
                             showFullNoteHeight = showFullNoteHeight.value,
+                            preferFrontmatterTitle = preferFrontmatterTitle,
                             tagDisplayMode = tagDisplayMode,
                             noteViewType = noteViewType,
                             modifier = Modifier.padding(3.dp)
@@ -619,6 +624,7 @@ private fun NoteCard(
     selectedNotes: List<Note>,
     showFullPathOfNotes: Boolean,
     showFullNoteHeight: Boolean,
+    preferFrontmatterTitle: Boolean,
     tagDisplayMode: TagDisplayMode,
     noteViewType: NoteViewType,
     modifier: Modifier = Modifier,
@@ -689,7 +695,11 @@ private fun NoteCard(
                 val title = if (showFullPathOfNotes || !gridNote.isUnique) {
                     gridNote.note.relativePath
                 } else {
-                    gridNote.note.nameWithoutExtension()
+                    if (preferFrontmatterTitle) {
+                        FrontmatterParser.parseTitle(gridNote.note.content)?.takeIf { it.isNotBlank() } ?: gridNote.note.nameWithoutExtension()
+                    } else {
+                        gridNote.note.nameWithoutExtension()
+                    }
                 }
                 Row(
                     verticalAlignment = Alignment.CenterVertically,

@@ -139,6 +139,13 @@ object FrontmatterParser {
         return if (endIndex + 2 < lines.size) lines.subList(endIndex + 2, lines.size).joinToString("\n") else ""
     }
 
+    fun parseTitle(content: String): String? {
+        val frontmatter = extractFrontmatter(content) ?: return null
+        val lines = frontmatter.lines()
+        val titleLine = lines.find { it.trim().startsWith("title:") } ?: return null
+        return titleLine.substringAfter("title:").trim()
+    }
+
     private fun extractFrontmatter(content: String): String? {
         val lines = content.lines()
         if (lines.size < 3 || !lines[0].trim().startsWith("---")) return null

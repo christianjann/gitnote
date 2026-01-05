@@ -159,7 +159,6 @@ See [building.md](doc/building.md) for detailed build instructions.
 
 - Move more of the core logic and data handling into the Rust part?
 - Maybe get rid of the database caching entirely and use a more thin layer on top of the Git abstraction?
-- Extend and cleanup frontmatter support (use title etc...)
 
 # Attribution
 
