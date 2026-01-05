@@ -34,10 +34,12 @@ classDiagram
     class MainActivity {
         +setContent()
         +onCreate()
+        +onDestroy()
     }
     class MainViewModel {
         +isRepoReady: MutableStateFlow~Boolean~
         +startSync(): suspend
+        +initialSyncCompleted: Boolean
         +prefs: AppPreferences
     }
     class GridViewModel {
@@ -76,12 +78,14 @@ classDiagram
         +performBackgroundGitOperations()
         +updateDatabaseIfNeeded()
         +updateNote(note)
+        +shutdown()
     }
     class GitManager {
         +openRepo(path)
         +commitAll()
         +pull()
         +push()
+        +shutdown()
     }
     class RepoDatabase {
         +noteDao: NoteDao
@@ -146,6 +150,13 @@ flowchart TD
 3. **Background Sync Starts**: `MainViewModel.startSync()` opens repository asynchronously
 4. **Data Updates**: UI reacts to database changes via Flow observations as sync completes
 
+## App Shutdown Flow
+
+1. **MainActivity.onDestroy()**: Initiates graceful shutdown sequence
+2. **StorageManager.shutdown()**: Cancels all background git operations and waits for completion
+3. **GitManager.shutdown()**: Closes repository and frees native libgit2 resources
+4. **Resource Cleanup**: Prevents RepoNotInit errors during activity recreation by ensuring no background operations access closed repository
+
 ## Component Descriptions
 
 ### Repository (Git)
@@ -168,16 +179,56 @@ flowchart TD
 - **Queries**: Paginated note lists, individual note retrieval
 - **Updates**: Triggered by Git operations via StorageManager
 
+### StorageManager
+
+- **Purpose**: Orchestrates Git operations and database synchronization with proper lifecycle management
+- **Responsibilities**:
+  - Manages git operation queue with debouncing and background execution
+  - Handles database updates after successful git operations
+  - Provides graceful shutdown to prevent resource leaks and RepoNotInit errors
+- **Key Methods**:
+  - `performBackgroundGitOperations()`: Executes queued git operations (pull/push) in background
+  - `updateDatabaseIfNeeded()`: Synchronizes database with current repository state
+  - `shutdown()`: Cancels all background operations and waits for completion before shutdown
+- **Queue Management**: Uses unified queue for commits and pulls with configurable debouncing
+
+### GitManager
+
+- **Purpose**: Low-level Git operations interface with proper resource management
+- **Technology**: libgit2 via Rust JNI with mutex-protected access
+- **Operations**: Repository lifecycle (open/close), commits, pull/push, conflict resolution
+- **Key Methods**:
+  - `openRepo()`: Opens existing repository
+  - `commitAll()`: Stages and commits all changes
+  - `pull()` / `push()`: Synchronization with remote repository
+  - `shutdown()`: Closes repository and frees native resources
+- **State Management**: Tracks repository initialization state to prevent duplicate operations
+
 ### MainViewModel
 
 - **Responsibilities**:
   - App initialization and repository opening
-  - Background synchronization scheduling
-  - Global state (repo readiness)
+  - Background synchronization scheduling with lifecycle awareness
+  - Global state management (repo readiness)
+  - Preventing duplicate background operations during activity recreation
 - **Key Methods**:
-  - `startSync()`: Opens repo and starts background sync
+  - `startSync()`: Opens repo and starts background sync (only performs expensive operations once per app session)
   - `tryInit()`: Checks if app is configured
-- **State**: `isRepoReady` Flow controls UI visibility
+- **State**: 
+  - `isRepoReady` Flow controls UI visibility
+  - `initialSyncCompleted` flag prevents duplicate background sync operations during screen rotation
+- **Lifecycle**: Cancels sync operations in `onCleared()` to prevent resource leaks
+
+### MainActivity
+
+- **Responsibilities**:
+  - App entry point and UI composition
+  - Proper component shutdown during app termination
+  - Language switching with activity recreation
+- **Key Methods**:
+  - `onCreate()`: Initializes UI and starts sync
+  - `onDestroy()`: Gracefully shuts down StorageManager and GitManager to prevent background operations from accessing closed resources
+- **Shutdown Process**: Ensures all background git operations complete before closing repository to prevent RepoNotInit errors
 
 ### GridViewModel
 
