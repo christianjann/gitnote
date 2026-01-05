@@ -5,6 +5,15 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [26.01.7]
+
+### Added
+
+- Enhanced Background Git Operations: Improved asynchronous git synchronization
+  - Descriptive commit messages showing changed files for background sync
+  - Multiple file changes consolidated with detailed commit bodies
+  - Maintains clear git history while preventing UI blocking
+
 ## [26.01.6]
 
 ### Added

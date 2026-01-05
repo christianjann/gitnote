@@ -68,6 +68,9 @@ class StorageManager {
     // Custom dispatcher for git operations to avoid blocking Dispatchers.IO
     private val gitDispatcher: ExecutorCoroutineDispatcher = Executors.newFixedThreadPool(2).asCoroutineDispatcher()
 
+    // Pending commit messages for background operations
+    private val pendingCommitMessages = mutableListOf<String>()
+
     private val _syncState: MutableStateFlow<SyncState> = MutableStateFlow(SyncState.Ok(true))
     val syncState: StateFlow<SyncState> = _syncState
 
@@ -199,9 +202,15 @@ class StorageManager {
         Log.d(TAG, "Remote URL: $remoteUrl")
 
         // Commit any pending changes before syncing
-        gitManager.commitAll(author, "commit from gitnote background sync").onFailure {
-            Log.e(TAG, "Failed to commit pending changes: ${it.message}")
-            // Continue with sync even if commit fails
+        val commitMessages = synchronized(pendingCommitMessages) {
+            pendingCommitMessages.toList().also { pendingCommitMessages.clear() }
+        }
+        if (commitMessages.isNotEmpty()) {
+            val commitMessage = createBackgroundCommitMessage(commitMessages)
+            gitManager.commitAll(author, commitMessage).onFailure {
+                Log.e(TAG, "Failed to commit pending changes: ${it.message}")
+                // Continue with sync even if commit fails
+            }
         }
 
         if (remoteUrl.isNotEmpty()) {
@@ -511,6 +520,18 @@ class StorageManager {
     }
 
 
+    private fun createBackgroundCommitMessage(commitMessages: List<String>): String {
+        return when (commitMessages.size) {
+            0 -> "gitnote background sync"
+            1 -> commitMessages.first()
+            else -> {
+                val subject = "gitnote background sync (${commitMessages.size} changes)"
+                val body = commitMessages.joinToString("\n") { "- $it" }
+                "$subject\n\n$body"
+            }
+        }
+    }
+
     private suspend fun <T> update(
         commitMessage: String,
         onUpdated: suspend () -> Unit = {},
@@ -558,10 +579,15 @@ class StorageManager {
             onUpdated()
         }
 
-        // Only commit changes synchronously if background git ops are disabled
+        // Handle commits based on background git ops setting
         if (!backgroundGitOps) {
             gitManager.commitAll(author, commitMessage).onFailure {
                 return@withContext failure(it)
+            }
+        } else {
+            // Collect commit message for background commit
+            synchronized(pendingCommitMessages) {
+                pendingCommitMessages.add(commitMessage)
             }
         }
 
