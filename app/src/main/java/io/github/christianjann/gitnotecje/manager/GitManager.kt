@@ -154,6 +154,15 @@ class GitManager {
         commitHash
     }.getOrDefault("") ?: ""
 
+    suspend fun hasChanges(): Result<Boolean> = safelyAccessLibGit2 {
+        if (!isRepoInitialized) throw GitException(GitExceptionType.RepoNotInit)
+        val res = isChangeLib()
+        if (res < 0) {
+            throw GitException("Failed to check changes: $res")
+        }
+        res == 1
+    }
+
     suspend fun commitAll(author: GitAuthor, message: String): Result<Unit> = safelyAccessLibGit2 {
         Log.d(TAG, "commit all: ${author.name}")
         if (!isRepoInitialized) throw GitException(GitExceptionType.RepoNotInit)
@@ -175,6 +184,26 @@ class GitManager {
             throw GitException(uiHelper.getString(R.string.error_commit_repo, res.toString()))
         }
 
+    }
+
+    suspend fun sync(cred: Cred?): Result<Unit> = safelyAccessLibGit2 {
+        Log.d(TAG, "sync: $cred")
+        if (!isRepoInitialized) throw GitException(GitExceptionType.RepoNotInit)
+
+        val res = syncLib(cred)
+        if (res < 0) {
+            throw GitException(uiHelper.getString(R.string.error_sync_repo, res.toString()))
+        }
+    }
+
+    suspend fun checkoutPath(path: String): Result<Unit> = safelyAccessLibGit2 {
+        Log.d(TAG, "checkout path: $path")
+        if (!isRepoInitialized) throw GitException(GitExceptionType.RepoNotInit)
+
+        val res = checkoutPathLib(path)
+        if (res < 0) {
+            throw GitException("Checkout path failed: $res")
+        }
     }
 
     suspend fun currentSignature(): GitAuthor? = safelyAccessLibGit2 {
@@ -301,6 +330,7 @@ private external fun cloneRepoLib(
 private external fun lastCommitLib(): String?
 
 private external fun commitAllLib(name: String, email: String, message: String): Int
+private external fun checkoutPathLib(path: String): Int
 private external fun currentSignatureLib(): Pair<String, String>?
 private external fun pushLib(cred: Cred?): Int
 private external fun pullLib(cred: Cred?, name: String, email: String): Int

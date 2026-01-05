@@ -320,6 +320,14 @@ open class TextVM() : ViewModel() {
         }
     }
 
+    fun insertText(text: String) {
+        val current = content.value
+        val newText = current.text.substring(0, current.selection.start) + text + current.text.substring(current.selection.end)
+        val newSelection = current.selection.start + text.length
+        val newValue = TextFieldValue(newText, TextRange(newSelection))
+        onValueChange(newValue)
+    }
+
     fun updateNoteTags(newTags: List<String>) {
         viewModelScope.launch {
             val updatedContent = FrontmatterParser.updateTags(content.value.text, newTags)

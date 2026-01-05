@@ -504,6 +504,30 @@ pub fn commit_all(name: &str, email: &str, message: &str) -> Result<(), Error> {
     .map_err(|e| Error::git2(e, "commit"))
 }
 
+pub fn checkout_path(path: &str) -> Result<(), Error> {
+    info!("checkout_path called with path: {}", path);
+    let repo = REPO.lock().expect("repo lock");
+    let repo = repo.as_ref().expect("repo");
+
+    // Get HEAD tree
+    let head = repo.head().map_err(|e| Error::git2(e, "head"))?;
+    let commit = head
+        .peel_to_commit()
+        .map_err(|e| Error::git2(e, "peel_to_commit"))?;
+    let tree = commit.tree().map_err(|e| Error::git2(e, "tree"))?;
+
+    info!("About to checkout tree for path: {}", path);
+    // Checkout the path from HEAD
+    repo.checkout_tree(
+        tree.as_object(),
+        Some(git2::build::CheckoutBuilder::new().path(path).force()),
+    )
+    .map_err(|e| Error::git2(e, "checkout_tree"))?;
+
+    info!("checkout_path completed successfully for path: {}", path);
+    Ok(())
+}
+
 pub fn push(cred: Option<Cred>) -> Result<(), Error> {
     apply_ssh_workaround(false);
 

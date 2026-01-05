@@ -158,6 +158,10 @@ class AppPreferences(
 
     val defaultExtension = stringPreference("defaultExtension", "md")
     val showLinesNumber = booleanPreference("showLinesNumber", false)
+
+    // Asset management preferences
+    val assetDirectory = stringPreference("assetDirectory", "assets")
+    val autoCommitAssets = booleanPreference("autoCommitAssets", true)
     val backgroundGitOperations = booleanPreference("backgroundGitOperations", true)
     val backgroundGitDelaySeconds = intPreference("backgroundGitDelaySeconds", 5)
 

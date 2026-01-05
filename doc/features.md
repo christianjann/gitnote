@@ -416,6 +416,70 @@ GitNote features a read-only mode that transforms the note editing experience in
 - **Accidental Edit Prevention**: Perfect for reviewing notes you don't want to modify.
 - **Presentation Mode**: Clean, formatted display for sharing or presenting notes.
 
+### Asset Management
+
+GitNote includes an initial asset management system that allows you to import, organize, and insert images and files into your notes with seamless Git integration.
+
+#### How It Works
+
+- **Asset Storage**: Assets are stored in an `assets/` folder within your Git repository
+- **Import Operation**: Import images and files from your device storage into the repository
+- **Export Operation**: Export assets back to device storage for sharing or backup
+- **Delete Operation**: Remove assets with confirmation dialogs
+- **Git Integration**: All asset operations are tracked in Git with automatic commits
+- **Sync Support**: Assets are included in repository synchronization (push/pull)
+- **Discard/Revert**: Asset changes can be discarded or reverted using Git operations
+
+#### Markdown Integration
+
+- **Automatic Link Insertion**: When inserting assets into markdown, GitNote automatically calculates the correct relative path from the note's location to the assets folder
+- **Image Button**: Access asset insertion through the image button in the markdown formatting toolbar
+- **Vertical Scrolling**: If the formatting toolbar has many buttons, scroll horizontally to find the image button
+- **Relative Paths**: Links are generated as `![alt](relative/path/to/assets/filename.ext)` for proper portability
+
+#### Usage Tips
+
+- Import assets before referencing them in notes to ensure they're available in the repository
+- The asset manager dialog shows all available assets with import/export/delete options
+- Asset operations are immediately committed to Git for version control
+- Use the formatting toolbar's image button for quick asset insertion while editing markdown
+- Scroll horizontally in the formatting toolbar if you don't see the image button
+
+#### Current Limitations & Future Plans
+
+This is an initial implementation with planned expansions:
+
+- **Multiple Asset Locations**: Support for different asset folder locations or structures
+- **Asset Types**: Extended support for additional file types beyond images
+- **Generic Link Insertion**: Helper for inserting links to other notes or external resources
+- **Asset Organization**: Folder organization and categorization features
+- **Bulk Operations**: Import/export multiple assets simultaneously
+
+#### Example Workflow
+
+1. Import an image using the asset manager (accessible via the image button in markdown editor)
+2. The asset is saved to `assets/filename.jpg` and committed to Git
+3. In your markdown note, click the image button in the formatting toolbar
+4. Select the imported asset - GitNote inserts `![filename](../assets/filename.jpg)` (path adjusted based on note location)
+5. The image displays correctly in both editing and read-only modes
+
+### Enhanced Text Editing
+
+GitNote provides improved text editing capabilities for better note-taking experience.
+
+#### Vertical Scrolling
+
+- **Scrollable Text Areas**: Both plain text and markdown editors support vertical scrolling for navigating long notes
+- **Extra Bottom Padding**: 200dp of padding at the bottom allows scrolling up even when text doesn't fill the screen
+- **Better Context**: Maintain visibility of content above your current editing position
+- **Smooth Navigation**: Scroll through notes of any length without UI constraints
+
+#### Usage Tips
+
+- Scroll vertically to see more content while editing
+- The extra padding helps maintain context when working at the bottom of long notes
+- Available in both regular text editing and markdown editing modes
+
 ### Git Log Viewer
 
 GitNote provides direct access to the git commit history of your notes repository, allowing you to track changes and see the evolution of your notes over time.

@@ -328,6 +328,21 @@ pub extern "C" fn Java_io_github_christianjann_gitnotecje_manager_GitManagerKt_c
 }
 
 #[unsafe(no_mangle)]
+pub extern "C" fn Java_io_github_christianjann_gitnotecje_manager_GitManagerKt_checkoutPathLib<
+    'local,
+>(
+    mut env: JNIEnv<'local>,
+    _class: JClass<'local>,
+    path: JString<'local>,
+) -> jint {
+    let path: String = env.get_string(&path).unwrap().into();
+
+    unwrap_or_log!(libgit2::checkout_path(&path), "checkout_path");
+
+    OK
+}
+
+#[unsafe(no_mangle)]
 pub extern "C" fn Java_io_github_christianjann_gitnotecje_manager_GitManagerKt_currentSignatureLib<
     'local,
 >(

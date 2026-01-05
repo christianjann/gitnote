@@ -5,7 +5,25 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [26.01.9]
+
 ### Added
+
+- **Asset Manager**: Initial implementation of asset management system for notes
+  - Import images and files from device storage into the repository's assets folder
+  - Export assets to device storage for sharing or backup
+  - Delete assets with confirmation dialogs
+  - Git integration: assets are committed, synced, and can be discarded/reverted
+  - Automatic relative path calculation for markdown image links from note location to assets
+  - Asset insertion button in markdown editor formatting toolbar (accessible via vertical scroll)
+  - Supports various image formats and file types
+  - Future expansion possible for different asset locations and generic link insertion
+
+- **Vertical Scrolling in Text Editor**: Enhanced text editing experience
+  - Text fields now support vertical scrolling for better navigation in long notes
+  - Extra bottom padding (200dp) allows scrolling up even when text doesn't fill the screen
+  - Improved context visibility while editing by allowing upward scrolling
+  - Applied to both plain text and markdown editing modes
 
 - **Git Operation Timeouts**: Cherry-picked from original GitNote - Added 7-second timeout for remote git operations (push and pull)
   - Prevents operations from hanging indefinitely on slow or unresponsive servers

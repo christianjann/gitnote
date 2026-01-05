@@ -98,12 +98,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import io.github.christianjann.gitnotecje.MyApp
 import io.github.christianjann.gitnotecje.R
 import io.github.christianjann.gitnotecje.data.room.Note
 import io.github.christianjann.gitnotecje.helper.FrontmatterParser
 import io.github.christianjann.gitnotecje.ui.component.CustomDropDown
 import io.github.christianjann.gitnotecje.ui.component.CustomDropDownModel
 import io.github.christianjann.gitnotecje.ui.component.EditTagsDialog
+import io.github.christianjann.gitnotecje.ui.component.AssetManagerDialog
 import io.github.christianjann.gitnotecje.ui.model.EditType
 import io.github.christianjann.gitnotecje.ui.model.FileExtension
 import kotlinx.coroutines.delay
@@ -240,6 +242,8 @@ fun GridScreen(
         val showLanguageDialog = remember { mutableStateOf(false) }
         val currentLanguage by vm.prefs.language.getAsState()
 
+        val showAssetManagerDialog = remember { mutableStateOf(false) }
+
         val nestedScrollConnection = rememberNestedScrollConnection(
             offset = offset,
             fabExpanded = fabExpanded,
@@ -281,6 +285,9 @@ fun GridScreen(
                 onSettingsClick = onSettingsClick,
                 onShowGitLog = {
                     vm.showGitLog()
+                },
+                onShowAssetManager = {
+                    showAssetManagerDialog.value = true
                 },
                 onSelectLanguage = {
                     showLanguageDialog.value = true
@@ -398,6 +405,14 @@ fun GridScreen(
                 }
             )
         }
+
+        // Asset Manager Dialog
+        AssetManagerDialog(
+            showDialog = showAssetManagerDialog,
+            assetManager = vm.assetManager,
+            repoPath = vm.prefs.repoPathBlocking(),
+            gitManager = MyApp.appModule.gitManager
+        )
     }
 }
 

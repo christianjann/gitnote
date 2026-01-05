@@ -1,7 +1,7 @@
 package io.github.christianjann.gitnotecje.ui.screen.app.edit
 
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.FormatBold
 import androidx.compose.material.icons.filled.FormatItalic
 import androidx.compose.material.icons.filled.FormatListNumbered
 import androidx.compose.material.icons.filled.FormatQuote
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Title
 import androidx.compose.runtime.Composable
@@ -267,16 +268,17 @@ fun MarkDownContent(
 fun TextFormatRow(
     vm: MarkDownVM,
     modifier: Modifier = Modifier,
-    textFormatExpanded: MutableState<Boolean>
+    textFormatExpanded: MutableState<Boolean>,
+    onAsset: () -> Unit = {}
 ) {
 
     Row(
         modifier = modifier
             .fillMaxWidth()
             .height(bottomBarHeight)
-            .scrollable(rememberScrollState(initial = 0), orientation = Orientation.Horizontal),
+            .horizontalScroll(rememberScrollState()),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
+        horizontalArrangement = Arrangement.Start
     ) {
         SmallButton(
             onClick = { vm.onTitle() },
@@ -334,6 +336,12 @@ fun TextFormatRow(
 
 
         SmallSeparator()
+
+        SmallButton(
+            onClick = onAsset,
+            imageVector = Icons.Default.Image,
+            contentDescription = "asset"
+        )
 
         SmallButton(
             onClick = {

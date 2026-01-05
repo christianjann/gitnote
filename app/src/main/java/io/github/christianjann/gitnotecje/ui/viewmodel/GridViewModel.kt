@@ -19,6 +19,7 @@ import io.github.christianjann.gitnotecje.helper.NameValidation
 import io.github.christianjann.gitnotecje.manager.GitLogEntry
 import io.github.christianjann.gitnotecje.manager.StorageManager
 import io.github.christianjann.gitnotecje.manager.SyncState
+import io.github.christianjann.gitnotecje.manager.AssetManager
 import io.github.christianjann.gitnotecje.ui.model.FileExtension
 import io.github.christianjann.gitnotecje.ui.model.GridNote
 import io.github.christianjann.gitnotecje.ui.model.NoteViewType
@@ -47,6 +48,7 @@ class GridViewModel : ViewModel() {
 
 
     private val storageManager: StorageManager = MyApp.appModule.storageManager
+    val assetManager: AssetManager = MyApp.appModule.assetManager
 
     val prefs: AppPreferences = MyApp.appModule.appPreferences
     private val noteRepository: NoteRepository = MyApp.appModule.noteRepository

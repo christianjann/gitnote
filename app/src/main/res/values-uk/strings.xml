@@ -146,6 +146,7 @@
     <string name="convert_to_note">Перетворити на нотатку</string>
     <string name="move_note">Перемістити нотатку</string>
     <string name="show_git_log">Показати журнал GIT</string>
+    <string name="asset_manager">Менеджер ресурсів</string>
     <string name="tags">Теги</string>
     <string name="all_notes">Усі нотатки</string>
     <string name="tag_ignores_folders">Фільтрація за тегами ігнорує папки</string>

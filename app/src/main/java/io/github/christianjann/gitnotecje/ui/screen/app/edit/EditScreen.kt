@@ -8,13 +8,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Tag
 import androidx.compose.material.icons.filled.TextFormat
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -46,10 +50,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import io.github.christianjann.gitnotecje.MyApp
 import io.github.christianjann.gitnotecje.R
 import io.github.christianjann.gitnotecje.helper.FrontmatterParser
+import io.github.christianjann.gitnotecje.manager.AssetManager
 import io.github.christianjann.gitnotecje.manager.ExtensionType
+import io.github.christianjann.gitnotecje.manager.GitManager
 import io.github.christianjann.gitnotecje.manager.extensionType
+import io.github.christianjann.gitnotecje.ui.component.AssetManagerDialog
 import io.github.christianjann.gitnotecje.ui.component.EditTagsDialog
 import io.github.christianjann.gitnotecje.ui.component.SimpleIcon
 import io.github.christianjann.gitnotecje.ui.destination.EditParams
@@ -79,6 +87,11 @@ fun EditScreen(
         null -> throw Exception("file extension not supported, but present in the database?? $extension")
     }
 
+    val assetManager = remember { MyApp.appModule.assetManager }
+    val gitManager = remember { MyApp.appModule.gitManager }
+
+    val showAssetManagerDialog = remember { mutableStateOf(false) }
+
     if (editParams is EditParams.Saved) {
         BackHandler {
             vm.shouldSaveWhenQuitting = false
@@ -105,6 +118,8 @@ fun EditScreen(
 
     var hasPendingCheckboxChanges by remember { mutableStateOf(false) }
     var pendingCheckboxText by remember { mutableStateOf<String?>(null) }
+
+    var menuExpanded by remember { mutableStateOf(false) }
 
     Scaffold(
         contentWindowInsets = WindowInsets.safeDrawing,
@@ -260,7 +275,7 @@ fun EditScreen(
                         rememberSaveable(isReadOnlyModeActive) { mutableStateOf(false) }
 
                     if (textFormatExpanded.value) {
-                        TextFormatRow(vm = vm, textFormatExpanded = textFormatExpanded)
+                        TextFormatRow(vm = vm, textFormatExpanded = textFormatExpanded, onAsset = { showAssetManagerDialog.value = true })
                     } else {
                         DefaultRow(
                             vm = vm,
@@ -316,6 +331,28 @@ fun EditScreen(
             onConfirm = { newTags -> vm.updateNoteTags(newTags) }
         )
     }
+
+    if (vm is MarkDownVM) {
+        AssetManagerDialog(
+            showDialog = showAssetManagerDialog,
+            assetManager = assetManager,
+            repoPath = vm.prefs.repoPathBlocking(),
+            gitManager = gitManager,
+            onAssetSelected = { assetPath ->
+                // Insert markdown link: ![alt](relative/path/to/assets/filename)
+                val filename = assetPath.substringAfterLast('/')
+                val altText = filename.substringBeforeLast('.')
+                val noteDirectory = vm.previousNote.relativePath.substringBeforeLast('/', "")
+                val relativeAssetsPath = if (noteDirectory.isEmpty()) {
+                    "assets"
+                } else {
+                    "../".repeat(noteDirectory.split('/').size) + "assets"
+                }
+                val markdownLink = "![$altText]($relativeAssetsPath/$filename)"
+                vm.insertText(markdownLink)
+            }
+        )
+    }
 }
 
 @Composable
@@ -326,25 +363,30 @@ fun GenericTextField(
     isReadOnlyModeActive: Boolean = false,
     textContent: TextFieldValue,
 ) {
-    TextField(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .focusRequester(textFocusRequester),
-        value = textContent,
-        onValueChange = { vm.onValueChange(it) },
-        colors = TextFieldDefaults.colors(
-            focusedContainerColor = MaterialTheme.colorScheme.background,
-            unfocusedContainerColor = MaterialTheme.colorScheme.background,
-            focusedTextColor = MaterialTheme.colorScheme.onBackground,
-            unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
-        ),
-        keyboardActions = KeyboardActions(
-            onDone = { vm.save(onSuccess = onFinished) }
-        ),
-        readOnly = isReadOnlyModeActive
-    )
-
-
+            .verticalScroll(rememberScrollState())
+    ) {
+        TextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusRequester(textFocusRequester)
+                .padding(bottom = 200.dp), // Extra space for better editing
+            value = textContent,
+            onValueChange = { vm.onValueChange(it) },
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.background,
+                unfocusedContainerColor = MaterialTheme.colorScheme.background,
+                focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = { vm.save(onSuccess = onFinished) }
+            ),
+            readOnly = isReadOnlyModeActive
+        )
+    }
 }

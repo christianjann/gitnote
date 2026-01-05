@@ -84,7 +84,16 @@ sealed class NodeFs(
         companion object {
             fun fromPath(path: String): File = Paths.get(path).toFileFs()
             fun fromPath(prefix: String, suffix: String): File {
-                return Paths.get(prefix).resolve(removeFirstAndLastSlash(suffix)).toFileFs()
+                val cleanedSuffix = removeFirstAndLastSlash(suffix)
+                val fullPath = Paths.get(prefix).resolve(cleanedSuffix)
+                val extension = fullPath.extension.run {
+                    FileExtension.match(this)
+                }
+                return NodeFs.File(
+                    fullName = cleanedSuffix,
+                    path = fullPath.pathString,
+                    extension = extension
+                )
             }
         }
 

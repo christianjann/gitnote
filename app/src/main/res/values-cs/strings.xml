@@ -178,6 +178,7 @@
     <string name="convert_to_note">Převést na poznámku</string>
     <string name="move_note">Přesunout poznámku</string>
     <string name="show_git_log">Zobrazit GIT log</string>
+    <string name="asset_manager">Správce assetů</string>
     <string name="tags">Štítky</string>
     <string name="all_notes">Všechny poznámky</string>
     <string name="tag_ignores_folders">Filtrování štítků ignoruje složky</string>

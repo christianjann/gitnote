@@ -98,6 +98,7 @@ fun TopBar(
     drawerState: DrawerState,
     onSettingsClick: () -> Unit,
     onShowGitLog: () -> Unit,
+    onShowAssetManager: () -> Unit,
     onSelectLanguage: () -> Unit,
     searchFocusRequester: FocusRequester,
     onReloadDatabase: () -> Unit,
@@ -115,6 +116,7 @@ fun TopBar(
                 vm = vm,
                 onSettingsClick = onSettingsClick,
                 onShowGitLog = onShowGitLog,
+                onShowAssetManager = onShowAssetManager,
                 onSelectLanguage = onSelectLanguage,
                 searchFocusRequester = searchFocusRequester,
                 onReloadDatabase = onReloadDatabase,
@@ -139,6 +141,7 @@ private fun SearchBar(
     vm: GridViewModel,
     onSettingsClick: () -> Unit,
     onShowGitLog: () -> Unit,
+    onShowAssetManager: () -> Unit,
     onSelectLanguage: () -> Unit,
     searchFocusRequester: FocusRequester,
     onReloadDatabase: () -> Unit,
@@ -276,6 +279,10 @@ private fun SearchBar(
                                 CustomDropDownModel(
                                     text = stringResource(R.string.show_git_log),
                                     onClick = onShowGitLog
+                                ),
+                                CustomDropDownModel(
+                                    text = stringResource(R.string.asset_manager),
+                                    onClick = onShowAssetManager
                                 ),
                                 CustomDropDownModel(
                                     text = if (readOnlyMode) stringResource(

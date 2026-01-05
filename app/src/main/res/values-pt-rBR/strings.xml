@@ -170,6 +170,7 @@
     <string name="convert_to_note">Converter para nota</string>
     <string name="move_note">Mover nota</string>
     <string name="show_git_log">Mostrar log do GIT</string>
+    <string name="asset_manager">Gerenciador de assets</string>
     <string name="tags">Tags</string>
     <string name="all_notes">Todas as notas</string>
     <string name="tag_ignores_folders">Filtragem por tag ignora pastas</string>

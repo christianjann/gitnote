@@ -7,6 +7,7 @@ import io.github.christianjann.gitnotecje.data.room.RepoDatabase
 import io.github.christianjann.gitnotecje.helper.UiHelper
 import io.github.christianjann.gitnotecje.manager.GitManager
 import io.github.christianjann.gitnotecje.manager.StorageManager
+import io.github.christianjann.gitnotecje.manager.AssetManager
 
 
 interface AppModule {
@@ -14,6 +15,7 @@ interface AppModule {
     val noteRepository: NoteRepository
     val uiHelper: UiHelper
     val storageManager: StorageManager
+    val assetManager: AssetManager
     val gitManager: GitManager
     val appPreferences: AppPreferences
     val context: Context
@@ -37,6 +39,9 @@ class AppModuleImpl(
     }
     override val storageManager: StorageManager by lazy {
         StorageManager()
+    }
+    override val assetManager: AssetManager by lazy {
+        AssetManager(context, appPreferences)
     }
     override val gitManager: GitManager by lazy {
         GitManager()

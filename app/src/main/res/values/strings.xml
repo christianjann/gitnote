@@ -24,6 +24,7 @@
     <string name="language_ukrainian">Українська</string>
     <string name="language_german">Deutsch</string>
     <string name="show_git_log">Show GIT log</string>
+    <string name="asset_manager">Asset manager</string>
     <string name="search_in_notes">Search in notes</string>
     <string name="user_interface">User interface</string>
     <string name="dynamic_colors">Dynamic colors</string>

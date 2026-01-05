@@ -55,6 +55,7 @@ Because all apps which integrate with Git on Android either crash, are slow, are
 - [x] frontmatter metadata support
 - [x] view the Git log
 - [x] automatic merge conflict resolution
+- [x] asset management for images and files
 
 <table align="center">
   <tr>
