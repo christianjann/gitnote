@@ -74,7 +74,8 @@ just release-install
 just fix          # Run lint fixes
 just fmt-just     # Format the justfile
 just prettier     # Format code with Prettier
-just fix-wrapper  # Update Gradle wrapper (commented out)
+just prettier     # Format all files
+just get-wrapper  # Get Gradle wrapper
 ```
 
 ## Key Files
@@ -100,5 +101,4 @@ just fix-wrapper  # Update Gradle wrapper (commented out)
 - Ensure Android SDK/NDK are properly configured
 - Check that Rust targets are installed: `rustup target add aarch64-linux-android x86_64-linux-android`
 - Verify JAVA_HOME in `.gradle/config.properties` points to correct JDK
-- For device issues, ensure ADB is working and device is authorized</content>
-  <parameter name="filePath">/home/data/Projects/Programming/Platform/Android/gitnote/copilot-instructions.md
+- For device issues, ensure ADB is working and device is authorized
