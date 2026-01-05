@@ -14,6 +14,14 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - Multiple file changes consolidated with detailed commit bodies
   - Maintains clear git history while preventing UI blocking
 
+### Fixed
+
+- Database Synchronization: Fixed background git operations causing unnecessary database updates
+  - Background operations now only update database when pull operations actually bring in remote changes
+  - Prevents excessive database reloading when no remote changes occurred
+  - Improved logging for database sync state comparisons
+  - Reduces UI interruptions during background synchronization
+
 ## [26.01.6]
 
 ### Added

@@ -213,6 +213,9 @@ class StorageManager {
             }
         }
 
+        var pullChangedHead = false
+        val commitBeforePull = if (remoteUrl.isNotEmpty()) gitManager.lastCommit() else ""
+
         if (remoteUrl.isNotEmpty()) {
             Log.d(TAG, "Starting pull operation")
             _syncState.emit(SyncState.Pull)
@@ -223,6 +226,9 @@ class StorageManager {
                 // Don't show toast for background operations
             }.onSuccess {
                 Log.d(TAG, "Pull succeeded")
+                val commitAfterPull = gitManager.lastCommit()
+                pullChangedHead = commitAfterPull != commitBeforePull
+                Log.d(TAG, "Pull changed HEAD: $pullChangedHead (before: $commitBeforePull, after: $commitAfterPull)")
             }
         }
 
@@ -238,8 +244,16 @@ class StorageManager {
 
         if (!syncFailed) {
             _syncState.emit(SyncState.Ok(false))
-            // Update database after successful git operations
-            updateDatabaseIfNeeded()
+            // Update database only if pull brought in changes
+            Log.d(TAG, "pullChangedHead=$pullChangedHead, will ${if (pullChangedHead) "update" else "skip"} database update")
+            if (pullChangedHead) {
+                updateDatabaseIfNeeded()
+            } else {
+                // No remote changes, just update the commit hash to current HEAD
+                val currentHead = gitManager.lastCommit()
+                Log.d(TAG, "Updating databaseCommit to current HEAD: $currentHead")
+                prefs.databaseCommit.update(currentHead)
+            }
         }
     }
 
@@ -300,7 +314,9 @@ class StorageManager {
         return try {
             val fsCommit = gitManager.lastCommit()
             val databaseCommit = prefs.databaseCommit.get()
-            fsCommit != databaseCommit
+            val outOfSync = fsCommit != databaseCommit
+            Log.d(TAG, "isDatabaseOutOfSync: fsCommit=$fsCommit, databaseCommit=$databaseCommit, outOfSync=$outOfSync")
+            outOfSync
         } catch (e: Exception) {
             Log.e(TAG, "Error checking database sync status: ${e.message}", e)
             false // Assume in sync if we can't check
@@ -313,8 +329,10 @@ class StorageManager {
     suspend fun updateDatabaseIfNeeded() {
         Log.d(TAG, "updateDatabaseIfNeeded called")
         try {
-            if (isDatabaseOutOfSync()) {
-                Log.d(TAG, "Database is out of sync, updating...")
+            val shouldUpdate = isDatabaseOutOfSync()
+            Log.d(TAG, "updateDatabaseIfNeeded: shouldUpdate=$shouldUpdate")
+            if (shouldUpdate) {
+                Log.d(TAG, "Database needs updating, starting update...")
                 // Show sync indicator in top grid
                 _syncState.emit(SyncState.Reloading)
                 // Show user feedback that sync is happening
@@ -328,13 +346,14 @@ class StorageManager {
                         uiHelper.makeToast(uiHelper.getString(R.string.sync_failed))
                     }
                 }.onSuccess {
+                    Log.d(TAG, "Database update successful")
                     _syncState.emit(SyncState.Ok(false))
                     withContext(Dispatchers.Main) {
                         uiHelper.makeToast(uiHelper.getString(R.string.sync_success))
                     }
                 }
             } else {
-                Log.d(TAG, "Database is already in sync")
+                Log.d(TAG, "Database is already in sync, skipping update")
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error checking database sync status: ${e.message}", e)
@@ -600,7 +619,11 @@ class StorageManager {
             }
         }
 
-        prefs.databaseCommit.update(gitManager.lastCommit())
+        // Only update database commit if not using background git operations
+        // For background operations, it will be updated after the operations complete
+        if (!backgroundGitOps) {
+            prefs.databaseCommit.update(gitManager.lastCommit())
+        }
 
         // If background git operations are enabled, perform them asynchronously
         if (backgroundGitOps) {
