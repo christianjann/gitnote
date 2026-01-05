@@ -7,6 +7,14 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Fixed
 
+- **Screen Rotation Stability**: Fixed `RepoNotInit` errors during device screen rotation
+  - Added proper shutdown sequence in MainActivity.onDestroy() to cancel background operations before closing repository
+  - StorageManager now cancels all queued git operations and waits for completion during shutdown
+  - Prevents background git operations from accessing closed repository during activity recreation
+  - Repository state is properly maintained across activity lifecycle events
+  - Expensive sync operations now only run once per app session, not on every screen rotation
+  - Eliminates synchronization failures caused by premature repository closure
+
 - **Git Operation Queue and Debouncing**: Implemented a unified queue system for all git operations to prevent data races and ensure proper debouncing
   - Commits are queued and executed immediately when it's their turn
   - Pull operations are queued with configurable debouncing delay (default 5 seconds) to prevent excessive syncs during rapid editing

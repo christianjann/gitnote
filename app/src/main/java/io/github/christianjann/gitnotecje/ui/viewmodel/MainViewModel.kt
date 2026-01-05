@@ -30,6 +30,7 @@ class MainViewModel : ViewModel() {
     private val storageManager = MyApp.appModule.storageManager
 
     private var syncJob: Job? = null
+    private var initialSyncCompleted = false
 
     override fun onCleared() {
         super.onCleared()
@@ -77,7 +78,7 @@ class MainViewModel : ViewModel() {
                 // Set opening state
                 storageManager.setSyncState(SyncState.Opening)
                 
-                // Open the repository first
+                // Open the repository first (only if not already open)
                 val storageConfig = when (prefs.storageConfig.get()) {
                     StorageConfig.App -> {
                         StorageConfiguration.App
@@ -88,16 +89,19 @@ class MainViewModel : ViewModel() {
                     }
                 }
 
-                Log.i(TAG, "About to open repo: ${storageConfig.repoPath()}")
-                val openResult = gitManager.openRepo(storageConfig.repoPath())
-                if (openResult.isFailure) {
-                    val exception = openResult.exceptionOrNull()
-                    Log.e(TAG, "Failed to open repo: $exception")
-                    storageManager.setSyncState(SyncState.Error)
-                    return@launch
+                if (!gitManager.isRepositoryInitialized()) {
+                    Log.i(TAG, "About to open repo: ${storageConfig.repoPath()}")
+                    val openResult = gitManager.openRepo(storageConfig.repoPath())
+                    if (openResult.isFailure) {
+                        val exception = openResult.exceptionOrNull()
+                        Log.e(TAG, "Failed to open repo: $exception")
+                        storageManager.setSyncState(SyncState.Error)
+                        return@launch
+                    }
+                    Log.i(TAG, "Repo opened successfully")
+                } else {
+                    Log.i(TAG, "Repo already open, skipping open operation")
                 }
-                Log.i(TAG, "Repo opened successfully")
-                // Clear opening state - let normal sync states take over
                 storageManager.setSyncState(SyncState.Ok(false))
                 prefs.applyGitAuthorDefaults(null, gitManager.currentSignature())
 
@@ -113,13 +117,20 @@ class MainViewModel : ViewModel() {
                 
                 // Perform background git operations to sync with remote
                 // This will automatically update the database after completion
-                val backgroundGitOps = prefs.backgroundGitOperations.getBlocking()
-                Log.i(TAG, "Background git ops enabled: $backgroundGitOps")
-                if (backgroundGitOps) {
-                    storageManager.performBackgroundGitOperations(immediate = true)
+                // Only perform these expensive operations on the first app start, not on screen rotations
+                if (!initialSyncCompleted) {
+                    val backgroundGitOps = prefs.backgroundGitOperations.getBlocking()
+                    Log.i(TAG, "Background git ops enabled: $backgroundGitOps")
+                    if (backgroundGitOps) {
+                        storageManager.performBackgroundGitOperations(immediate = true)
+                    } else {
+                        // If background git ops are disabled, still update database
+                        storageManager.updateDatabaseIfNeeded()
+                    }
+                    
+                    initialSyncCompleted = true
                 } else {
-                    // If background git ops are disabled, still update database
-                    storageManager.updateDatabaseIfNeeded()
+                    Log.i(TAG, "Skipping background sync operations - already completed for this app session")
                 }
                 
                 prefs.lastDatabaseSyncTime.update(currentTime)

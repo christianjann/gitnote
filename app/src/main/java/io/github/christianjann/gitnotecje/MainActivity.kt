@@ -207,6 +207,9 @@ class MainActivity : ComponentActivity() {
         Log.d(TAG, "onDestroy")
 
         runBlocking {
+            // Shutdown StorageManager first to cancel all background operations
+            appModule.storageManager.shutdown()
+            // Then shutdown GitManager
             appModule.gitManager.shutdown()
         }
     }

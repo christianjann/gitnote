@@ -708,4 +708,26 @@ class StorageManager {
     suspend fun consumeOkSyncState() {
         _syncState.emit(SyncState.Ok(true))
     }
+
+    suspend fun shutdown() {
+        Log.d(TAG, "Shutting down StorageManager")
+        
+        // Cancel any scheduled pull timer
+        scheduledPullTimer?.cancel()
+        scheduledPullTimer = null
+        
+        // Cancel any waiting git job
+        waitingGitJob?.cancel()
+        waitingGitJob = null
+        
+        // Cancel any executing git job
+        executingGitJob?.cancel()
+        executingGitJob = null
+        
+        // Cancel current operation job and wait for queue completion
+        currentOperationJob?.cancel()
+        waitForQueueCompletion()
+        
+        Log.d(TAG, "StorageManager shutdown complete")
+    }
 }
