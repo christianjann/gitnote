@@ -520,7 +520,12 @@ pub fn checkout_path(path: &str) -> Result<(), Error> {
     // Checkout the path from HEAD
     repo.checkout_tree(
         tree.as_object(),
-        Some(git2::build::CheckoutBuilder::new().path(path).force()),
+        Some(
+            git2::build::CheckoutBuilder::new()
+                .path(path)
+                .force()
+                .remove_untracked(true),
+        ),
     )
     .map_err(|e| Error::git2(e, "checkout_tree"))?;
 

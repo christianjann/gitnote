@@ -5,6 +5,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [26.01.10]
+
+### Fixed
+
+- Full internationalization support with translations in Czech, German, French, Portuguese (Brazil), Russian, and Ukrainian
+- Fixed discard functionality to properly remove untracked imported assets
+
 ## [26.01.9]
 
 ### Added
