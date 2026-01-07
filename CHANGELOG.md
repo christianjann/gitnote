@@ -7,6 +7,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [26.01.11]
 
+### Fixed
+
 - **Text Field Focus and Scrolling**: Fixed text editor cursor visibility and interaction issues
   - Cursor now appears when tapping anywhere in the text editing area, not just the first line
   - Added virtual scrolling capability to scroll up even when text doesn't fill the screen
