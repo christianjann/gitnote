@@ -5,9 +5,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
-### Fixed
-
 ## [26.01.12]
+
+### Fixed
 
 - **Repository Initialization**: Fixed empty repository handling to ensure proper git operations
   - Local repositories now automatically created with initial welcome commit
