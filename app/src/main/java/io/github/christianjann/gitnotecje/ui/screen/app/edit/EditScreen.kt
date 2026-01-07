@@ -2,7 +2,9 @@ package io.github.christianjann.gitnotecje.ui.screen.app.edit
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,6 +14,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Done
@@ -363,30 +367,40 @@ fun GenericTextField(
     isReadOnlyModeActive: Boolean = false,
     textContent: TextFieldValue,
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    
     Box(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null
+            ) {
+                textFocusRequester.requestFocus()
+            }
     ) {
-        TextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .focusRequester(textFocusRequester)
-                .padding(bottom = 200.dp), // Extra space for better editing
-            value = textContent,
-            onValueChange = { vm.onValueChange(it) },
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.background,
-                unfocusedContainerColor = MaterialTheme.colorScheme.background,
-                focusedTextColor = MaterialTheme.colorScheme.onBackground,
-                unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-            ),
-            keyboardActions = KeyboardActions(
-                onDone = { vm.save(onSuccess = onFinished) }
-            ),
-            readOnly = isReadOnlyModeActive
-        )
+        Column(modifier = Modifier.fillMaxWidth()) {
+            TextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(textFocusRequester),
+                value = textContent,
+                onValueChange = { vm.onValueChange(it) },
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.background,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.background,
+                    focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = { vm.save(onSuccess = onFinished) }
+                ),
+                readOnly = isReadOnlyModeActive
+            )
+            Spacer(modifier = Modifier.height(200.dp))
+        }
     }
 }
