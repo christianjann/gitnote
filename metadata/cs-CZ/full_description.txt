@@ -1,10 +1,21 @@
-Aplikace pro poznámky pro Android s reálnými soubory. Lze synchronizovat s poskytovateli git, jako je Github.
+GitTasks je aplikace pro Android pro tvorbu poznámek a správu úkolů s integrací Git, optimalizovaná pro efektivní správu poznámek založených na Markdownu s pokročilými funkcemi jako filtrování tagů, prohlížení Git logu a bezproblémová synchronizace.
 
-* vytvoření/otevření/klonování repozitářů
-* fuzzy vyhledávání (globální a z konkrétní složky)
-* mřížkové zobrazení
-* stromové zobrazení
-* editační zobrazení
-* soukromé repozitáře s SSH
-* vzdálená synchronizace
-* řazení podle času
+Funkce zahrnují:
+
+- vytvoření/otevření/klonování repozitářů
+- podpora soukromých repozitářů (SSH a HTTPS)
+- poznámky a úkoly
+- vyhledávání (globální a z konkrétní složky)
+- mřížkové zobrazení s přizpůsobitelnými šířkami
+- seznamové zobrazení
+- editační zobrazení Markdown a úplné vykreslování Markdown
+- klikatelné zaškrtávací políčka v zobrazeních a vykreslování Markdown
+- vzdálená synchronizace
+- řazení podle času
+- podpora více jazyků
+- flexibilní zobrazení tagů v mřížkovém a seznamovém zobrazení
+- filtrování a organizace na základě tagů
+- podpora metadat frontmatter
+- prohlížeč Git logu
+- automatické řešení konfliktů sloučení
+- správa aktiv pro obrázky a soubory

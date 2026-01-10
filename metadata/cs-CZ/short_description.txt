@@ -1,1 +1,1 @@
-Udělejte si poznámku pomocí rozhraní git
+Efektivní tvorba poznámek v Markdownu a správa úkolů s synchronizací Git

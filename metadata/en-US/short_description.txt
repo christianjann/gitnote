@@ -1,1 +1,1 @@
-Take note, using a git backend
+Efficient markdown note-taking and task management with Git sync

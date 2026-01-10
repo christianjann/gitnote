@@ -1,10 +1,21 @@
-Android note app with real file. Can be sync with git providers such as Github
+GitTasks is an Android note-taking and task management app with Git integration optimized for efficient markdown-based note management with advanced features like tag filtering, Git log viewing, and seamless synchronization.
 
-* create/open/clone repositories
-* notes search (global and from specific folder)
-* grid view
-* tree view
-* edit view
-* private repo (SSH and HTTPS)
-* remote sync
-* time based sort
+Features include:
+
+- create/open/clone repositories
+- private repo support (SSH and HTTPS)
+- note and task items
+- search (global and from specific folder)
+- grid view with customizable widths
+- list view
+- markdown edit view and full markdown rendering
+- clickable check boxes in views and markdown rendering
+- remote sync
+- time based sort
+- multi-language support
+- flexible tag display in grid and list view
+- tag-based filtering and organization
+- frontmatter metadata support
+- git log viewer
+- automatic merge conflict resolution
+- asset management for images and files

@@ -1,1 +1,1 @@
-Faça anotações, utilizando um backend em git
+Tomada de notas eficiente em Markdown e gerenciamento de tarefas com sincronização Git

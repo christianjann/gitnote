@@ -1,1 +1,1 @@
-Notizen verwalten mit Git-Backend
+Effiziente Markdown-Notizen und Aufgabenverwaltung mit Git-Synchronisation

@@ -1,10 +1,21 @@
-Aplicativo de anotações Android com arquivos reais. Pode ser sincronizado com provedores git como o Github.
+GitTasks é um aplicativo Android para tomada de notas e gerenciamento de tarefas com integração Git, otimizado para gerenciamento eficiente de notas baseadas em Markdown com recursos avançados como filtragem de tags, visualização de log do Git e sincronização perfeita.
 
-* crie/abra/clone repositórios
-* busca de anotações (global ou por pasta específica)
-* exibição de grade
-* exibição de árvore
-* tela de edição
-* repositório privado (SSH e HTTPS)
-* sincronização remota
-* organização baseada em tempo
+Recursos incluem:
+
+- criar/abrir/clonar repositórios
+- suporte a repositórios privados (SSH e HTTPS)
+- notas e itens de tarefas
+- busca (global e de pastas específicas)
+- visualização em grade com larguras personalizáveis
+- visualização em lista
+- visualização de edição Markdown e renderização completa de Markdown
+- caixas de seleção clicáveis em visualizações e renderização Markdown
+- sincronização remota
+- organização baseada em tempo
+- suporte multilíngue
+- exibição flexível de tags em grade e lista
+- filtragem e organização baseada em tags
+- suporte a metadados frontmatter
+- visualizador de log do Git
+- resolução automática de conflitos de mesclagem
+- gerenciamento de ativos para imagens e arquivos
