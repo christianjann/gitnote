@@ -5,6 +5,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+- **Export Repository as ZIP**: New backup feature in settings
+  - Export entire repository including all notes and assets to a ZIP file
+  - Save to device storage or share via email, cloud services, etc.
+  - Especially useful for app memory repositories without remote sync
+  - Timestamped filenames for easy backup organization
+
 ## [26.01.14]
 
 ### Changed

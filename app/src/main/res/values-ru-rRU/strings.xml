@@ -175,4 +175,9 @@
     <string name="sync_pushing_message">Отправка изменений в удаленный репозиторий</string>
     <string name="opening_repository">Открытие репозитория Git</string>
     <string name="ok">OK</string>
+    <string name="export_repo_as_zip">Экспортировать репозиторий как ZIP</string>
+    <string name="export_repo_as_zip_subtitle">Создать резервную копию репозитория, которую можно сохранить или поделиться</string>
+    <string name="export_success">Репозиторий успешно экспортирован</string>
+    <string name="export_failed">Не удалось экспортировать репозиторий</string>
+    <string name="exporting_repository">Экспорт репозитория…</string>
 </resources>

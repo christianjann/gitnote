@@ -212,4 +212,9 @@
     <string name="sync_pushing_message">Odesílání změn do vzdáleného repozitáře</string>
     <string name="opening_repository">Otevírání Git repozitáře</string>
     <string name="ok">OK</string>
+    <string name="export_repo_as_zip">Exportovat repozitář jako ZIP</string>
+    <string name="export_repo_as_zip_subtitle">Vytvořit zálohu repozitáře, kterou lze uložit nebo sdílet</string>
+    <string name="export_success">Repozitář úspěšně exportován</string>
+    <string name="export_failed">Export repozitáře selhal</string>
+    <string name="exporting_repository">Exportování repozitáře…</string>
 </resources>

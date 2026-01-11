@@ -223,4 +223,9 @@
     <string name="sync_pushing_message">Envoi des modifications vers le dépôt distant</string>
     <string name="opening_repository">Ouverture du dépôt Git</string>
     <string name="ok">OK</string>
+    <string name="export_repo_as_zip">Exporter le dépôt en ZIP</string>
+    <string name="export_repo_as_zip_subtitle">Créer une sauvegarde de votre dépôt qui peut être enregistrée ou partagée</string>
+    <string name="export_success">Dépôt exporté avec succès</string>
+    <string name="export_failed">Échec de l\'exportation du dépôt</string>
+    <string name="exporting_repository">Exportation du dépôt…</string>
 </resources>

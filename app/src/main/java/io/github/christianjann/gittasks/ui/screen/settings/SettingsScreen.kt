@@ -2,12 +2,15 @@ package io.github.christianjann.gittasks.ui.screen.settings
 
 import android.content.ClipData
 import android.content.ClipDescription
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.FolderZip
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
@@ -42,6 +45,9 @@ import io.github.christianjann.gittasks.ui.model.TagDisplayMode
 import io.github.christianjann.gittasks.ui.theme.Theme
 import io.github.christianjann.gittasks.ui.viewmodel.SettingsViewModel
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun SettingsScreen(
@@ -342,6 +348,23 @@ fun SettingsScreen(
                 },
                 showFullText = false,
                 keyboardType = KeyboardType.Uri
+            )
+
+            val exportZipLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.CreateDocument("application/zip")
+            ) { uri ->
+                uri?.let { vm.exportRepoAsZip(it) }
+            }
+
+            DefaultSettingsRow(
+                title = stringResource(R.string.export_repo_as_zip),
+                subTitle = stringResource(R.string.export_repo_as_zip_subtitle),
+                startIcon = Icons.Default.FolderZip,
+                onClick = {
+                    val dateFormat = SimpleDateFormat("yyyy-MM-dd_HHmmss", Locale.US)
+                    val timestamp = dateFormat.format(Date())
+                    exportZipLauncher.launch("gittasks-backup-$timestamp.zip")
+                }
             )
 
             val expanded = rememberSaveable {

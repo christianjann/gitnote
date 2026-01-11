@@ -101,6 +101,28 @@ GitTasks supports two storage locations with dramatically different performance 
 - **App Memory** (Recommended): Faster performance, suitable for most users
 - **Device Memory**: Slower but allows access to the full device storage when app memory is insufficient
 
+### Export Repository as ZIP
+
+GitTasks allows you to export your entire repository as a ZIP file for backup or sharing purposes. This is especially useful for:
+
+- **App Memory Repositories**: Data in app memory cannot be accessed directly from other apps or file managers
+- **No Remote Configured**: When you haven't set up a remote Git server
+- **Remote Sync Issues**: When there are problems pushing to your remote repository
+- **Backup Before Changes**: Creating a safe backup before major reorganization
+
+#### How It Works
+
+1. Open **Settings** → **Repository** section
+2. Tap **Export repository as ZIP**
+3. Choose a save location (device storage, cloud drive, etc.)
+4. The ZIP file is created with a timestamped filename (e.g., `gittasks-backup-2026-01-11_143025.zip`)
+
+#### Features
+
+- **Complete Backup**: Includes all notes, assets, and Git history
+- **Share Options**: Save locally or share via email, cloud services, messaging apps
+- **Timestamped Filenames**: Automatic naming prevents overwriting previous backups
+
 ### Tag Filtering
 
 GitTasks supports filtering notes by tags defined in the frontmatter, allowing users to quickly find related notes.

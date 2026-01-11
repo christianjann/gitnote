@@ -243,4 +243,9 @@
     <string name="sync_pushing_message">Änderungen in das Remote-Repository pushen</string>
     <string name="opening_repository">Git-Repository wird geöffnet</string>
     <string name="ok">OK</string>
+    <string name="export_repo_as_zip">Repository als ZIP exportieren</string>
+    <string name="export_repo_as_zip_subtitle">Erstellen Sie eine Sicherungskopie Ihres Repositorys, die gespeichert oder geteilt werden kann</string>
+    <string name="export_success">Repository erfolgreich exportiert</string>
+    <string name="export_failed">Export des Repositorys fehlgeschlagen</string>
+    <string name="exporting_repository">Repository wird exportiert…</string>
 </resources>
