@@ -225,6 +225,14 @@ fun DrawerScreen(
 
     val showTags = rememberSaveable { mutableStateOf(false) }
 
+    // Switch to folder mode when starting to move a note
+    LaunchedEffect(noteBeingMoved) {
+        if (noteBeingMoved != null && showTags.value) {
+            showTags.value = false
+            onTagSelected(null)
+        }
+    }
+
     val scope = rememberCoroutineScope()
     BackHandler(enabled = drawerState.isOpen || currentNoteFolderRelativePath.isNotEmpty()) {
         if (currentNoteFolderRelativePath.isEmpty()) {

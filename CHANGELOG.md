@@ -5,11 +5,21 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [26.01.15]
+
+### Added
+
 - **Export Repository as ZIP**: New backup feature in settings
   - Export entire repository including all notes and assets to a ZIP file
   - Save to device storage or share via email, cloud services, etc.
   - Especially useful for app memory repositories without remote sync
   - Timestamped filenames for easy backup organization
+
+### Fixed
+
+- **Move Note in Tag Mode**: Drawer now automatically switches to folder mode when moving a note
+  - Previously, users couldn't select a destination folder if the drawer was in tag browsing mode
+  - The drawer now switches to folder view and clears tag selection when initiating a move
 
 ## [26.01.14]
 
