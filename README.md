@@ -123,6 +123,29 @@ Because all apps which integrate with Git on Android either crash, are slow, are
       Edit and organize note tags with an intuitive interface
     </td>
   </tr>
+  <tr>
+    <td align="center">
+      <img src="assets/asset_manager.png" width="220" alt="Asset manager"/>
+    </td>
+    <td align="center">
+    </td>
+    <td align="center">
+    </td>
+    <td align="center">
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <strong>Asset Manager</strong><br>
+      Import, export, and manage images and files attached to your notes
+    </td>
+    <td align="center">
+    </td>
+    <td align="center">
+    </td>
+    <td align="center">
+    </td>
+  </tr>
 </table>
 
 _Supported Android versions: 11+_
@@ -133,6 +156,7 @@ _Supported Architecture: `arm64-v8a`, `x86_64`_
 
 - [Detailed features documentation](./doc/features.md)
 - [Building the app](./doc/building.md)
+- [GitHub authentication](./doc/github_authentication.md)
 - [Markdown header format](./doc/design/markdown_header.md)
 - [App architecture](./doc/design/app_architecture.md)
 - [Contributing](./CONTRIBUTING.md)
@@ -156,7 +180,6 @@ See [building.md](doc/building.md) for detailed build instructions.
 
 - Android does not differentiate case for file name, so if you have a folder named `A` and another folder named `a`, `a` will not be displayed.
 - Device memory storage is significantly slower than app memory (up to 200x). See [Storage Options and Performance](./doc/features.md#storage-options-and-performance) for details. Use app memory where possible.
-- Automatic setup of a remote GitHub repo seems not to work, use manual setup instead
 - When you create a local repository then you can't configure a remote later, so in that case better use device memory to be able to access the notes outside of the app
 
 # Future direction

@@ -18,15 +18,15 @@ class GithubProvider(
     override fun deployKeyLink(repo: String): String =
         "https://github.com/$repo/settings/keys/new"
 
-    private val clientId = "Ov23li8EPatIAsWPt9QT"
+    private val clientId = "Ov23libk2sIrZVtUBdTO"
 
     // storing this secret in the repo is "ok"
     // the only risk is github app reputation and quotas
     // it would require a server to not store it here
-    private val clientSecret = "12f3f4742855deaafb45e798bcc635608b9d6fe6"
+    private val clientSecret = "6675d7a1dfc831ec5a13ce5aaef115b7d4f13165"
 
     override fun getLaunchOAuthScreenUrl(): String {
-        return "https://github.com/login/oauth/authorize?client_id=$clientId&scope=repo"
+        return "https://github.com/login/oauth/authorize?client_id=$clientId&scope=repo&redirect_uri=gittasks-identity://register-callback"
     }
 
     override fun exchangeCodeForAccessToken(code: String): String {
