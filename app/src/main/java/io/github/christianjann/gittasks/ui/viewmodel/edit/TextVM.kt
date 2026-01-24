@@ -87,6 +87,16 @@ open class TextVM() : ViewModel() {
     private val _showEditTagsDialog = MutableStateFlow(false)
     val showEditTagsDialog: StateFlow<Boolean> = _showEditTagsDialog.asStateFlow()
 
+    private val _showDueDateDialog = MutableStateFlow(false)
+    val showDueDateDialog: StateFlow<Boolean> = _showDueDateDialog.asStateFlow()
+
+    // Derived state to check if there are unsaved changes (for UI to show save button)
+    // This is a simple function rather than StateFlow since content is MutableState not Flow
+    fun hasUnsavedChanges(): Boolean {
+        return previousNote.content != _content.value.text || 
+            previousNote.nameWithoutExtension() != NameValidation.removeEndingWhiteSpace(name.value.text)
+    }
+
     constructor(editType: EditType, previousNote: Note) : this() {
 
         shouldForceNotReadOnlyMode.value = editType == EditType.Create
@@ -317,6 +327,27 @@ open class TextVM() : ViewModel() {
     fun cancelEditTags() {
         viewModelScope.launch {
             _showEditTagsDialog.emit(false)
+        }
+    }
+
+    fun startEditDueDate() {
+        viewModelScope.launch {
+            _showDueDateDialog.emit(true)
+        }
+    }
+
+    fun cancelEditDueDate() {
+        viewModelScope.launch {
+            _showDueDateDialog.emit(false)
+        }
+    }
+
+    fun updateNoteDueDate(dueDate: java.time.LocalDateTime?) {
+        viewModelScope.launch {
+            val updatedContent = FrontmatterParser.setDueDate(content.value.text, dueDate)
+            val newTextFieldValue = content.value.copy(text = updatedContent)
+            onValueChange(newTextFieldValue)
+            cancelEditDueDate()
         }
     }
 

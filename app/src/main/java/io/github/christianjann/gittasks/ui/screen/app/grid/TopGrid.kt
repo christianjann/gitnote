@@ -32,6 +32,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ViewList
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.CloudUpload
@@ -233,17 +234,18 @@ private fun SearchBar(
                     onClick = { vm.toggleViewType() }
                 ) {
                     SimpleIcon(
-                        imageVector = if (noteViewType.value == NoteViewType.Grid) {
-                            Icons.AutoMirrored.Rounded.ViewList
-                        } else {
-                            Icons.Rounded.ViewModule
+                        // Icon shows CURRENT view, clicking switches to next
+                        imageVector = when (noteViewType.value) {
+                            NoteViewType.Grid -> Icons.Rounded.ViewModule
+                            NoteViewType.List -> Icons.AutoMirrored.Rounded.ViewList
+                            NoteViewType.Due -> Icons.Filled.CalendarMonth
                         },
                         tint = MaterialTheme.colorScheme.onSurface,
                         contentDescription = stringResource(
-                            if (noteViewType.value == NoteViewType.Grid) {
-                                R.string.switch_to_list_view
-                            } else {
-                                R.string.switch_to_grid_view
+                            when (noteViewType.value) {
+                                NoteViewType.Grid -> R.string.switch_to_list_view
+                                NoteViewType.List -> R.string.switch_to_due_view
+                                NoteViewType.Due -> R.string.switch_to_grid_view
                             }
                         )
                     )

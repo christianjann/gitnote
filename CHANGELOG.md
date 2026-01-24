@@ -11,6 +11,14 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - Select multiple notes and choose "Move selected notes" from the menu
   - Navigate to destination folder using the drawer
   - All selected notes are moved in a single Git commit
+- Due Date Feature: Set and track due dates for notes
+  - New "Due" view mode (cycle through Grid → List → Due with the view toggle button)
+  - Due view shows only notes with due dates set, sorted by due date
+  - Set due date from note context menu ("Set due date" option)
+  - Set due date from editor/preview mode (calendar button in top bar)
+  - Due dates displayed in list view with color coding (red if overdue, primary color if upcoming)
+  - Due dates stored in frontmatter as ISO format (e.g., `due: 2024-08-07T11:28:29`)
+  - New setting: "Due view ignores all filters" (enabled by default) - shows all notes with due dates from all folders
 
 ### Fixed
 
@@ -18,6 +26,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Cursor Position When Tapping Below Text: Tapping below the last line in the text editor now moves the cursor to the end of the text instead of the beginning
 - Markdown Preview: Text can now be selected and copied in read-only markdown view
 - Markdown Preview: Improved checkbox alignment so checkboxes align with the first line of text
+- Markdown Preview: Save button now appears when tags or due date is changed in preview mode
 
 ### Changed
 

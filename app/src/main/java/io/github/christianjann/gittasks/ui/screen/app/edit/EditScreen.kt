@@ -18,6 +18,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Lock
@@ -63,6 +64,7 @@ import io.github.christianjann.gittasks.manager.ExtensionType
 import io.github.christianjann.gittasks.manager.GitManager
 import io.github.christianjann.gittasks.manager.extensionType
 import io.github.christianjann.gittasks.ui.component.AssetManagerDialog
+import io.github.christianjann.gittasks.ui.component.DueDatePickerDialog
 import io.github.christianjann.gittasks.ui.component.EditTagsDialog
 import io.github.christianjann.gittasks.ui.component.SimpleIcon
 import io.github.christianjann.gittasks.ui.destination.EditParams
@@ -120,6 +122,9 @@ fun EditScreen(
 
     val isReadOnlyModeActive =
         !vm.shouldForceNotReadOnlyMode.value && vm.prefs.isReadOnlyModeActive.getAsState().value
+
+    // Check for unsaved changes - reactive since it reads from Compose State
+    val hasUnsavedChanges = vm.hasUnsavedChanges()
 
     var hasPendingCheckboxChanges by remember { mutableStateOf(false) }
     var pendingCheckboxText by remember { mutableStateOf<String?>(null) }
@@ -187,6 +192,13 @@ fun EditScreen(
                         )
                     }
                     IconButton(
+                        onClick = { vm.startEditDueDate() },
+                    ) {
+                        SimpleIcon(
+                            imageVector = Icons.Default.CalendarMonth,
+                        )
+                    }
+                    IconButton(
                         colors = IconButtonDefaults.iconButtonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = MaterialTheme.colorScheme.onPrimary
@@ -209,7 +221,8 @@ fun EditScreen(
         floatingActionButton = {
             // bug: https://issuetracker.google.com/issues/224005027
             //AnimatedVisibility(visible = currentNoteFolderRelativePath.isNotEmpty()) {
-            if ((!isReadOnlyModeActive || hasPendingCheckboxChanges) && vm.name.value.text.isNotEmpty()) {
+            // Show FAB when: not in read-only mode, OR has pending checkbox changes, OR has unsaved changes (tags/due date changed in preview mode)
+            if ((!isReadOnlyModeActive || hasPendingCheckboxChanges || hasUnsavedChanges) && vm.name.value.text.isNotEmpty()) {
                 FloatingActionButton(
                     modifier = Modifier
                         .padding(bottom = bottomBarHeight),
@@ -334,6 +347,18 @@ fun EditScreen(
             currentTags = FrontmatterParser.parseTags(vm.content.value.text),
             availableTags = allTags,
             onConfirm = { newTags -> vm.updateNoteTags(newTags) }
+        )
+    }
+
+    // Due Date Dialog
+    val showDueDateDialog by vm.showDueDateDialog.collectAsState()
+    
+    if (showDueDateDialog) {
+        val currentDueDate = FrontmatterParser.parseDueDate(vm.content.value.text)
+        DueDatePickerDialog(
+            currentDueDate = currentDueDate,
+            onDismiss = { vm.cancelEditDueDate() },
+            onConfirm = { newDueDate -> vm.updateNoteDueDate(newDueDate) }
         )
     }
 

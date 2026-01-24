@@ -185,4 +185,12 @@
     <string name="export_success">Репозиторій успішно експортовано</string>
     <string name="export_failed">Не вдалося експортувати репозиторій</string>
     <string name="exporting_repository">Експорт репозиторію…</string>
+    <string name="switch_to_due_view">Перемкнути на вигляд за термінами</string>
+    <string name="due_view_ignores_filters">Вигляд за термінами ігнорує всі фільтри</string>
+    <string name="due_view_ignores_filters_subtitle">Показувати всі нотатки з термінами з усіх папок, відсортовані за датою терміну</string>
+    <string name="set_due_date">Встановити термін</string>
+    <string name="clear_due_date">Очистити</string>
+    <string name="select_time">Вибрати час</string>
+    <string name="back">Назад</string>
+    <string name="due_date_label">Термін: %1$s</string>
 </resources>

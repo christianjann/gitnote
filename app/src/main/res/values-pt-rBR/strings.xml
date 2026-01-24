@@ -209,4 +209,12 @@
     <string name="export_success">Repositório exportado com sucesso</string>
     <string name="export_failed">Falha ao exportar repositório</string>
     <string name="exporting_repository">Exportando repositório…</string>
+    <string name="switch_to_due_view">Mudar para visualização de vencimento</string>
+    <string name="due_view_ignores_filters">Visualização de vencimento ignora todos os filtros</string>
+    <string name="due_view_ignores_filters_subtitle">Mostrar todas as notas com datas de vencimento de todas as pastas, ordenadas por data de vencimento</string>
+    <string name="set_due_date">Definir data de vencimento</string>
+    <string name="clear_due_date">Limpar</string>
+    <string name="select_time">Selecionar hora</string>
+    <string name="back">Voltar</string>
+    <string name="due_date_label">Vencimento: %1$s</string>
 </resources>

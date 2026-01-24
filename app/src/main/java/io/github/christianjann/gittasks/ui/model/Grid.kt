@@ -1,6 +1,7 @@
 package io.github.christianjann.gittasks.ui.model
 
 import androidx.room.Embedded
+import androidx.room.Ignore
 import io.github.christianjann.gittasks.MyApp
 import io.github.christianjann.gittasks.R
 import io.github.christianjann.gittasks.data.room.Note
@@ -38,6 +39,7 @@ enum class NoteMinWidth(val size: Int) {
 enum class NoteViewType {
     Grid,
     List,
+    Due,
 }
 
 enum class TagDisplayMode {
@@ -62,5 +64,17 @@ data class GridNote(
     val note: Note,
     val isUnique: Boolean,
     val selected: Boolean = false,
+    @Ignore
     val completed: Boolean? = null,
-)
+    @Ignore
+    val dueDate: java.time.LocalDateTime? = null,
+) {
+    // Secondary constructor for Room - it can't handle @Ignore fields in primary constructor
+    constructor(note: Note, isUnique: Boolean, selected: Boolean) : this(
+        note = note,
+        isUnique = isUnique,
+        selected = selected,
+        completed = null,
+        dueDate = null
+    )
+}

@@ -66,6 +66,8 @@
     <string name="tag_ignores_folders_subtitle">When filtering by tag, show notes from all folders instead of current folder only</string>
     <string name="search_ignores_filters">Search ignores all filters</string>
     <string name="search_ignores_filters_subtitle">When searching, show results from all folders regardless of current folder and subfolder settings</string>
+    <string name="due_view_ignores_filters">Due view ignores all filters</string>
+    <string name="due_view_ignores_filters_subtitle">Show all notes with due dates from all folders, sorted by due date</string>
     <string name="background_git_operations">Background git operations</string>
     <string name="background_git_operations_subtitle">Perform git pull/push in background during refresh to avoid blocking UI</string>
     <string name="background_git_delay_seconds">Background git delay (seconds)</string>
@@ -125,6 +127,7 @@
     <string name="list">List</string>
     <string name="switch_to_list_view">Switch to list view</string>
     <string name="switch_to_grid_view">Switch to grid view</string>
+    <string name="switch_to_due_view">Switch to due date view</string>
     <string name="about">About</string>
     <string name="app_page_choose_method">Choose method</string>
     <string name="create_local_repo">Create local repository</string>
@@ -253,4 +256,9 @@
     <string name="export_success">Repository exported successfully</string>
     <string name="export_failed">Failed to export repository</string>
     <string name="exporting_repository">Exporting repository…</string>
+    <string name="set_due_date">Set due date</string>
+    <string name="clear_due_date">Clear</string>
+    <string name="select_time">Select time</string>
+    <string name="back">Back</string>
+    <string name="due_date_label">Due: %1$s</string>
 </resources>

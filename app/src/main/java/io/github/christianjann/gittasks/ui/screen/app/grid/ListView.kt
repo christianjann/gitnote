@@ -212,6 +212,16 @@ private fun NoteListRow(
             .format(Date(gridNote.note.lastModifiedTimeMillis))
     }
 
+    // Use pre-computed dueDate from GridNote (parsed in ViewModel flow)
+    val dueDate = gridNote.dueDate
+
+    val formattedDueDate = remember(dueDate) {
+        dueDate?.let {
+            val formatter = java.time.format.DateTimeFormatter.ofPattern("EEE MMM d, yyyy HH:mm")
+            it.format(formatter)
+        }
+    }
+
     val title = if (showFullPathOfNotes || !gridNote.isUnique) {
         gridNote.note.relativePath
     } else {
@@ -344,6 +354,20 @@ private fun NoteListRow(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+
+                    if (formattedDueDate != null) {
+                        Text(
+                            text = stringResource(R.string.due_date_label, formattedDueDate),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = if (dueDate != null && dueDate.isBefore(java.time.LocalDateTime.now())) {
+                                MaterialTheme.colorScheme.error
+                            } else {
+                                MaterialTheme.colorScheme.primary
+                            }
+                        )
+                    }
                 }
             }
         }

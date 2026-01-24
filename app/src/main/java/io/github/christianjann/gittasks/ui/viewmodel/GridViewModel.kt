@@ -7,6 +7,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import androidx.paging.filter
 import androidx.paging.map
 import io.github.christianjann.gittasks.MyApp
 import io.github.christianjann.gittasks.R
@@ -126,6 +127,13 @@ class GridViewModel : ViewModel() {
     private val _noteBeingEditedTags = MutableStateFlow<Note?>(null)
     val noteBeingEditedTags: StateFlow<Note?> = _noteBeingEditedTags.asStateFlow()
 
+    // Due date dialog state
+    private val _showDueDateDialog = MutableStateFlow(false)
+    val showDueDateDialog: StateFlow<Boolean> = _showDueDateDialog.asStateFlow()
+
+    private val _noteBeingEditedDueDate = MutableStateFlow<Note?>(null)
+    val noteBeingEditedDueDate: StateFlow<Note?> = _noteBeingEditedDueDate.asStateFlow()
+
     // Direct tag state for immediate UI updates
     private val _currentTags = MutableStateFlow<Map<Int, List<String>>>(emptyMap())
     val currentTags: StateFlow<Map<Int, List<String>>> = _currentTags.asStateFlow()
@@ -167,6 +175,39 @@ class GridViewModel : ViewModel() {
         viewModelScope.launch {
             _showEditTagsDialog.emit(false)
             _noteBeingEditedTags.emit(null)
+        }
+    }
+
+    fun startEditDueDate(note: Note) {
+        viewModelScope.launch {
+            _noteBeingEditedDueDate.emit(note)
+            _showDueDateDialog.emit(true)
+        }
+    }
+
+    fun cancelEditDueDate() {
+        viewModelScope.launch {
+            _showDueDateDialog.emit(false)
+            _noteBeingEditedDueDate.emit(null)
+        }
+    }
+
+    fun updateNoteDueDate(note: Note, dueDate: java.time.LocalDateTime?) {
+        viewModelScope.launch {
+            Log.d(TAG, "updateNoteDueDate: updating note ${note.id} with dueDate $dueDate")
+
+            val updatedContent = FrontmatterParser.setDueDate(note.content, dueDate)
+            val updatedNote = note.copy(
+                content = updatedContent,
+                lastModifiedTimeMillis = System.currentTimeMillis()
+            )
+            val result = storageManager.updateNote(updatedNote, note) {
+                kotlinx.coroutines.delay(50)
+            }
+            result.onFailure { e ->
+                uiHelper.makeToast("Failed to update note due date: $e")
+            }
+            cancelEditDueDate()
         }
     }
 
@@ -319,10 +360,10 @@ class GridViewModel : ViewModel() {
 
     fun toggleViewType() {
         viewModelScope.launch {
-            val next = if (prefs.noteViewType.get() == NoteViewType.Grid) {
-                NoteViewType.List
-            } else {
-                NoteViewType.Grid
+            val next = when (prefs.noteViewType.get()) {
+                NoteViewType.Grid -> NoteViewType.List
+                NoteViewType.List -> NoteViewType.Due
+                NoteViewType.Due -> NoteViewType.Grid
             }
             prefs.noteViewType.update(next)
         }
@@ -417,10 +458,58 @@ class GridViewModel : ViewModel() {
             pagingData.map { gridNote ->
                 val updatedGridNote = gridNote.copy(
                     selected = selectedNotes.contains(gridNote.note),
-                    completed = FrontmatterParser.parseCompletedOrNull(gridNote.note.content)
+                    completed = FrontmatterParser.parseCompletedOrNull(gridNote.note.content),
+                    dueDate = FrontmatterParser.parseDueDate(gridNote.note.content)
                 )
                 //Log.d(TAG, "gridNotes map: note ${gridNote.note.id}, content hash = ${gridNote.note.content.hashCode()}, tags = ${FrontmatterParser.parseTags(gridNote.note.content)}")
                 updatedGridNote
+            }
+        }
+    }.flowOn(Dispatchers.Main)
+
+    // Filtered flow for Due view - only notes with due dates, sorted by due date
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val dueNotes = combine(
+        refreshTrigger,
+        selectedNotes,
+        prefs.dueViewIgnoresFilters.getFlow()
+    ) { _, selectedNotes, ignoresFilters ->
+        Pair(selectedNotes, ignoresFilters)
+    }.flatMapLatest { (selectedNotes, ignoresFilters) ->
+        if (ignoresFilters) {
+            // When ignoring filters, get all notes and filter/sort in memory
+            noteRepository.getAllNotes().flowMap { allNotes ->
+                val dueNotesFiltered = allNotes
+                    .mapNotNull { note ->
+                        val dueDate = FrontmatterParser.parseDueDate(note.content)
+                        if (dueDate != null) {
+                            GridNote(
+                                note = note,
+                                isUnique = true, // Assume unique when showing all
+                                selected = selectedNotes.contains(note),
+                                completed = FrontmatterParser.parseCompletedOrNull(note.content),
+                                dueDate = dueDate
+                            )
+                        } else null
+                    }
+                    .sortedBy { it.dueDate }
+                PagingData.from(dueNotesFiltered)
+            }
+        } else {
+            // When respecting filters, use the regular paging flow
+            pagingFlow.flowMap { pagingData ->
+                pagingData
+                    .map { gridNote: GridNote ->
+                        val parsedDueDate = FrontmatterParser.parseDueDate(gridNote.note.content)
+                        gridNote.copy(
+                            selected = selectedNotes.contains(gridNote.note),
+                            completed = FrontmatterParser.parseCompletedOrNull(gridNote.note.content),
+                            dueDate = parsedDueDate
+                        )
+                    }
+                    .filter { gridNote: GridNote ->
+                        gridNote.dueDate != null
+                    }
             }
         }
     }.flowOn(Dispatchers.Main)

@@ -1,15 +1,88 @@
 package io.github.christianjann.gittasks.helper
 
 import java.time.Instant
+import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 
 object FrontmatterParser {
 
     private val updatedFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss'Z'").withZone(ZoneId.systemDefault())
+    
+    // ISO format for due dates: "2024-08-07T11:28:29.715170"
+    private val dueDateFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
 
     private val completedRegex = Regex("completed\\?\\s*:\\s*\\w+", RegexOption.IGNORE_CASE)
+    private val dueRegex = Regex("due\\s*:\\s*.+", RegexOption.IGNORE_CASE)
+
+    fun parseDueDate(content: String): LocalDateTime? {
+        val frontmatter = extractFrontmatter(content) ?: return null
+        val dueLine = frontmatter.lines().find { dueRegex.containsMatchIn(it.trim()) } ?: return null
+        val dueValue = dueLine.substringAfter(":").trim()
+        return try {
+            LocalDateTime.parse(dueValue, dueDateFormatter)
+        } catch (e: DateTimeParseException) {
+            // Try parsing just the date part if time is not present
+            try {
+                java.time.LocalDate.parse(dueValue).atStartOfDay()
+            } catch (e2: DateTimeParseException) {
+                null
+            }
+        }
+    }
+
+    fun setDueDate(content: String, dueDate: LocalDateTime?): String {
+        val lines = content.lines()
+        val currentTime = updatedFormatter.format(Instant.now())
+
+        if (lines.isNotEmpty() && lines[0].trim().startsWith("---")) {
+            val endIndex = lines.drop(1).indexOfFirst { it.trim().startsWith("---") }
+            if (endIndex == -1) return content
+
+            val frontmatterLines = lines.subList(1, endIndex + 1).toMutableList()
+            val bodyLines = if (endIndex + 2 < lines.size) lines.subList(endIndex + 2, lines.size) else emptyList()
+
+            // Find existing due line
+            val dueIndex = frontmatterLines.indexOfFirst { dueRegex.containsMatchIn(it.trim()) }
+
+            if (dueDate != null) {
+                val dueDateString = "due: ${dueDateFormatter.format(dueDate)}"
+                if (dueIndex != -1) {
+                    frontmatterLines[dueIndex] = dueDateString
+                } else {
+                    // Add due date after title or at the end
+                    val insertIndex = frontmatterLines.indexOfFirst { it.trim().startsWith("title:") }.takeIf { it >= 0 }?.plus(1) ?: frontmatterLines.size
+                    frontmatterLines.add(insertIndex, dueDateString)
+                }
+            } else {
+                // Remove due date if present
+                if (dueIndex != -1) {
+                    frontmatterLines.removeAt(dueIndex)
+                }
+            }
+
+            // Update updated timestamp
+            val updatedIndex = frontmatterLines.indexOfFirst { it.trim().startsWith("updated:") }
+            if (updatedIndex != -1) {
+                frontmatterLines[updatedIndex] = "updated: $currentTime"
+            }
+
+            return (listOf("---") + frontmatterLines + listOf("---") + bodyLines).joinToString("\n")
+        } else if (dueDate != null) {
+            // No frontmatter, add it with due date
+            val title = "title: ${lines.firstOrNull()?.take(50) ?: "Untitled"}"
+            val newFrontmatter = listOf(
+                title,
+                "due: ${dueDateFormatter.format(dueDate)}",
+                "updated: $currentTime",
+                "created: $currentTime"
+            )
+            return (listOf("---") + newFrontmatter + listOf("---") + lines).joinToString("\n")
+        }
+        return content
+    }
 
     fun parseCompleted(content: String): Boolean {
         val frontmatter = extractFrontmatter(content) ?: return false

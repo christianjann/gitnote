@@ -221,6 +221,16 @@ fun SettingsScreen(
                 }
             )
 
+            val dueViewIgnoresFilters by vm.prefs.dueViewIgnoresFilters.getAsState()
+            ToggleableSettings(
+                title = stringResource(R.string.due_view_ignores_filters),
+                subtitle = stringResource(R.string.due_view_ignores_filters_subtitle),
+                checked = dueViewIgnoresFilters,
+                onCheckedChange = {
+                    vm.update { vm.prefs.dueViewIgnoresFilters.update(it) }
+                }
+            )
+
             val backgroundGitOperations by vm.prefs.backgroundGitOperations.getAsState()
             ToggleableSettings(
                 title = stringResource(R.string.background_git_operations),

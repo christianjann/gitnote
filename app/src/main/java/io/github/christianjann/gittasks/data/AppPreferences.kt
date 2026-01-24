@@ -155,6 +155,7 @@ class AppPreferences(
 
     val tagIgnoresFolders = booleanPreference("tagIgnoresFolders", true)
     val searchIgnoresFilters = booleanPreference("searchIgnoresFilters", true)
+    val dueViewIgnoresFilters = booleanPreference("dueViewIgnoresFilters", true)
 
     val defaultExtension = stringPreference("defaultExtension", "md")
     val showLinesNumber = booleanPreference("showLinesNumber", false)

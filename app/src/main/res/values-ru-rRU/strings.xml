@@ -185,4 +185,12 @@
     <string name="export_success">Репозиторий успешно экспортирован</string>
     <string name="export_failed">Не удалось экспортировать репозиторий</string>
     <string name="exporting_repository">Экспорт репозитория…</string>
+    <string name="switch_to_due_view">Переключить на вид по срокам</string>
+    <string name="due_view_ignores_filters">Вид по срокам игнорирует все фильтры</string>
+    <string name="due_view_ignores_filters_subtitle">Показывать все заметки со сроками из всех папок, отсортированные по дате срока</string>
+    <string name="set_due_date">Установить срок</string>
+    <string name="clear_due_date">Очистить</string>
+    <string name="select_time">Выбрать время</string>
+    <string name="back">Назад</string>
+    <string name="due_date_label">Срок: %1$s</string>
 </resources>

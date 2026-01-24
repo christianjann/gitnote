@@ -104,6 +104,7 @@ import io.github.christianjann.gittasks.data.room.Note
 import io.github.christianjann.gittasks.helper.FrontmatterParser
 import io.github.christianjann.gittasks.ui.component.CustomDropDown
 import io.github.christianjann.gittasks.ui.component.CustomDropDownModel
+import io.github.christianjann.gittasks.ui.component.DueDatePickerDialog
 import io.github.christianjann.gittasks.ui.component.EditTagsDialog
 import io.github.christianjann.gittasks.ui.component.AssetManagerDialog
 import io.github.christianjann.gittasks.ui.model.EditType
@@ -412,6 +413,21 @@ fun GridScreen(
             )
         }
 
+        // Due Date Picker Dialog
+        val showDueDateDialog by vm.showDueDateDialog.collectAsState()
+        val noteBeingEditedDueDate by vm.noteBeingEditedDueDate.collectAsState()
+
+        if (showDueDateDialog && noteBeingEditedDueDate != null) {
+            val currentDueDate = FrontmatterParser.parseDueDate(noteBeingEditedDueDate!!.content)
+            DueDatePickerDialog(
+                currentDueDate = currentDueDate,
+                onDismiss = { vm.cancelEditDueDate() },
+                onConfirm = { newDueDate ->
+                    vm.updateNoteDueDate(noteBeingEditedDueDate!!, newDueDate)
+                }
+            )
+        }
+
         // Asset Manager Dialog
         AssetManagerDialog(
             showDialog = showAssetManagerDialog,
@@ -439,6 +455,7 @@ private fun GridView(
     tagDisplayMode: TagDisplayMode,
 ) {
     val gridNotes = vm.gridNotes.collectAsLazyPagingItems<GridNote>()
+    val dueNotes = vm.dueNotes.collectAsLazyPagingItems<GridNote>()
     val query = vm.query.collectAsState()
 
     val isRefreshing by vm.isRefreshing.collectAsStateWithLifecycle()
@@ -495,6 +512,30 @@ private fun GridView(
 
                 NoteListView(
                     gridNotes = gridNotes,
+                    listState = listState,
+                    modifier = commonModifier,
+                    selectedNotes = selectedNotes,
+                    showFullPathOfNotes = showFullPathOfNotes.value,
+                    showFullTitleInListView = showFullTitleInListView.value,
+                    preferFrontmatterTitle = preferFrontmatterTitle.value,
+                    tagDisplayMode = currentTagDisplayMode,
+                    noteViewType = noteViewType,
+                    onEditClick = onEditClick,
+                    vm = vm,
+                    showScrollbars = showScrollbars.value,
+                )
+            }
+
+            NoteViewType.Due -> {
+                val listState = rememberLazyListState()
+
+                LaunchedEffect(query.value) {
+                    listState.animateScrollToItem(index = 0)
+                }
+
+                // Due view uses list view but filters to only show notes with due dates
+                NoteListView(
+                    gridNotes = dueNotes,
                     listState = listState,
                     modifier = commonModifier,
                     selectedNotes = selectedNotes,
@@ -837,6 +878,9 @@ internal fun NoteActionsDropdown(
                 CustomDropDownModel(
                     text = stringResource(R.string.edit_tags),
                     onClick = { vm.startEditTags(gridNote.note) }),
+                CustomDropDownModel(
+                    text = stringResource(R.string.set_due_date),
+                    onClick = { vm.startEditDueDate(gridNote.note) }),
             ),
             clickPosition = clickPosition
         )

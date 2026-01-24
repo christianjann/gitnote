@@ -253,4 +253,12 @@
     <string name="export_success">Repository erfolgreich exportiert</string>
     <string name="export_failed">Export des Repositorys fehlgeschlagen</string>
     <string name="exporting_repository">Repository wird exportiert…</string>
+    <string name="switch_to_due_view">Zur Fälligkeitsansicht wechseln</string>
+    <string name="due_view_ignores_filters">Fälligkeitsansicht ignoriert alle Filter</string>
+    <string name="due_view_ignores_filters_subtitle">Alle Notizen mit Fälligkeitsdatum aus allen Ordnern anzeigen, sortiert nach Fälligkeitsdatum</string>
+    <string name="set_due_date">Fälligkeitsdatum setzen</string>
+    <string name="clear_due_date">Löschen</string>
+    <string name="select_time">Zeit auswählen</string>
+    <string name="back">Zurück</string>
+    <string name="due_date_label">Fällig: %1$s</string>
 </resources>
