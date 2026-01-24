@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
@@ -133,7 +134,8 @@ private fun RenderMarkdownBlock(
     MarkdownText(
         markdown = markdown,
         modifier = Modifier.padding(vertical = 2.dp),
-        imageLoader = imageLoader
+        imageLoader = imageLoader,
+        isTextSelectable = true
     )
 }
 
@@ -211,16 +213,17 @@ fun MarkDownContent(
             "![$altText]($processedPath)"
         }
         
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-        ) {
-            MarkdownWithClickableCheckboxes(
-                markdown = processedBodyText,
-                modifier = Modifier.padding(15.dp),
-                imageLoader = imageLoader,
-                onCheckboxClick = { originalLine, isChecked ->
+        SelectionContainer {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+            ) {
+                MarkdownWithClickableCheckboxes(
+                    markdown = processedBodyText,
+                    modifier = Modifier.padding(15.dp),
+                    imageLoader = imageLoader,
+                    onCheckboxClick = { originalLine, isChecked ->
                     // Find and replace the line in the body text
                     val lines = bodyText.lines().toMutableList()
                     val lineIndex = lines.indexOf(originalLine)
@@ -252,6 +255,7 @@ fun MarkDownContent(
                     }
                 }
             )
+            }
         }
     } else {
         GenericTextField(
