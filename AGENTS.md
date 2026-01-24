@@ -94,9 +94,9 @@ just get-wrapper  # Get Gradle wrapper
 3. Run `just rust-build` to compile Rust changes
 4. Run `just build` or `just install` to test
 5. For release: `just release-build` or `just release-install`
-6. **When adding features**: 
-    - Update `CHANGELOG.md` and `doc/features.md` to document the new functionality
-    - Check [app architecture](doc/design/app_architecture.md) fo follow the popper design when changing the app
+6. **When adding features**:
+   - Update `CHANGELOG.md` and `doc/features.md` to document the new functionality
+   - Check [app architecture](doc/design/app_architecture.md) fo follow the popper design when changing the app
 
 ## Troubleshooting
 

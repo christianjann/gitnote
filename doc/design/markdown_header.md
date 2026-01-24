@@ -10,12 +10,13 @@ GitTasks supports YAML frontmatter in Markdown files to store metadata. The fron
 - `updated`: Last modification timestamp in ISO format (e.g., `2025-12-31 15:51:02Z`).
 - `created`: Creation timestamp in ISO format.
 - `completed?`: Completion status, either `yes` or `no` (optional).
+- `due`: Due date/time in ISO local format (e.g., `2025-12-31T15:00:00`) (optional).
 - `author`: Author name (optional).
 - `tags`: List of tags (optional, one per line).
 
 ## Examples
 
-### Basic Note with Completion
+### Basic Note with Completion and Due Date
 
 ```
 ---
@@ -23,6 +24,7 @@ title: Buy Groceries
 updated: 2025-12-31 15:51:02Z
 created: 2025-12-30 10:00:00Z
 completed?: no
+due: 2025-12-31T18:00:00
 ---
 
 - Milk
@@ -64,9 +66,19 @@ Just a simple note without completion or tags.
 
 - Fields are case-sensitive.
 - The `completed?` field is used by the app to display a checkbox in the UI.
+- The `due` field uses ISO local date-time format (`yyyy-MM-ddTHH:mm:ss`) without timezone.
 - Timestamps should be in the format `yyyy-MM-dd HH:mm:ssZ`.
 - Extra spaces around `?` and `:` are allowed (e.g., `completed ? : yes`).
 - If no frontmatter is present, the app treats the note as incomplete.
+
+## Due Dates
+
+- Due dates can be set from the note context menu or via the calendar button in the editor.
+- Notes with due dates appear in the dedicated "Due" view mode (cycle: Grid → List → Due).
+- Due dates are displayed in list view with color coding:
+  - **Red**: Overdue (past due date)
+  - **Primary color**: Upcoming (future due date)
+- The "Due view ignores all filters" setting (enabled by default) shows all notes with due dates from all folders, sorted by due date.
 
 ## UI Rendering
 

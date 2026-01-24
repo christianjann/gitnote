@@ -43,6 +43,7 @@ Because all apps which integrate with Git on Android either crash, are slow, are
 - [x] create/open/clone repositories
 - [x] private repo support (SSH and HTTPS)
 - [x] note and task items
+- [x] due dates with dedicated view mode
 - [x] search (global and from specific folder)
 - [x] grid view with customizable widths
 - [x] list view
@@ -128,6 +129,7 @@ Because all apps which integrate with Git on Android either crash, are slow, are
       <img src="assets/asset_manager.png" width="220" alt="Asset manager"/>
     </td>
     <td align="center">
+      <img src="assets/due.png" width="220" alt="Due dates view"/>
     </td>
     <td align="center">
     </td>
@@ -140,6 +142,8 @@ Because all apps which integrate with Git on Android either crash, are slow, are
       Import, export, and manage images and files attached to your notes
     </td>
     <td align="center">
+      <strong>Due Dates</strong><br>
+      Track deadlines with a dedicated view showing all notes with due dates
     </td>
     <td align="center">
     </td>

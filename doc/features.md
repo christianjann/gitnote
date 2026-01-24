@@ -620,6 +620,72 @@ In list view, with sort by "Most recent":
 [x] Completed Task 2 (last month)
 ```
 
+## Due Dates
+
+GitTasks supports due dates for notes and tasks, allowing you to track deadlines and see upcoming items at a glance.
+
+### How It Works
+
+- **Due Date Storage**: Due dates are stored in YAML frontmatter using the `due:` field in ISO local date-time format (e.g., `due: 2026-01-25T14:00:00`).
+- **Setting Due Dates**: Set due dates from the note context menu ("Set due date") or via the calendar button in the editor/preview top bar.
+- **Date/Time Picker**: A full date and time picker dialog allows precise due date selection.
+- **Clearing Due Dates**: Remove a due date by selecting "Clear" in the date picker dialog.
+- **Git Integration**: Due date changes are committed to the repository with proper version control.
+
+### Due View Mode
+
+GitTasks includes a dedicated "Due" view mode for browsing notes with due dates:
+
+- **View Toggle**: Cycle through view modes using the view toggle button: Grid → List → Due
+- **Filtered Display**: Due view shows only notes that have due dates set
+- **Sorted by Due Date**: Notes are automatically sorted by due date (earliest first)
+- **Ignores Filters (Optional)**: By default, Due view ignores folder and tag filters to show all notes with due dates from all folders
+
+### Visual Indicators
+
+- **List View Display**: Due dates appear below the note title in list view with weekday, date, and time (e.g., "Fri, Jan 24, 2026 14:30")
+- **Color Coding**:
+  - **Red**: Overdue items (due date is in the past)
+  - **Primary color**: Upcoming items (due date is in the future)
+
+### Configuration
+
+- **Due View Ignores All Filters**: Enable/disable in Settings > Filtering (enabled by default)
+  - When enabled: Due view shows all notes with due dates from all folders, sorted by due date
+  - When disabled: Due view respects current folder and filter settings
+
+### Usage Tips
+
+- Use due dates for time-sensitive tasks and deadlines
+- The Due view provides a quick overview of all upcoming deadlines
+- Combine with completion status for full task tracking
+- Due dates work with both regular notes and tasks
+- Set specific times for reminders or just dates for all-day deadlines
+
+### Example Workflow
+
+1. Create or open a note/task
+2. Long-press and select "Set due date" from the context menu, or tap the calendar icon in the editor
+3. Select a date and time in the picker dialog
+4. The due date is saved to frontmatter and the note appears in Due view
+5. Switch to Due view to see all notes with upcoming deadlines
+6. Overdue items appear in red for quick identification
+
+### Example Frontmatter
+
+```yaml
+---
+title: Submit Report
+completed?: no
+due: 2026-01-25T17:00:00
+tags:
+  - work
+  - deadline
+---
+```
+
+This note will appear in the Due view and show "Fri, Jan 25, 2026 17:00" in list view.
+
 ## Floating Action Button (FAB)
 
 The FAB provides quick access to create new notes and tasks directly.
