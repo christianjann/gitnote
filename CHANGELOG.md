@@ -10,6 +10,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Fixed two times 150 in NoteMinWidth menu
 - Cursor Position When Tapping Below Text: Tapping below the last line in the text editor now moves the cursor to the end of the text instead of the beginning
 
+### Changed
+
+- Asset Manager: Improved usability
+  - Full filenames now displayed instead of truncated text
+  - Added scrollbar for easier navigation when many assets are present
+  - Added image preview thumbnails for image files (PNG, JPG, GIF, WebP, BMP, SVG)
+
 ## [26.01.15]
 
 ### Added

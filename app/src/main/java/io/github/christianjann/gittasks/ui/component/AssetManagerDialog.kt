@@ -4,11 +4,13 @@ import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,7 +18,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -45,13 +53,55 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import io.github.christianjann.gittasks.R
 import io.github.christianjann.gittasks.data.platform.NodeFs
+import java.io.File
 import io.github.christianjann.gittasks.manager.AssetManager
 import io.github.christianjann.gittasks.manager.GitManager
 import kotlinx.coroutines.launch
+
+// Custom scrollbar implementation for LazyColumn
+@Composable
+private fun CustomVerticalScrollbar(
+    scrollState: LazyListState,
+    modifier: Modifier = Modifier
+) {
+    val scrollbarWidth = 8.dp
+    val scrollbarColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+
+    Box(modifier = modifier) {
+        Canvas(
+            modifier = Modifier
+                .width(scrollbarWidth)
+                .fillMaxHeight()
+                .align(Alignment.CenterEnd)
+        ) {
+            val canvasHeight = size.height
+            val totalItems = scrollState.layoutInfo.totalItemsCount.toFloat()
+            val visibleItems = scrollState.layoutInfo.visibleItemsInfo.size.toFloat()
+
+            if (totalItems > visibleItems) {
+                val thumbHeight = (canvasHeight * visibleItems / totalItems).coerceAtLeast(20f)
+                val maxThumbTravel = canvasHeight - thumbHeight
+                val scrollProgress = if (totalItems - visibleItems > 0) {
+                    scrollState.firstVisibleItemIndex.toFloat() / (totalItems - visibleItems)
+                } else 0f
+                val thumbY = scrollProgress * maxThumbTravel
+
+                drawRoundRect(
+                    color = scrollbarColor,
+                    topLeft = Offset(0f, thumbY),
+                    size = Size(size.width, thumbHeight),
+                    cornerRadius = CornerRadius(4f, 4f)
+                )
+            }
+        }
+    }
+}
 
 @Composable
 fun AssetManagerDialog(
@@ -196,14 +246,20 @@ fun AssetManagerDialog(
                             }
                         }
                     } else {
-                        LazyColumn(
+                        val listState = rememberLazyListState()
+                        Box(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(300.dp)
                         ) {
-                            items(assets) { asset ->
+                            LazyColumn(
+                                state = listState,
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                items(assets) { asset ->
                                 AssetItem(
                                     asset = asset,
+                                    repoPath = repoPath,
                                     onSelect = { onAssetSelected?.invoke(asset.fullName) },
                                     onDelete = {
                                         scope.launch {
@@ -226,6 +282,14 @@ fun AssetManagerDialog(
                                     }
                                 )
                             }
+                            }
+                            CustomVerticalScrollbar(
+                                scrollState = listState,
+                                modifier = Modifier
+                                    .align(Alignment.CenterEnd)
+                                    .fillMaxHeight()
+                                    .padding(end = 2.dp)
+                            )
                         }
                     }
                 }
@@ -324,13 +388,30 @@ private fun getFilenameFromUri(context: Context, uri: Uri): String? {
     }
 }
 
+private val imageExtensions = listOf("png", "jpg", "jpeg", "gif", "webp", "bmp", "svg")
+
+private fun isImageFile(filename: String): Boolean {
+    val extension = filename.substringAfterLast('.', "").lowercase()
+    return extension in imageExtensions
+}
+
 @Composable
 private fun AssetItem(
     asset: NodeFs,
+    repoPath: String,
     onSelect: () -> Unit,
     onDelete: () -> Unit,
     onExport: () -> Unit
 ) {
+    // Get working directory (handle .git suffix)
+    val workingDir = if (repoPath.endsWith(".git")) {
+        File(repoPath).parent ?: repoPath
+    } else {
+        repoPath
+    }
+    val assetFilePath = "$workingDir/${asset.fullName}"
+    val isImage = isImageFile(asset.fullName)
+    
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -347,9 +428,7 @@ private fun AssetItem(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = asset.fullName,
-                    style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    style = MaterialTheme.typography.bodyMedium
                 )
                 if (asset is NodeFs.File) {
                     Text(
@@ -358,6 +437,19 @@ private fun AssetItem(
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                 }
+            }
+            
+            // Image preview for image files
+            if (isImage) {
+                AsyncImage(
+                    model = File(assetFilePath),
+                    contentDescription = asset.fullName,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(RoundedCornerShape(4.dp)),
+                    contentScale = ContentScale.Crop
+                )
+                Spacer(modifier = Modifier.width(8.dp))
             }
 
             Row(
