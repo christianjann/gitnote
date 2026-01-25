@@ -355,7 +355,7 @@ fun DrawerScreen(
                 .padding(paddingValues = paddingValues),
             state = listState,
             // Add bottom padding to prevent items from being hidden by FAB buttons
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 140.dp)
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 200.dp)
         ) {
 
             when (drawerMode) {
