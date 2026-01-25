@@ -5,6 +5,15 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added
+
+- Network Sync Settings:
+  - New "Offline mode" toggle - completely disables all network operations (sync, push, pull)
+  - New "Sync only on WiFi" option - prevents sync over mobile data
+  - Optional "Sync on specific WiFi only" - requires location permission to detect WiFi network name
+  - Users can select current network or manually enter a WiFi network name (SSID)
+  - Location permission is only requested when enabling specific WiFi feature (opt-in)
+
 ### Fixed
 
 - Due View: Notes are now properly sorted by due date when "Due view ignores all filters" is disabled

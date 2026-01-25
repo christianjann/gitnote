@@ -172,6 +172,26 @@
     <string name="background_git_operations_subtitle">Provádět git pull/push na pozadí během obnovení, aby se zabránilo blokování UI</string>
     <string name="background_git_delay_seconds">Zpoždění operací Git na pozadí (sekundy)</string>
     <string name="background_git_delay_seconds_subtitle">Zpoždění před provedením operací Git na pozadí pro sdružení více změn (0 = okamžitě)</string>
+    <string name="offline_mode">Offline režim</string>
+    <string name="offline_mode_subtitle">Zakázat všechny síťové operace (sync, push, pull)</string>
+    <string name="sync_skipped_offline_mode">Synchronizace přeskočena: offline režim je aktivní</string>
+    <string name="sync_only_on_wifi">Synchronizovat pouze přes WiFi</string>
+    <string name="sync_only_on_wifi_subtitle">Synchronizovat se vzdáleným repozitářem pouze při připojení k WiFi</string>
+    <string name="sync_on_specific_wifi">Synchronizovat pouze na konkrétní WiFi</string>
+    <string name="sync_on_specific_wifi_subtitle">Synchronizovat pouze při připojení ke konkrétní WiFi síti</string>
+    <string name="sync_wifi_ssid">Název WiFi sítě</string>
+    <string name="sync_wifi_ssid_subtitle">Vyberte WiFi síť pro synchronizaci</string>
+    <string name="sync_wifi_ssid_current">Aktuálně: %1$s</string>
+    <string name="sync_wifi_location_permission_title">Vyžadováno oprávnění k poloze</string>
+    <string name="sync_wifi_location_permission_message">Pro detekci, ke které WiFi síti jste připojeni, Android vyžaduje oprávnění k poloze. Toto se používá pouze pro identifikaci WiFi sítě, ne pro sledování vaší polohy.</string>
+    <string name="sync_wifi_location_denied">Oprávnění k poloze zamítnuto. Bez tohoto oprávnění nelze detekovat konkrétní WiFi sítě.</string>
+    <string name="sync_wifi_select_network">Vybrat WiFi síť</string>
+    <string name="sync_wifi_use_current">Použít aktuální síť</string>
+    <string name="sync_wifi_enter_manually">Zadat ručně</string>
+    <string name="sync_wifi_no_current_ssid">Nelze detekovat aktuální WiFi. Ujistěte se, že jsou povoleny služby určování polohy.</string>
+    <string name="sync_wifi_not_connected">Nepřipojeno k WiFi</string>
+    <string name="sync_skipped_not_on_wifi">Synchronizace přeskočena: nepřipojeno k WiFi</string>
+    <string name="sync_skipped_wrong_wifi">Synchronizace přeskočena: nepřipojeno k požadované WiFi síti</string>
     <string name="include_subfolders">Zahrnout podsložky</string>
     <string name="include_subfolders_subtitle">Zobrazit poznámky z podsložek při procházení složky</string>
     <string name="tag_display_mode">Režim zobrazení štítků</string>

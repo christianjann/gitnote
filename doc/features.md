@@ -43,6 +43,49 @@ GitTasks features a sophisticated background synchronization system that prevent
 - **Background Git Operations**: Enable/disable background sync (enabled by default)
 - **Background Git Delay**: Set delay in seconds (0 = immediate, default = 5)
 
+### Network Sync Settings
+
+GitTasks provides flexible network synchronization controls to manage when and how your notes sync with remote Git repositories.
+
+#### Offline Mode
+
+Completely disable all network operations when you want to work without any synchronization.
+
+- **Setting Location**: Settings > Git > Offline mode
+- **Effect**: Disables all push, pull, and sync operations
+- **Use Case**: Working in airplane mode, conserving data, or when you want to batch changes before syncing
+
+#### WiFi-Only Sync
+
+Restrict synchronization to WiFi connections to conserve mobile data.
+
+- **Setting Location**: Settings > Git > Sync only on WiFi
+- **Effect**: Sync operations are skipped when not connected to WiFi
+- **Notification**: Status bar shows when sync is skipped due to network conditions
+
+#### Specific WiFi Network Sync
+
+For additional control, you can restrict synchronization to a specific WiFi network (e.g., your home or office network).
+
+- **Setting Location**: Settings > Git > Sync on specific WiFi
+- **Requires**: Location permission (Android requirement to read WiFi network name)
+- **Permission Handling**: Location permission is only requested when you enable this feature
+- **Privacy**: Location data is only used locally to identify the WiFi network name
+
+#### Configuration Steps
+
+1. **Enable WiFi-Only**: Go to Settings > Git > Enable "Sync only on WiFi"
+2. **Optional - Specific Network**: Enable "Sync on specific WiFi"
+3. **Grant Permission**: When prompted, grant location permission (required by Android to read WiFi SSID)
+4. **Select Network**: Choose to use your current network or enter the name manually
+
+#### Technical Notes
+
+- WiFi detection uses Android's ConnectivityManager
+- SSID detection requires ACCESS_FINE_LOCATION permission (Android 8.0+ requirement)
+- Location permission is opt-in and only requested when specific WiFi feature is enabled
+- Sync status messages indicate when operations are skipped due to network conditions
+
 ### Automatic Merge Conflict Resolution
 
 GitTasks features intelligent automatic merge conflict resolution that handles conflicts seamlessly during synchronization, eliminating the need for manual conflict resolution.

@@ -1,5 +1,6 @@
 package io.github.christianjann.gittasks.ui.screen.settings
 
+import android.Manifest
 import android.content.ClipData
 import android.content.ClipDescription
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -13,13 +14,17 @@ import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.FolderZip
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -28,7 +33,9 @@ import dev.olshevski.navigation.reimagined.NavController
 import dev.olshevski.navigation.reimagined.navigate
 import io.github.christianjann.gittasks.BuildConfig
 import io.github.christianjann.gittasks.R
+import io.github.christianjann.gittasks.helper.NetworkHelper
 import io.github.christianjann.gittasks.ui.component.AppPage
+import io.github.christianjann.gittasks.ui.component.BaseDialog
 import io.github.christianjann.gittasks.ui.component.DefaultSettingsRow
 import io.github.christianjann.gittasks.ui.component.MultipleChoiceSettings
 import io.github.christianjann.gittasks.ui.component.PickFolderDialog
@@ -255,6 +262,189 @@ fun SettingsScreen(
                     }
                 }
             )
+
+            // Network sync settings
+            val context = LocalContext.current
+            val networkHelper = remember { NetworkHelper(context) }
+
+            // Offline mode toggle
+            val offlineMode by vm.prefs.offlineMode.getAsState()
+            ToggleableSettings(
+                title = stringResource(R.string.offline_mode),
+                subtitle = stringResource(R.string.offline_mode_subtitle),
+                checked = offlineMode,
+                onCheckedChange = {
+                    vm.update { vm.prefs.offlineMode.update(it) }
+                }
+            )
+
+            // WiFi-only sync (only show when not in offline mode)
+            if (!offlineMode) {
+                val syncOnlyOnWifi by vm.prefs.syncOnlyOnWifi.getAsState()
+                ToggleableSettings(
+                    title = stringResource(R.string.sync_only_on_wifi),
+                    subtitle = stringResource(R.string.sync_only_on_wifi_subtitle),
+                    icon = Icons.Default.Wifi,
+                    checked = syncOnlyOnWifi,
+                    onCheckedChange = {
+                        vm.update { vm.prefs.syncOnlyOnWifi.update(it) }
+                        // If disabling WiFi-only, also disable specific WiFi
+                        if (!it) {
+                            vm.update { vm.prefs.syncOnSpecificWifi.update(false) }
+                        }
+                    }
+                )
+
+                val syncOnSpecificWifi by vm.prefs.syncOnSpecificWifi.getAsState()
+                val syncWifiSsid by vm.prefs.syncWifiSsid.getAsState()
+                val showLocationPermissionDialog = rememberSaveable { mutableStateOf(false) }
+                val showSsidSelectionDialog = rememberSaveable { mutableStateOf(false) }
+                
+                // Permission launcher for location (needed for SSID detection)
+                val locationPermissionLauncher = rememberLauncherForActivityResult(
+                    ActivityResultContracts.RequestPermission()
+                ) { granted ->
+                    if (granted) {
+                        vm.update { vm.prefs.syncOnSpecificWifi.update(true) }
+                        showSsidSelectionDialog.value = true
+                    } else {
+                        vm.uiHelper.makeToast(vm.uiHelper.getString(R.string.sync_wifi_location_denied))
+                    }
+                }
+
+                // Only show specific WiFi option when WiFi-only is enabled
+                if (syncOnlyOnWifi) {
+                    ToggleableSettings(
+                        title = stringResource(R.string.sync_on_specific_wifi),
+                        subtitle = if (syncOnSpecificWifi && syncWifiSsid.isNotEmpty()) {
+                            stringResource(R.string.sync_wifi_ssid_current, syncWifiSsid)
+                        } else {
+                            stringResource(R.string.sync_on_specific_wifi_subtitle)
+                        },
+                        checked = syncOnSpecificWifi,
+                        onCheckedChange = { enabled ->
+                            if (enabled) {
+                                // Check if we have location permission
+                                if (networkHelper.hasLocationPermission()) {
+                                    vm.update { vm.prefs.syncOnSpecificWifi.update(true) }
+                                    showSsidSelectionDialog.value = true
+                                } else {
+                                    // Show explanation dialog first
+                                    showLocationPermissionDialog.value = true
+                                }
+                            } else {
+                                vm.update { vm.prefs.syncOnSpecificWifi.update(false) }
+                            }
+                        }
+                    )
+
+                    // Show SSID selection when specific WiFi is enabled
+                    if (syncOnSpecificWifi) {
+                        DefaultSettingsRow(
+                            title = stringResource(R.string.sync_wifi_ssid),
+                            subTitle = syncWifiSsid.ifEmpty { stringResource(R.string.none) },
+                            onClick = {
+                                if (networkHelper.hasLocationPermission()) {
+                                    showSsidSelectionDialog.value = true
+                                } else {
+                                    showLocationPermissionDialog.value = true
+                                }
+                            }
+                        )
+                    }
+                }
+
+                // Location permission explanation dialog
+                if (showLocationPermissionDialog.value) {
+                    BaseDialog(
+                        expanded = showLocationPermissionDialog,
+                    ) {
+                        Text(
+                            text = stringResource(R.string.sync_wifi_location_permission_title),
+                            style = androidx.compose.material3.MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = stringResource(R.string.sync_wifi_location_permission_message),
+                            style = androidx.compose.material3.MaterialTheme.typography.bodyMedium
+                        )
+                        Button(
+                            onClick = {
+                                showLocationPermissionDialog.value = false
+                                locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                            }
+                        ) {
+                            Text(stringResource(R.string.confirm))
+                        }
+                        Button(
+                            onClick = { showLocationPermissionDialog.value = false }
+                        ) {
+                            Text(stringResource(R.string.cancel))
+                        }
+                    }
+                }
+
+                // SSID selection dialog
+                if (showSsidSelectionDialog.value) {
+                    BaseDialog(
+                        expanded = showSsidSelectionDialog,
+                    ) {
+                        Text(
+                            text = stringResource(R.string.sync_wifi_select_network),
+                            style = androidx.compose.material3.MaterialTheme.typography.titleMedium
+                        )
+                        
+                        // Use current WiFi button
+                        val currentSsid = remember { networkHelper.getCurrentWifiSsid() }
+                        if (currentSsid != null) {
+                            Button(
+                                onClick = {
+                                    vm.update { vm.prefs.syncWifiSsid.update(currentSsid) }
+                                    showSsidSelectionDialog.value = false
+                                }
+                            ) {
+                                Text("${stringResource(R.string.sync_wifi_use_current)}: $currentSsid")
+                            }
+                        } else if (networkHelper.isOnWifi()) {
+                            Text(
+                                text = stringResource(R.string.sync_wifi_no_current_ssid),
+                                style = androidx.compose.material3.MaterialTheme.typography.bodySmall
+                            )
+                        } else {
+                            Text(
+                                text = stringResource(R.string.sync_wifi_not_connected),
+                                style = androidx.compose.material3.MaterialTheme.typography.bodySmall
+                            )
+                        }
+
+                        // Manual entry option
+                        val manualSsidExpanded = rememberSaveable { mutableStateOf(false) }
+                        Button(
+                            onClick = { manualSsidExpanded.value = true }
+                        ) {
+                            Text(stringResource(R.string.sync_wifi_enter_manually))
+                        }
+
+                        if (manualSsidExpanded.value) {
+                            io.github.christianjann.gittasks.ui.component.GetStringDialog(
+                                expanded = manualSsidExpanded,
+                                label = stringResource(R.string.sync_wifi_ssid),
+                                actionText = stringResource(R.string.save),
+                                defaultString = syncWifiSsid,
+                                onValidation = { ssid ->
+                                    vm.update { vm.prefs.syncWifiSsid.update(ssid.trim()) }
+                                    showSsidSelectionDialog.value = false
+                                }
+                            )
+                        }
+
+                        Button(
+                            onClick = { showSsidSelectionDialog.value = false }
+                        ) {
+                            Text(stringResource(R.string.cancel))
+                        }
+                    }
+                }
+            } // end of if (!offlineMode)
 
 
             val defaultPathForNewNote by vm.prefs.defaultPathForNewNote.getAsState()

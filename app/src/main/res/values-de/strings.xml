@@ -70,6 +70,26 @@
     <string name="background_git_operations_subtitle">GIT-Pull/Push im Hintergrund während der Aktualisierung ausführen, um die Benutzeroberfläche nicht zu blockieren</string>
     <string name="background_git_delay_seconds">Hintergrund-GIT-Verzögerung (Sekunden)</string>
     <string name="background_git_delay_seconds_subtitle">Verzögerung vor der Ausführung von Hintergrund-GIT-Operationen, um mehrere Änderungen zu bündeln (0 = sofort)</string>
+    <string name="offline_mode">Offline-Modus</string>
+    <string name="offline_mode_subtitle">Alle Netzwerkoperationen deaktivieren (Sync, Push, Pull)</string>
+    <string name="sync_skipped_offline_mode">Sync übersprungen: Offline-Modus ist aktiviert</string>
+    <string name="sync_only_on_wifi">Nur über WLAN synchronisieren</string>
+    <string name="sync_only_on_wifi_subtitle">Nur mit dem Remote-Repository synchronisieren, wenn WLAN verbunden ist</string>
+    <string name="sync_on_specific_wifi">Nur über bestimmtes WLAN synchronisieren</string>
+    <string name="sync_on_specific_wifi_subtitle">Nur synchronisieren, wenn mit einem bestimmten WLAN-Netzwerk verbunden</string>
+    <string name="sync_wifi_ssid">WLAN-Netzwerkname</string>
+    <string name="sync_wifi_ssid_subtitle">Wählen Sie das WLAN-Netzwerk für die Synchronisation</string>
+    <string name="sync_wifi_ssid_current">Aktuell: %1$s</string>
+    <string name="sync_wifi_location_permission_title">Standortberechtigung erforderlich</string>
+    <string name="sync_wifi_location_permission_message">Um zu erkennen, mit welchem WLAN-Netzwerk Sie verbunden sind, benötigt Android die Standortberechtigung. Diese wird nur zur WLAN-Netzwerkerkennung verwendet, nicht zur Standortverfolgung.</string>
+    <string name="sync_wifi_location_denied">Standortberechtigung verweigert. Bestimmte WLAN-Netzwerke können ohne diese Berechtigung nicht erkannt werden.</string>
+    <string name="sync_wifi_select_network">WLAN-Netzwerk auswählen</string>
+    <string name="sync_wifi_use_current">Aktuelles Netzwerk verwenden</string>
+    <string name="sync_wifi_enter_manually">Manuell eingeben</string>
+    <string name="sync_wifi_no_current_ssid">Aktuelles WLAN konnte nicht erkannt werden. Stellen Sie sicher, dass die Standortdienste aktiviert sind.</string>
+    <string name="sync_wifi_not_connected">Nicht mit WLAN verbunden</string>
+    <string name="sync_skipped_not_on_wifi">Sync übersprungen: Nicht mit WLAN verbunden</string>
+    <string name="sync_skipped_wrong_wifi">Sync übersprungen: Nicht mit dem erforderlichen WLAN-Netzwerk verbunden</string>
     <string name="folder_filters">Ordnerfilter</string>
     <string name="folder_filters_subtitle">Regex definieren, um Ordner des Repositorys zu filtern</string>
     <string name="edit">Bearbeiten</string>

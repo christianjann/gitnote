@@ -7,6 +7,7 @@ import io.github.christianjann.gittasks.data.AppPreferences
 import io.github.christianjann.gittasks.data.room.Note
 import io.github.christianjann.gittasks.data.room.NoteFolder
 import io.github.christianjann.gittasks.data.NoteRepository
+import io.github.christianjann.gittasks.helper.NetworkHelper
 import io.github.christianjann.gittasks.ui.model.Cred
 import io.github.christianjann.gittasks.ui.model.GitAuthor
 import kotlinx.coroutines.CoroutineScope
@@ -60,6 +61,7 @@ class StorageManager {
     private val uiHelper = MyApp.appModule.uiHelper
 
     private val gitManager: GitManager = MyApp.appModule.gitManager
+    private val networkHelper: NetworkHelper = NetworkHelper(MyApp.appModule.context)
 
     private val locker = Mutex()
     private var executingGitJob: kotlinx.coroutines.Job? = null
@@ -91,6 +93,38 @@ class StorageManager {
         _syncState.emit(state)
     }
 
+    /**
+     * Check if network sync is allowed based on offline mode and WiFi settings.
+     * Returns a pair of (allowed, reason) where reason is a string resource ID if not allowed.
+     */
+    private fun isSyncAllowed(): Pair<Boolean, Int?> {
+        // Check offline mode first
+        if (prefs.offlineMode.getBlocking()) {
+            return Pair(false, R.string.sync_skipped_offline_mode)
+        }
+
+        val syncOnlyOnWifi = prefs.syncOnlyOnWifi.getBlocking()
+        val syncOnSpecificWifi = prefs.syncOnSpecificWifi.getBlocking()
+        val syncWifiSsid = prefs.syncWifiSsid.getBlocking()
+
+        if (!syncOnlyOnWifi) {
+            return Pair(true, null)
+        }
+
+        if (!networkHelper.isOnWifi()) {
+            return Pair(false, R.string.sync_skipped_not_on_wifi)
+        }
+
+        if (syncOnSpecificWifi && syncWifiSsid.isNotEmpty()) {
+            val currentSsid = networkHelper.getCurrentWifiSsid()
+            if (currentSsid != syncWifiSsid) {
+                return Pair(false, R.string.sync_skipped_wrong_wifi)
+            }
+        }
+
+        return Pair(true, null)
+    }
+
 
     suspend fun updateDatabaseAndRepo(includeGitOperations: Boolean = true): Result<Unit> = locker.withLock {
         Log.d(TAG, "updateDatabaseAndRepo")
@@ -108,7 +142,20 @@ class StorageManager {
             uiHelper.makeToast(it.message)
         }
 
-        if (includeGitOperations && remoteUrl.isNotEmpty()) {
+        // Check WiFi conditions before syncing
+        val (syncAllowed, syncBlockedReason) = isSyncAllowed()
+        val shouldSync = includeGitOperations && remoteUrl.isNotEmpty() && syncAllowed
+        
+        if (includeGitOperations && remoteUrl.isNotEmpty() && !syncAllowed) {
+            Log.d(TAG, "Sync blocked by WiFi settings")
+            syncBlockedReason?.let {
+                if (prefs.debugFeaturesEnabled.getBlocking()) {
+                    uiHelper.makeToast(uiHelper.getString(it))
+                }
+            }
+        }
+
+        if (shouldSync) {
             _syncState.emit(SyncState.Pull)
             gitManager.pull(cred, author).onFailure {
                 syncFailed = true
@@ -119,7 +166,7 @@ class StorageManager {
             }
         }
 
-        if (includeGitOperations && remoteUrl.isNotEmpty()) {
+        if (shouldSync) {
             _syncState.emit(SyncState.Push)
             // todo: maybe async this call
             gitManager.push(cred).onFailure {
@@ -292,6 +339,18 @@ class StorageManager {
     private suspend fun performQueuedPull(cred: Cred?, author: GitAuthor) {
         val remoteUrl = prefs.remoteUrl.get()
         if (remoteUrl.isEmpty()) return
+
+        // Check WiFi conditions before syncing
+        val (syncAllowed, syncBlockedReason) = isSyncAllowed()
+        if (!syncAllowed) {
+            Log.d(TAG, "performQueuedPull: Sync blocked by WiFi settings")
+            syncBlockedReason?.let {
+                if (prefs.debugFeaturesEnabled.getBlocking()) {
+                    uiHelper.makeToast(uiHelper.getString(it))
+                }
+            }
+            return
+        }
 
         try {
             Log.d(TAG, "performQueuedPull: starting queued pull")

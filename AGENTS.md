@@ -41,6 +41,7 @@ doc/                   # Design docs and feature documentation
 2. Update `CHANGELOG.md` under `[Unreleased]` section
 3. Update `doc/features.md` if adding user-facing features
 4. Run `just build` to verify compilation
+5. When adding new strings to [strings.xml](app/src/main/res/values/strings.xml) also update the translations
 
 **Frontmatter format** (see [doc/design/markdown_header.md](doc/design/markdown_header.md)):
 

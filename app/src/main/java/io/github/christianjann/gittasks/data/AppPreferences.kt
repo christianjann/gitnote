@@ -166,6 +166,12 @@ class AppPreferences(
     val backgroundGitOperations = booleanPreference("backgroundGitOperations", true)
     val backgroundGitDelaySeconds = intPreference("backgroundGitDelaySeconds", 5)
 
+    // Network sync settings
+    val offlineMode = booleanPreference("offlineMode", false)
+    val syncOnlyOnWifi = booleanPreference("syncOnlyOnWifi", false)
+    val syncOnSpecificWifi = booleanPreference("syncOnSpecificWifi", false)
+    val syncWifiSsid = stringPreference("syncWifiSsid", "")
+
     val folderFilters = setPreference(
         "folderFilters", setOf(
             ".*"

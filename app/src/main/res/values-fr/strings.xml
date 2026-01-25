@@ -183,6 +183,26 @@
     <string name="background_git_operations_subtitle">Effectuer git pull/push en arrière-plan pendant l\'actualisation pour éviter de bloquer l\'interface</string>
     <string name="background_git_delay_seconds">Délai opérations Git arrière-plan (secondes)</string>
     <string name="background_git_delay_seconds_subtitle">Délai avant d\'effectuer les opérations Git en arrière-plan pour regrouper plusieurs modifications (0 = immédiat)</string>
+    <string name="offline_mode">Mode hors ligne</string>
+    <string name="offline_mode_subtitle">Désactiver toutes les opérations réseau (sync, push, pull)</string>
+    <string name="sync_skipped_offline_mode">Sync ignorée : mode hors ligne activé</string>
+    <string name="sync_only_on_wifi">Synchroniser uniquement en WiFi</string>
+    <string name="sync_only_on_wifi_subtitle">Synchroniser avec le dépôt distant uniquement lorsque connecté au WiFi</string>
+    <string name="sync_on_specific_wifi">Synchroniser sur un WiFi spécifique uniquement</string>
+    <string name="sync_on_specific_wifi_subtitle">Synchroniser uniquement lorsque connecté à un réseau WiFi spécifique</string>
+    <string name="sync_wifi_ssid">Nom du réseau WiFi</string>
+    <string name="sync_wifi_ssid_subtitle">Sélectionnez le réseau WiFi pour la synchronisation</string>
+    <string name="sync_wifi_ssid_current">Actuellement : %1$s</string>
+    <string name="sync_wifi_location_permission_title">Autorisation de localisation requise</string>
+    <string name="sync_wifi_location_permission_message">Pour détecter à quel réseau WiFi vous êtes connecté, Android nécessite l\'autorisation de localisation. Ceci est utilisé uniquement pour l\'identification du réseau WiFi, pas pour suivre votre position.</string>
+    <string name="sync_wifi_location_denied">Autorisation de localisation refusée. Impossible de détecter les réseaux WiFi spécifiques sans cette autorisation.</string>
+    <string name="sync_wifi_select_network">Sélectionner le réseau WiFi</string>
+    <string name="sync_wifi_use_current">Utiliser le réseau actuel</string>
+    <string name="sync_wifi_enter_manually">Saisir manuellement</string>
+    <string name="sync_wifi_no_current_ssid">Impossible de détecter le WiFi actuel. Assurez-vous que les services de localisation sont activés.</string>
+    <string name="sync_wifi_not_connected">Non connecté au WiFi</string>
+    <string name="sync_skipped_not_on_wifi">Sync ignorée : non connecté au WiFi</string>
+    <string name="sync_skipped_wrong_wifi">Sync ignorée : non connecté au réseau WiFi requis</string>
     <string name="include_subfolders">Inclure les sous-dossiers</string>
     <string name="include_subfolders_subtitle">Afficher les notes des sous-dossiers lors de la navigation dans un dossier</string>
     <string name="tag_display_mode">Mode d\'affichage des tags</string>

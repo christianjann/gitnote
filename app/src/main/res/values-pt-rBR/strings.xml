@@ -159,6 +159,26 @@
     <string name="background_git_operations_subtitle">Executar git pull/push em segundo plano durante a atualização para evitar bloquear a interface</string>
     <string name="background_git_delay_seconds">Atraso operações Git segundo plano (segundos)</string>
     <string name="background_git_delay_seconds_subtitle">Atraso antes de executar operações Git em segundo plano para agrupar múltiplas alterações (0 = imediato)</string>
+    <string name="offline_mode">Modo offline</string>
+    <string name="offline_mode_subtitle">Desativar todas as operações de rede (sync, push, pull)</string>
+    <string name="sync_skipped_offline_mode">Sincronização ignorada: modo offline está ativado</string>
+    <string name="sync_only_on_wifi">Sincronizar apenas no WiFi</string>
+    <string name="sync_only_on_wifi_subtitle">Sincronizar com o repositório remoto apenas quando conectado ao WiFi</string>
+    <string name="sync_on_specific_wifi">Sincronizar apenas em WiFi específico</string>
+    <string name="sync_on_specific_wifi_subtitle">Sincronizar apenas quando conectado a uma rede WiFi específica</string>
+    <string name="sync_wifi_ssid">Nome da rede WiFi</string>
+    <string name="sync_wifi_ssid_subtitle">Selecione a rede WiFi para sincronização</string>
+    <string name="sync_wifi_ssid_current">Atualmente: %1$s</string>
+    <string name="sync_wifi_location_permission_title">Permissão de localização necessária</string>
+    <string name="sync_wifi_location_permission_message">Para detectar a qual rede WiFi você está conectado, o Android requer permissão de localização. Isso é usado apenas para identificação da rede WiFi, não para rastrear sua localização.</string>
+    <string name="sync_wifi_location_denied">Permissão de localização negada. Não é possível detectar redes WiFi específicas sem esta permissão.</string>
+    <string name="sync_wifi_select_network">Selecionar rede WiFi</string>
+    <string name="sync_wifi_use_current">Usar rede atual</string>
+    <string name="sync_wifi_enter_manually">Inserir manualmente</string>
+    <string name="sync_wifi_no_current_ssid">Não foi possível detectar o WiFi atual. Certifique-se de que os serviços de localização estão ativados.</string>
+    <string name="sync_wifi_not_connected">Não conectado ao WiFi</string>
+    <string name="sync_skipped_not_on_wifi">Sincronização ignorada: não conectado ao WiFi</string>
+    <string name="sync_skipped_wrong_wifi">Sincronização ignorada: não conectado à rede WiFi necessária</string>
     <string name="include_subfolders">Incluir subpastas</string>
     <string name="include_subfolders_subtitle">Mostrar notas de subpastas ao navegar em uma pasta</string>
     <string name="tag_display_mode">Modo de exibição de tags</string>

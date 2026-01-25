@@ -72,6 +72,26 @@
     <string name="background_git_operations_subtitle">Perform git pull/push in background during refresh to avoid blocking UI</string>
     <string name="background_git_delay_seconds">Background git delay (seconds)</string>
     <string name="background_git_delay_seconds_subtitle">Delay before performing background git operations to batch multiple changes (0 = immediate)</string>
+    <string name="offline_mode">Offline mode</string>
+    <string name="offline_mode_subtitle">Disable all network operations (sync, push, pull)</string>
+    <string name="sync_skipped_offline_mode">Sync skipped: offline mode is enabled</string>
+    <string name="sync_only_on_wifi">Sync only on WiFi</string>
+    <string name="sync_only_on_wifi_subtitle">Only sync with remote repository when connected to WiFi</string>
+    <string name="sync_on_specific_wifi">Sync on specific WiFi only</string>
+    <string name="sync_on_specific_wifi_subtitle">Only sync when connected to a specific WiFi network</string>
+    <string name="sync_wifi_ssid">WiFi network name</string>
+    <string name="sync_wifi_ssid_subtitle">Select the WiFi network to sync on</string>
+    <string name="sync_wifi_ssid_current">Currently: %1$s</string>
+    <string name="sync_wifi_location_permission_title">Location permission required</string>
+    <string name="sync_wifi_location_permission_message">To detect which WiFi network you\'re connected to, Android requires location permission. This is only used for WiFi network identification, not for tracking your location.</string>
+    <string name="sync_wifi_location_denied">Location permission denied. Cannot detect specific WiFi networks without this permission.</string>
+    <string name="sync_wifi_select_network">Select WiFi network</string>
+    <string name="sync_wifi_use_current">Use current network</string>
+    <string name="sync_wifi_enter_manually">Enter manually</string>
+    <string name="sync_wifi_no_current_ssid">Could not detect current WiFi. Make sure location services are enabled.</string>
+    <string name="sync_wifi_not_connected">Not connected to WiFi</string>
+    <string name="sync_skipped_not_on_wifi">Sync skipped: not connected to WiFi</string>
+    <string name="sync_skipped_wrong_wifi">Sync skipped: not connected to required WiFi network</string>
     <string name="folder_filters">Folder filters</string>
     <string name="folder_filters_subtitle">Define regex to filter folders of the repository</string>
     <string name="edit">Edit</string>

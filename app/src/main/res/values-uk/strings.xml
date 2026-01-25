@@ -140,6 +140,26 @@
     <string name="background_git_operations_subtitle">Виконувати git pull/push у фоні під час оновлення, щоб уникнути блокування інтерфейсу</string>
     <string name="background_git_delay_seconds">Затримка фонових операцій Git (секунди)</string>
     <string name="background_git_delay_seconds_subtitle">Затримка перед виконанням фонових операцій Git для групування декількох змін (0 = негайно)</string>
+    <string name="offline_mode">Автономний режим</string>
+    <string name="offline_mode_subtitle">Вимкнути всі мережеві операції (синхронізація, push, pull)</string>
+    <string name="sync_skipped_offline_mode">Синхронізацію пропущено: увімкнено автономний режим</string>
+    <string name="sync_only_on_wifi">Синхронізувати лише через WiFi</string>
+    <string name="sync_only_on_wifi_subtitle">Синхронізувати з віддаленим репозиторієм лише при підключенні до WiFi</string>
+    <string name="sync_on_specific_wifi">Синхронізувати лише в певній мережі WiFi</string>
+    <string name="sync_on_specific_wifi_subtitle">Синхронізувати лише при підключенні до певної мережі WiFi</string>
+    <string name="sync_wifi_ssid">Назва мережі WiFi</string>
+    <string name="sync_wifi_ssid_subtitle">Виберіть мережу WiFi для синхронізації</string>
+    <string name="sync_wifi_ssid_current">Поточна: %1$s</string>
+    <string name="sync_wifi_location_permission_title">Потрібен дозвіл на місцезнаходження</string>
+    <string name="sync_wifi_location_permission_message">Щоб визначити, до якої мережі WiFi ви підключені, Android потребує дозволу на місцезнаходження. Це використовується лише для ідентифікації мережі WiFi, а не для відстеження вашого місцезнаходження.</string>
+    <string name="sync_wifi_location_denied">Дозвіл на місцезнаходження відхилено. Без цього дозволу неможливо визначити конкретні мережі WiFi.</string>
+    <string name="sync_wifi_select_network">Вибрати мережу WiFi</string>
+    <string name="sync_wifi_use_current">Використати поточну мережу</string>
+    <string name="sync_wifi_enter_manually">Ввести вручну</string>
+    <string name="sync_wifi_no_current_ssid">Не вдалося визначити поточну мережу WiFi. Переконайтеся, що служби визначення місцезнаходження увімкнені.</string>
+    <string name="sync_wifi_not_connected">Не підключено до WiFi</string>
+    <string name="sync_skipped_not_on_wifi">Синхронізацію пропущено: немає підключення до WiFi</string>
+    <string name="sync_skipped_wrong_wifi">Синхронізацію пропущено: не підключено до потрібної мережі WiFi</string>
     <string name="include_subfolders">Включати підпапки</string>
     <string name="include_subfolders_subtitle">Показувати нотатки з підпапок під час перегляду папки</string>
     <string name="tag_display_mode">Режим відображення тегів</string>
