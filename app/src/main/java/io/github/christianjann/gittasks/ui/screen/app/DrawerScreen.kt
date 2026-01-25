@@ -178,32 +178,6 @@ fun RowNFoldersNavigation(
                     )
                 }
             } else {
-                // Create folder button - only shown in Folders mode
-                if (drawerMode == DrawerMode.Folders) {
-                    val showCreateNewFolder = rememberSaveable {
-                        mutableStateOf(false)
-                    }
-
-                    IconButton(onClick = {
-                        showCreateNewFolder.value = true
-                    }) {
-                        SimpleIcon(
-                            imageVector = Icons.Filled.CreateNewFolder
-                        )
-                    }
-
-                    GetStringDialog(
-                        expanded = showCreateNewFolder,
-                        label = stringResource(R.string.new_folder_label),
-                        actionText = stringResource(R.string.create_new_folder),
-                        unExpandedOnValidation = false
-                    ) {
-                        if (createNoteFolder(currentPath, it)) {
-                            showCreateNewFolder.value = false
-                        }
-                    }
-                }
-
                 // Mode cycle button - cycles through Folders -> Tags -> Favorites -> Folders
                 IconButton(onClick = onCycleMode) {
                     SimpleIcon(
@@ -313,41 +287,67 @@ fun DrawerScreen(
             )
         },
         floatingActionButton = {
+            // FAB buttons for Folders mode
+            if (drawerMode == DrawerMode.Folders) {
+                val showCreateNewFolder = rememberSaveable {
+                    mutableStateOf(false)
+                }
 
-            // bug: https://issuetracker.google.com/issues/224005027
-            //AnimatedVisibility(visible = currentNoteFolderRelativePath.isNotEmpty()) {
-            if (currentNoteFolderRelativePath.isNotEmpty() && drawerMode == DrawerMode.Folders) {
+                GetStringDialog(
+                    expanded = showCreateNewFolder,
+                    label = stringResource(R.string.new_folder_label),
+                    actionText = stringResource(R.string.create_new_folder),
+                    unExpandedOnValidation = false
+                ) {
+                    if (createNoteFolder(currentNoteFolderRelativePath, it)) {
+                        showCreateNewFolder.value = false
+                    }
+                }
+
                 Column(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Up button - navigate to parent folder
+                    // Create new folder button
                     FloatingActionButton(
-                        modifier = Modifier,
                         containerColor = MaterialTheme.colorScheme.secondary,
                         shape = RoundedCornerShape(20.dp),
                         onClick = {
-                            openFolder(getParentPath(currentNoteFolderRelativePath))
+                            showCreateNewFolder.value = true
                         }
                     ) {
                         SimpleIcon(
-                            imageVector = Icons.Filled.ArrowUpward,
+                            imageVector = Icons.Filled.CreateNewFolder,
                             tint = MaterialTheme.colorScheme.onSecondary
                         )
                     }
-                    // Enter/Accept button - select current folder and close drawer
-                    FloatingActionButton(
-                        modifier = Modifier,
-                        containerColor = MaterialTheme.colorScheme.secondary,
-                        shape = RoundedCornerShape(20.dp),
-                        onClick = {
-                            openFolder(currentNoteFolderRelativePath)
-                            scope.launch { drawerState.close() }
+                    // Up button - navigate to parent folder (only when in a subfolder)
+                    if (currentNoteFolderRelativePath.isNotEmpty()) {
+                        FloatingActionButton(
+                            containerColor = MaterialTheme.colorScheme.secondary,
+                            shape = RoundedCornerShape(20.dp),
+                            onClick = {
+                                openFolder(getParentPath(currentNoteFolderRelativePath))
+                            }
+                        ) {
+                            SimpleIcon(
+                                imageVector = Icons.Filled.ArrowUpward,
+                                tint = MaterialTheme.colorScheme.onSecondary
+                            )
                         }
-                    ) {
-                        SimpleIcon(
-                            imageVector = Icons.AutoMirrored.Filled.KeyboardReturn,
-                            tint = MaterialTheme.colorScheme.onSecondary
-                        )
+                        // Enter/Accept button - select current folder and close drawer
+                        FloatingActionButton(
+                            containerColor = MaterialTheme.colorScheme.secondary,
+                            shape = RoundedCornerShape(20.dp),
+                            onClick = {
+                                openFolder(currentNoteFolderRelativePath)
+                                scope.launch { drawerState.close() }
+                            }
+                        ) {
+                            SimpleIcon(
+                                imageVector = Icons.AutoMirrored.Filled.KeyboardReturn,
+                                tint = MaterialTheme.colorScheme.onSecondary
+                            )
+                        }
                     }
                 }
             }

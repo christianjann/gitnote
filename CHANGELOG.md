@@ -5,6 +5,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [26.01.17]
+
 ### Added
 
 - Favorites Feature:
@@ -26,6 +28,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Changed
 
 - Editor: Moved Tags and Due Date buttons from top bar to FAB area for more space to view/edit note filename
+- Drawer: Moved Create New Folder button from top bar to FAB area for more space to view the current path
 
 ### Fixed
 
