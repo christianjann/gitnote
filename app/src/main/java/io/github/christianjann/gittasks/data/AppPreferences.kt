@@ -7,6 +7,7 @@ import io.github.christianjann.gittasks.provider.ProviderType
 import io.github.christianjann.gittasks.provider.UserInfo
 import io.github.christianjann.gittasks.ui.model.Cred
 import io.github.christianjann.gittasks.ui.model.CredType
+import io.github.christianjann.gittasks.ui.model.DrawerMode
 import io.github.christianjann.gittasks.ui.model.GitAuthor
 import io.github.christianjann.gittasks.ui.model.NoteMinWidth
 import io.github.christianjann.gittasks.ui.model.NoteViewType
@@ -151,6 +152,7 @@ class AppPreferences(
     val showFullTitleInListView = booleanPreference("showFullTitleInListView", true)
     val preferFrontmatterTitle = booleanPreference("preferFrontmatterTitle", true)
     val tagDisplayMode = enumPreference("tagDisplayMode", TagDisplayMode.Both)
+    val drawerMode = enumPreference("drawerMode", DrawerMode.Folders)
     val includeSubfolders = booleanPreference("includeSubfolders", false)
 
     val tagIgnoresFolders = booleanPreference("tagIgnoresFolders", true)

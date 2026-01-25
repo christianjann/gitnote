@@ -150,8 +150,9 @@ interface RepoDatabaseDao {
             }
             
             // Add tag filtering if tag is specified
+            // Match YAML frontmatter tags by requiring 'tags:' to appear before '- tagname'
             if (tag != null) {
-                conditions.add("content LIKE '%- ' || :tag || '%'")
+                conditions.add("content LIKE '%tags:%- ' || :tag || '%'")
             }
             
             if (conditions.isNotEmpty()) {
@@ -244,8 +245,9 @@ interface RepoDatabaseDao {
             conditions.add("NotesFts MATCH :query")
             
             // Add tag filtering if tag is specified
+            // Match YAML frontmatter tags by requiring 'tags:' to appear before '- tagname'
             if (tag != null) {
-                conditions.add("Notes.content LIKE '%- ' || :tag || '%'")
+                conditions.add("Notes.content LIKE '%tags:%- ' || :tag || '%'")
             }
             
             append(conditions.joinToString(" AND "))

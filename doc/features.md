@@ -248,6 +248,55 @@ The tag editor maintains perfect synchronization with the note's current state:
 - **Persistent State**: Reopening the tag editor shows the latest tags, not stale data.
 - **Cross-Session Consistency**: Tag state persists correctly across app sessions and screen rotations.
 
+### Favorites
+
+GitTasks allows you to mark folders and tags as favorites for quick access from the navigation drawer.
+
+#### How It Works
+
+- **Favorites Mode**: The navigation drawer has three modes: Folders, Tags, and Favorites. Cycle through them using the mode button.
+- **Adding Favorites**: Long-press on any folder or tag to add it to favorites via the context menu.
+- **Removing Favorites**: Long-press on a favorite folder or tag in Favorites mode to remove it.
+- **Persistence**: Favorites are stored in a `favorites.md` file at the repository root, so they sync with your Git repository.
+- **Visual Indicator**: Favorited items show a star icon in Folders and Tags modes.
+
+#### File Format
+
+The favorites.md file is a standard markdown note that you can view and edit directly:
+
+```markdown
+---
+title: Favorites
+---
+
+## Folders
+
+- /
+- projects/work
+
+## Tags
+
+- important
+- todo
+```
+
+#### Usage Tips
+
+- Use favorites for frequently accessed folders or commonly used tags.
+- The favorites file is a standard markdown note - you can open and edit it directly in the app or any text editor.
+- Favorites sync across devices when using Git synchronization.
+- The mode button cycles: Folders → Tags → Favorites → Folders.
+
+#### Example Workflow
+
+1. Open the navigation drawer.
+2. Long-press on a folder you frequently access.
+3. Select "Add to favorites" from the context menu.
+4. Click the mode button to cycle to Tags mode.
+5. Long-press on a tag you use often and add it to favorites.
+6. Click the mode button again to reach Favorites mode.
+7. See all your favorite folders and tags in one place for quick access.
+
 ### Advanced Filtering Options
 
 GitTasks provides configurable filtering options that give users more control over how tag filtering and search behave across folder boundaries.

@@ -248,4 +248,12 @@
     <string name="clear_due_date">Vymazat</string>
     <string name="select_time">Vybrat čas</string>
     <string name="back">Zpět</string>
-    <string name="due_date_label">Termín: %1$s</string></resources>
+    <string name="due_date_label">Termín: %1$s</string>
+    <string name="favorites">Oblíbené</string>
+    <string name="add_to_favorites">Přidat do oblíbených</string>
+    <string name="remove_from_favorites">Odebrat z oblíbených</string>
+    <string name="no_favorites">Zatím žádné oblíbené</string>
+    <string name="no_favorites_hint">Dlouhým stiskem složky nebo štítku ho přidáte do oblíbených</string>
+    <string name="favorite_folders">Oblíbené složky</string>
+    <string name="favorite_tags">Oblíbené štítky</string>
+</resources>

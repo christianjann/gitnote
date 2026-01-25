@@ -261,4 +261,11 @@
     <string name="select_time">Sélectionner l\'heure</string>
     <string name="back">Retour</string>
     <string name="due_date_label">Échéance: %1$s</string>
+    <string name="favorites">Favoris</string>
+    <string name="add_to_favorites">Ajouter aux favoris</string>
+    <string name="remove_from_favorites">Retirer des favoris</string>
+    <string name="no_favorites">Aucun favori pour l\'instant</string>
+    <string name="no_favorites_hint">Appuyez longuement sur un dossier ou une étiquette pour l\'ajouter aux favoris</string>
+    <string name="favorite_folders">Dossiers favoris</string>
+    <string name="favorite_tags">Étiquettes favorites</string>
 </resources>

@@ -28,10 +28,12 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CreateNewFolder
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.rounded.Tag
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -43,6 +45,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -65,11 +68,13 @@ import io.github.christianjann.gittasks.R
 import io.github.christianjann.gittasks.manager.SyncState
 import io.github.christianjann.gittasks.data.room.Note
 import io.github.christianjann.gittasks.data.room.NoteFolder
+import io.github.christianjann.gittasks.helper.Favorites
 import io.github.christianjann.gittasks.ui.component.CustomDropDown
 import io.github.christianjann.gittasks.ui.component.CustomDropDownModel
 import io.github.christianjann.gittasks.ui.component.GetStringDialog
 import io.github.christianjann.gittasks.ui.component.SimpleIcon
 import io.github.christianjann.gittasks.ui.component.SimpleSpacer
+import io.github.christianjann.gittasks.ui.model.DrawerMode
 import io.github.christianjann.gittasks.ui.theme.IconDefaultSize
 import io.github.christianjann.gittasks.ui.theme.LocalSpaces
 import io.github.christianjann.gittasks.utils.getParentPath
@@ -92,8 +97,8 @@ fun RowNFoldersNavigation(
     currentPath: String,
     openFolder: (String) -> Unit,
     createNoteFolder: (relativeParentPath: String, name: String) -> Boolean,
-    showTags: Boolean,
-    onToggleMode: () -> Unit,
+    drawerMode: DrawerMode,
+    onCycleMode: () -> Unit,
     noteBeingMoved: Note?,
     notesBeingMovedCount: Int = 0,
     onMoveNoteToFolder: (String) -> Unit,
@@ -173,13 +178,8 @@ fun RowNFoldersNavigation(
                     )
                 }
             } else {
-                IconButton(onClick = onToggleMode) {
-                    SimpleIcon(
-                        imageVector = if (showTags) Icons.Filled.Folder else Icons.Rounded.Tag
-                    )
-                }
-
-                if (!showTags) {
+                // Create folder button - only shown in Folders mode
+                if (drawerMode == DrawerMode.Folders) {
                     val showCreateNewFolder = rememberSaveable {
                         mutableStateOf(false)
                     }
@@ -203,6 +203,17 @@ fun RowNFoldersNavigation(
                         }
                     }
                 }
+
+                // Mode cycle button - cycles through Folders -> Tags -> Favorites -> Folders
+                IconButton(onClick = onCycleMode) {
+                    SimpleIcon(
+                        imageVector = when (drawerMode) {
+                            DrawerMode.Folders -> Icons.Filled.Folder
+                            DrawerMode.Tags -> Icons.Rounded.Tag
+                            DrawerMode.Favorites -> Icons.Filled.Star
+                        }
+                    )
+                }
             }
         }
     )
@@ -225,15 +236,23 @@ fun DrawerScreen(
     onMoveNoteToFolder: (String) -> Unit,
     onCancelMove: () -> Unit,
     syncState: SyncState,
-    scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(),) {
+    favorites: Favorites,
+    onLoadFavorites: () -> Unit,
+    onAddFolderToFavorites: (String) -> Unit,
+    onRemoveFolderFromFavorites: (String) -> Unit,
+    onAddTagToFavorites: (String) -> Unit,
+    onRemoveTagFromFavorites: (String) -> Unit,
+    drawerMode: DrawerMode,
+    onDrawerModeChange: (DrawerMode) -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(),
+) {
 
     val isMovingNotes = noteBeingMoved != null || notesBeingMovedCount > 0
-    val showTags = rememberSaveable { mutableStateOf(false) }
 
     // Switch to folder mode when starting to move a note
     LaunchedEffect(noteBeingMoved, notesBeingMovedCount) {
-        if (isMovingNotes && showTags.value) {
-            showTags.value = false
+        if (isMovingNotes && drawerMode != DrawerMode.Folders) {
+            onDrawerModeChange(DrawerMode.Folders)
             onTagSelected(null)
         }
     }
@@ -249,7 +268,7 @@ fun DrawerScreen(
 
     // Auto-close drawer when navigating to a leaf folder (no subfolders)
     LaunchedEffect(drawerFolders) {
-        if (currentNoteFolderRelativePath.isNotEmpty() && drawerFolders.isEmpty() && !isMovingNotes) {
+        if (currentNoteFolderRelativePath.isNotEmpty() && drawerFolders.isEmpty() && !isMovingNotes && drawerMode == DrawerMode.Folders) {
             scope.launch { drawerState.close() }
         }
     }
@@ -260,13 +279,20 @@ fun DrawerScreen(
                 currentPath = currentNoteFolderRelativePath,
                 openFolder = openFolder,
                 createNoteFolder = createNoteFolder,
-                showTags = showTags.value,
-                onToggleMode = { 
-                    val newShowTags = !showTags.value
-                    showTags.value = newShowTags
-                    if (!newShowTags) { // switching to folder mode
+                drawerMode = drawerMode,
+                onCycleMode = { 
+                    val newMode = when (drawerMode) {
+                        DrawerMode.Folders -> DrawerMode.Tags
+                        DrawerMode.Tags -> DrawerMode.Favorites
+                        DrawerMode.Favorites -> DrawerMode.Folders
+                    }
+                    onDrawerModeChange(newMode)
+                    if (newMode == DrawerMode.Favorites) {
+                        onLoadFavorites()
+                    }
+                    if (newMode == DrawerMode.Folders) {
                         onTagSelected(null)
-                    } // when switching to tag mode, keep current folder
+                    }
                 },
                 noteBeingMoved = noteBeingMoved,
                 notesBeingMovedCount = notesBeingMovedCount,
@@ -283,7 +309,7 @@ fun DrawerScreen(
 
             // bug: https://issuetracker.google.com/issues/224005027
             //AnimatedVisibility(visible = currentNoteFolderRelativePath.isNotEmpty()) {
-            if (currentNoteFolderRelativePath.isNotEmpty()) {
+            if (currentNoteFolderRelativePath.isNotEmpty() && drawerMode == DrawerMode.Folders) {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
@@ -332,7 +358,8 @@ fun DrawerScreen(
             contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 140.dp)
         ) {
 
-            if (showTags.value) {
+            when (drawerMode) {
+                DrawerMode.Tags -> {
                 item {
                     Text(
                         text = stringResource(R.string.tags),
@@ -356,19 +383,238 @@ fun DrawerScreen(
                 }
 
                 items(allTags) { tag ->
-                    Text(
-                        text = tag,
+                    val dropDownExpanded = remember { mutableStateOf(false) }
+                    val clickPosition = remember { mutableStateOf(Offset.Zero) }
+                    val isFavorite = tag in favorites.tags
+
+                    Box {
+                        CustomDropDown(
+                            expanded = dropDownExpanded,
+                            shape = MaterialTheme.shapes.medium,
+                            options = listOf(
+                                CustomDropDownModel(
+                                    text = stringResource(
+                                        if (isFavorite) R.string.remove_from_favorites 
+                                        else R.string.add_to_favorites
+                                    ),
+                                    onClick = {
+                                        if (isFavorite) {
+                                            onRemoveTagFromFavorites(tag)
+                                        } else {
+                                            onAddTagToFavorites(tag)
+                                        }
+                                    }
+                                ),
+                            ),
+                            clickPosition = clickPosition
+                        )
+                    }
+
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { 
-                                onTagSelected(tag)
-                                scope.launch { drawerState.close() }
+                            .combinedClickable(
+                                onLongClick = { dropDownExpanded.value = true },
+                                onClick = {
+                                    onTagSelected(tag)
+                                    scope.launch { drawerState.close() }
+                                }
+                            )
+                            .pointerInteropFilter {
+                                clickPosition.value = Offset(it.x, it.y)
+                                false
                             }
                             .padding(LocalSpaces.current.smallPadding),
-                        color = if (selectedTag == tag) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                    )
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = tag,
+                            color = if (selectedTag == tag) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.weight(1f)
+                        )
+                        if (isFavorite) {
+                            SimpleIcon(
+                                imageVector = Icons.Filled.Star,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+                    }
                 }
-            } else {
+
+                DrawerMode.Favorites -> {
+                    item {
+                        Text(
+                            text = stringResource(R.string.favorites),
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(LocalSpaces.current.smallPadding)
+                        )
+                    }
+
+                    if (favorites.folders.isEmpty() && favorites.tags.isEmpty()) {
+                        item {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(LocalSpaces.current.smallPadding),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.no_favorites),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = stringResource(R.string.no_favorites_hint),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+
+                    // Favorite folders section
+                    if (favorites.folders.isNotEmpty()) {
+                        item {
+                            Text(
+                                text = stringResource(R.string.favorite_folders),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(
+                                    start = LocalSpaces.current.smallPadding,
+                                    top = LocalSpaces.current.smallPadding,
+                                    bottom = 4.dp
+                                )
+                            )
+                        }
+
+                        items(favorites.folders) { folderPath ->
+                            val dropDownExpanded = remember { mutableStateOf(false) }
+                            val clickPosition = remember { mutableStateOf(Offset.Zero) }
+
+                            Box {
+                                CustomDropDown(
+                                    expanded = dropDownExpanded,
+                                    shape = MaterialTheme.shapes.medium,
+                                    options = listOf(
+                                        CustomDropDownModel(
+                                            text = stringResource(R.string.remove_from_favorites),
+                                            onClick = { onRemoveFolderFromFavorites(folderPath) }
+                                        ),
+                                    ),
+                                    clickPosition = clickPosition
+                                )
+                            }
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .combinedClickable(
+                                        onLongClick = { dropDownExpanded.value = true },
+                                        onClick = {
+                                            onTagSelected(null) // Clear tag filter when opening favorite folder
+                                            openFolder(folderPath)
+                                            scope.launch { drawerState.close() }
+                                        }
+                                    )
+                                    .pointerInteropFilter {
+                                        clickPosition.value = Offset(it.x, it.y)
+                                        false
+                                    }
+                                    .padding(LocalSpaces.current.smallPadding),
+                                horizontalArrangement = Arrangement.Start,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                SimpleIcon(
+                                    modifier = Modifier.size(IconDefaultSize),
+                                    imageVector = Icons.Filled.Folder
+                                )
+                                SimpleSpacer(width = LocalSpaces.current.smallPadding)
+                                Text(
+                                    text = folderPath.ifEmpty { "/" },
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
+                        }
+                    }
+
+                    // Favorite tags section
+                    if (favorites.tags.isNotEmpty()) {
+                        item {
+                            if (favorites.folders.isNotEmpty()) {
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(vertical = 8.dp)
+                                )
+                            }
+                            Text(
+                                text = stringResource(R.string.favorite_tags),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(
+                                    start = LocalSpaces.current.smallPadding,
+                                    top = if (favorites.folders.isEmpty()) LocalSpaces.current.smallPadding else 0.dp,
+                                    bottom = 4.dp
+                                )
+                            )
+                        }
+
+                        items(favorites.tags) { tag ->
+                            val dropDownExpanded = remember { mutableStateOf(false) }
+                            val clickPosition = remember { mutableStateOf(Offset.Zero) }
+
+                            Box {
+                                CustomDropDown(
+                                    expanded = dropDownExpanded,
+                                    shape = MaterialTheme.shapes.medium,
+                                    options = listOf(
+                                        CustomDropDownModel(
+                                            text = stringResource(R.string.remove_from_favorites),
+                                            onClick = { onRemoveTagFromFavorites(tag) }
+                                        ),
+                                    ),
+                                    clickPosition = clickPosition
+                                )
+                            }
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .combinedClickable(
+                                        onLongClick = { dropDownExpanded.value = true },
+                                        onClick = {
+                                            onTagSelected(tag)
+                                            scope.launch { drawerState.close() }
+                                        }
+                                    )
+                                    .pointerInteropFilter {
+                                        clickPosition.value = Offset(it.x, it.y)
+                                        false
+                                    }
+                                    .padding(LocalSpaces.current.smallPadding),
+                                horizontalArrangement = Arrangement.Start,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                SimpleIcon(
+                                    modifier = Modifier.size(IconDefaultSize),
+                                    imageVector = Icons.Rounded.Tag
+                                )
+                                SimpleSpacer(width = LocalSpaces.current.smallPadding)
+                                Text(
+                                    text = tag,
+                                    color = if (selectedTag == tag) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
+                        }
+                    }
+                }
+
+                DrawerMode.Folders -> {
                 val displayItems = mutableListOf<Any>()
                 if (drawerFolders.isEmpty() && (syncState is SyncState.Pull || syncState is SyncState.Push)) {
                     displayItems.add("sync")
@@ -429,6 +675,8 @@ fun DrawerScreen(
                         }
                         is DrawerFolderModel -> {
                             val drawerNoteFolder = item as DrawerFolderModel
+                            val folderPath = drawerNoteFolder.noteFolder.relativePath
+                            val isFavorite = folderPath in favorites.folders
                             Box {
                                 val dropDownExpanded = remember {
                                     mutableStateOf(false)
@@ -444,6 +692,19 @@ fun DrawerScreen(
                                         expanded = dropDownExpanded,
                                         shape = MaterialTheme.shapes.medium,
                                         options = listOf(
+                                            CustomDropDownModel(
+                                                text = stringResource(
+                                                    if (isFavorite) R.string.remove_from_favorites 
+                                                    else R.string.add_to_favorites
+                                                ),
+                                                onClick = {
+                                                    if (isFavorite) {
+                                                        onRemoveFolderFromFavorites(folderPath)
+                                                    } else {
+                                                        onAddFolderToFavorites(folderPath)
+                                                    }
+                                                }
+                                            ),
                                             CustomDropDownModel(
                                                 text = stringResource(R.string.delete_this_folder),
                                                 onClick = {
@@ -507,6 +768,15 @@ fun DrawerScreen(
                                                     maxLines = 1,
                                                     overflow = TextOverflow.Ellipsis,
                                                 )
+
+                                                if (isFavorite) {
+                                                    SimpleSpacer(width = 4.dp)
+                                                    SimpleIcon(
+                                                        imageVector = Icons.Filled.Star,
+                                                        tint = MaterialTheme.colorScheme.primary,
+                                                        modifier = Modifier.size(14.dp)
+                                                    )
+                                                }
                                             }
                                         }
                                     }
@@ -515,7 +785,8 @@ fun DrawerScreen(
                         }
                     }
                 }
+                }
             }
         }
-    
-}}
+    }
+}

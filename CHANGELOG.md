@@ -7,6 +7,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- Favorites Feature:
+  - New "Favorites" mode in navigation drawer (cycle: Folders → Tags → Favorites)
+  - Long-press on a folder or tag to add/remove from favorites
+  - Favorites mode shows quick access to favorite folders and tags
+  - Favorites stored in `favorites.md` file at repository root (synced via Git)
+  - Star icon indicates favorited items in Folders and Tags modes
 - Network Sync Settings:
   - New "Offline mode" toggle - completely disables all network operations (sync, push, pull)
   - New "Sync only on WiFi" option - prevents sync over mobile data

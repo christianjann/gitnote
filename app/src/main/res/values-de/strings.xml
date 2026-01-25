@@ -281,4 +281,11 @@
     <string name="select_time">Zeit auswählen</string>
     <string name="back">Zurück</string>
     <string name="due_date_label">Fällig: %1$s</string>
+    <string name="favorites">Favoriten</string>
+    <string name="add_to_favorites">Zu Favoriten hinzufügen</string>
+    <string name="remove_from_favorites">Aus Favoriten entfernen</string>
+    <string name="no_favorites">Noch keine Favoriten</string>
+    <string name="no_favorites_hint">Halten Sie einen Ordner oder ein Tag gedrückt, um ihn zu den Favoriten hinzuzufügen</string>
+    <string name="favorite_folders">Lieblingsordner</string>
+    <string name="favorite_tags">Lieblings-Tags</string>
 </resources>

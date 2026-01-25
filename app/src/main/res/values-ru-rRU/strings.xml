@@ -213,4 +213,11 @@
     <string name="select_time">Выбрать время</string>
     <string name="back">Назад</string>
     <string name="due_date_label">Срок: %1$s</string>
+    <string name="favorites">Избранное</string>
+    <string name="add_to_favorites">Добавить в избранное</string>
+    <string name="remove_from_favorites">Удалить из избранного</string>
+    <string name="no_favorites">Пока нет избранного</string>
+    <string name="no_favorites_hint">Нажмите и удерживайте папку или тег, чтобы добавить в избранное</string>
+    <string name="favorite_folders">Избранные папки</string>
+    <string name="favorite_tags">Избранные теги</string>
 </resources>

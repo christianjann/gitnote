@@ -15,12 +15,15 @@ import io.github.christianjann.gittasks.data.AppPreferences
 import io.github.christianjann.gittasks.data.room.Note
 import io.github.christianjann.gittasks.data.room.NoteFolder
 import io.github.christianjann.gittasks.data.NoteRepository
+import io.github.christianjann.gittasks.helper.Favorites
+import io.github.christianjann.gittasks.helper.FavoritesManager
 import io.github.christianjann.gittasks.helper.FrontmatterParser
 import io.github.christianjann.gittasks.helper.NameValidation
 import io.github.christianjann.gittasks.manager.GitLogEntry
 import io.github.christianjann.gittasks.manager.StorageManager
 import io.github.christianjann.gittasks.manager.SyncState
 import io.github.christianjann.gittasks.manager.AssetManager
+import io.github.christianjann.gittasks.ui.model.DrawerMode
 import io.github.christianjann.gittasks.ui.model.FileExtension
 import io.github.christianjann.gittasks.ui.model.GridNote
 import io.github.christianjann.gittasks.ui.model.NoteViewType
@@ -73,6 +76,15 @@ class GridViewModel : ViewModel() {
         storageManager.onDatabaseUpdated = {
             Log.d(TAG, "onDatabaseUpdated callback triggered, refreshing UI")
             _refreshTrigger.value = _refreshTrigger.value + 1
+            // Reload favorites when database is updated (could be from git sync)
+            loadFavorites()
+        }
+        
+        // Load favorites on startup if drawer mode is Favorites
+        viewModelScope.launch {
+            if (prefs.drawerMode.get() == DrawerMode.Favorites) {
+                loadFavorites()
+            }
         }
     }
 
@@ -125,6 +137,11 @@ class GridViewModel : ViewModel() {
     private val _selectedTag = MutableStateFlow<String?>(null)
     val selectedTag: StateFlow<String?> = _selectedTag.asStateFlow()
 
+    // Favorites
+    private val favoritesManager = FavoritesManager()
+    private val _favorites = MutableStateFlow(Favorites())
+    val favorites: StateFlow<Favorites> = _favorites.asStateFlow()
+
     private val _noteBeingMoved = MutableStateFlow<Note?>(null)
     val noteBeingMoved: StateFlow<Note?> = _noteBeingMoved.asStateFlow()
 
@@ -164,6 +181,52 @@ class GridViewModel : ViewModel() {
     fun selectTag(tag: String?) {
         viewModelScope.launch {
             _selectedTag.emit(tag)
+        }
+    }
+
+    fun setDrawerMode(mode: DrawerMode) {
+        viewModelScope.launch {
+            prefs.drawerMode.update(mode)
+        }
+    }
+
+    // Favorites functions
+    fun loadFavorites() {
+        viewModelScope.launch {
+            val loaded = favoritesManager.loadFavorites()
+            _favorites.emit(loaded)
+        }
+    }
+
+    fun addFolderToFavorites(path: String) {
+        viewModelScope.launch {
+            favoritesManager.addFolderToFavorites(path).onSuccess {
+                _favorites.emit(it)
+            }
+        }
+    }
+
+    fun removeFolderFromFavorites(path: String) {
+        viewModelScope.launch {
+            favoritesManager.removeFolderFromFavorites(path).onSuccess {
+                _favorites.emit(it)
+            }
+        }
+    }
+
+    fun addTagToFavorites(name: String) {
+        viewModelScope.launch {
+            favoritesManager.addTagToFavorites(name).onSuccess {
+                _favorites.emit(it)
+            }
+        }
+    }
+
+    fun removeTagFromFavorites(name: String) {
+        viewModelScope.launch {
+            favoritesManager.removeTagFromFavorites(name).onSuccess {
+                _favorites.emit(it)
+            }
         }
     }
 

@@ -237,4 +237,11 @@
     <string name="select_time">Selecionar hora</string>
     <string name="back">Voltar</string>
     <string name="due_date_label">Vencimento: %1$s</string>
+    <string name="favorites">Favoritos</string>
+    <string name="add_to_favorites">Adicionar aos favoritos</string>
+    <string name="remove_from_favorites">Remover dos favoritos</string>
+    <string name="no_favorites">Nenhum favorito ainda</string>
+    <string name="no_favorites_hint">Pressione e segure uma pasta ou tag para adicioná-la aos favoritos</string>
+    <string name="favorite_folders">Pastas favoritas</string>
+    <string name="favorite_tags">Tags favoritas</string>
 </resources>

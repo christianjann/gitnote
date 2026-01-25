@@ -204,6 +204,14 @@ fun GridScreen(
                 onCancelMove = { vm.cancelMoveNote() },
                 syncState = vm.syncState.collectAsState().value,
                 scrollBehavior = drawerScrollBehavior,
+                favorites = vm.favorites.collectAsState().value,
+                onLoadFavorites = vm::loadFavorites,
+                onAddFolderToFavorites = vm::addFolderToFavorites,
+                onRemoveFolderFromFavorites = vm::removeFolderFromFavorites,
+                onAddTagToFavorites = vm::addTagToFavorites,
+                onRemoveTagFromFavorites = vm::removeTagFromFavorites,
+                drawerMode = vm.prefs.drawerMode.getAsState().value,
+                onDrawerModeChange = { vm.setDrawerMode(it) },
             )
         }
     }) {
