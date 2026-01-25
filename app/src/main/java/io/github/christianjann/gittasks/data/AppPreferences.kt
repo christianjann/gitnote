@@ -147,6 +147,7 @@ class AppPreferences(
 
     val rememberLastOpenedFolder = booleanPreference("rememberLastOpenedFolder", true)
     val lastOpenedFolder = stringPreference("lastOpenedFolder", "")
+    val lastSelectedTag = stringPreference("lastSelectedTag", "")
 
     val showFullPathOfNotes = booleanPreference("showFullPathOfNotes", false)
     val showFullTitleInListView = booleanPreference("showFullTitleInListView", true)

@@ -286,6 +286,7 @@ title: Favorites
 - The favorites file is a standard markdown note - you can open and edit it directly in the app or any text editor.
 - Favorites sync across devices when using Git synchronization.
 - The mode button cycles: Folders → Tags → Favorites → Folders.
+- The drawer mode and selected tag are persisted across app restarts.
 
 #### Example Workflow
 

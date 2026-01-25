@@ -82,7 +82,9 @@ class GridViewModel : ViewModel() {
         
         // Load favorites on startup if drawer mode is Favorites
         viewModelScope.launch {
-            if (prefs.drawerMode.get() == DrawerMode.Favorites) {
+            val savedMode = prefs.drawerMode.get()
+            Log.d(TAG, "init: loaded drawerMode from preferences = $savedMode")
+            if (savedMode == DrawerMode.Favorites) {
                 loadFavorites()
             }
         }
@@ -134,7 +136,13 @@ class GridViewModel : ViewModel() {
     val isGitLogLoading: StateFlow<Boolean> = _isGitLogLoading.asStateFlow()
 
 
-    private val _selectedTag = MutableStateFlow<String?>(null)
+    private val _selectedTag = MutableStateFlow<String?>(
+        if (prefs.rememberLastOpenedFolder.getBlocking()) {
+            prefs.lastSelectedTag.getBlocking().ifEmpty { null }
+        } else {
+            null
+        }
+    )
     val selectedTag: StateFlow<String?> = _selectedTag.asStateFlow()
 
     // Favorites
@@ -181,11 +189,13 @@ class GridViewModel : ViewModel() {
     fun selectTag(tag: String?) {
         viewModelScope.launch {
             _selectedTag.emit(tag)
+            prefs.lastSelectedTag.update(tag ?: "")
         }
     }
 
     fun setDrawerMode(mode: DrawerMode) {
         viewModelScope.launch {
+            Log.d(TAG, "setDrawerMode: saving mode = $mode")
             prefs.drawerMode.update(mode)
         }
     }

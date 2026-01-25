@@ -107,6 +107,7 @@ import io.github.christianjann.gittasks.ui.component.CustomDropDownModel
 import io.github.christianjann.gittasks.ui.component.DueDatePickerDialog
 import io.github.christianjann.gittasks.ui.component.EditTagsDialog
 import io.github.christianjann.gittasks.ui.component.AssetManagerDialog
+import io.github.christianjann.gittasks.ui.model.DrawerMode
 import io.github.christianjann.gittasks.ui.model.EditType
 import io.github.christianjann.gittasks.ui.model.FileExtension
 import kotlinx.coroutines.delay
@@ -179,6 +180,7 @@ fun GridScreen(
     val vm: GridViewModel = viewModel()
 
     val tagDisplayMode by vm.prefs.tagDisplayMode.getAsState()
+    val drawerMode by vm.prefs.drawerMode.getAsState()
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
@@ -210,7 +212,7 @@ fun GridScreen(
                 onRemoveFolderFromFavorites = vm::removeFolderFromFavorites,
                 onAddTagToFavorites = vm::addTagToFavorites,
                 onRemoveTagFromFavorites = vm::removeTagFromFavorites,
-                drawerMode = vm.prefs.drawerMode.getAsState().value,
+                drawerMode = drawerMode,
                 onDrawerModeChange = { vm.setDrawerMode(it) },
             )
         }

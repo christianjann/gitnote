@@ -13,6 +13,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - Favorites mode shows quick access to favorite folders and tags
   - Favorites stored in `favorites.md` file at repository root (synced via Git)
   - Star icon indicates favorited items in Folders and Tags modes
+- Drawer State Persistence:
+  - App remembers the last drawer mode (Folders/Tags/Favorites) across restarts
+  - Selected tag is now persisted and restored when reopening the app
 - Network Sync Settings:
   - New "Offline mode" toggle - completely disables all network operations (sync, push, pull)
   - New "Sync only on WiFi" option - prevents sync over mobile data
@@ -22,6 +25,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Fixed
 
+- Tag Filtering: Fixed tag filter to only match YAML frontmatter tags, not markdown list items in note content
 - Due View: Notes are now properly sorted by due date when "Due view ignores all filters" is disabled
 - Due View: Completed tasks now sort to the bottom (same behavior as List view)
 
