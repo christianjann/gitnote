@@ -23,6 +23,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - Users can select current network or manually enter a WiFi network name (SSID)
   - Location permission is only requested when enabling specific WiFi feature (opt-in)
 
+### Changed
+
+- Editor: Moved Tags and Due Date buttons from top bar to FAB area for more space to view/edit note filename
+
 ### Fixed
 
 - Tag Filtering: Fixed tag filter to only match YAML frontmatter tags, not markdown list items in note content

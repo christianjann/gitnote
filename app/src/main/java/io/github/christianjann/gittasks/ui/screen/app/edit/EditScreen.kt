@@ -185,20 +185,6 @@ fun EditScreen(
                 },
                 actions = {
                     IconButton(
-                        onClick = { vm.startEditTags() },
-                    ) {
-                        SimpleIcon(
-                            imageVector = Icons.Default.Tag,
-                        )
-                    }
-                    IconButton(
-                        onClick = { vm.startEditDueDate() },
-                    ) {
-                        SimpleIcon(
-                            imageVector = Icons.Default.CalendarMonth,
-                        )
-                    }
-                    IconButton(
                         colors = IconButtonDefaults.iconButtonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = MaterialTheme.colorScheme.onPrimary
@@ -219,30 +205,55 @@ fun EditScreen(
             )
         },
         floatingActionButton = {
-            // bug: https://issuetracker.google.com/issues/224005027
-            //AnimatedVisibility(visible = currentNoteFolderRelativePath.isNotEmpty()) {
-            // Show FAB when: not in read-only mode, OR has pending checkbox changes, OR has unsaved changes (tags/due date changed in preview mode)
-            if ((!isReadOnlyModeActive || hasPendingCheckboxChanges || hasUnsavedChanges) && vm.name.value.text.isNotEmpty()) {
+            // Tags, Due Date, and Save buttons stacked vertically
+            Column(
+                modifier = Modifier.padding(bottom = bottomBarHeight),
+                verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
+                horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
+            ) {
+                // Tags button
                 FloatingActionButton(
-                    modifier = Modifier
-                        .padding(bottom = bottomBarHeight),
-                    containerColor = MaterialTheme.colorScheme.primary,
+                    containerColor = MaterialTheme.colorScheme.secondary,
                     shape = RoundedCornerShape(20.dp),
-                    onClick = {
-                        if (hasPendingCheckboxChanges && pendingCheckboxText != null) {
-                            // Apply checkbox changes and save
-                            val newTextFieldValue = TextFieldValue(text = pendingCheckboxText!!)
-                            vm.onValueChange(newTextFieldValue)
-                            hasPendingCheckboxChanges = false
-                            pendingCheckboxText = null
-                        }
-                        vm.save(onSuccess = onFinished)
-                    }
+                    onClick = { vm.startEditTags() }
                 ) {
                     SimpleIcon(
-                        imageVector = Icons.Default.Done,
-                        tint = MaterialTheme.colorScheme.onPrimary
+                        imageVector = Icons.Default.Tag,
+                        tint = MaterialTheme.colorScheme.onSecondary
                     )
+                }
+                // Due Date button
+                FloatingActionButton(
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    shape = RoundedCornerShape(20.dp),
+                    onClick = { vm.startEditDueDate() }
+                ) {
+                    SimpleIcon(
+                        imageVector = Icons.Default.CalendarMonth,
+                        tint = MaterialTheme.colorScheme.onSecondary
+                    )
+                }
+                // Save button - only show when there are changes to save
+                if ((!isReadOnlyModeActive || hasPendingCheckboxChanges || hasUnsavedChanges) && vm.name.value.text.isNotEmpty()) {
+                    FloatingActionButton(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        shape = RoundedCornerShape(20.dp),
+                        onClick = {
+                            if (hasPendingCheckboxChanges && pendingCheckboxText != null) {
+                                // Apply checkbox changes and save
+                                val newTextFieldValue = TextFieldValue(text = pendingCheckboxText!!)
+                                vm.onValueChange(newTextFieldValue)
+                                hasPendingCheckboxChanges = false
+                                pendingCheckboxText = null
+                            }
+                            vm.save(onSuccess = onFinished)
+                        }
+                    ) {
+                        SimpleIcon(
+                            imageVector = Icons.Default.Done,
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
                 }
             }
         }
