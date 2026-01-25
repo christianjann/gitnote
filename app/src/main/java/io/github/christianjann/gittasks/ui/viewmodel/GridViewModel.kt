@@ -40,6 +40,16 @@ import kotlinx.coroutines.flow.map as flowMap
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+// Data class to hold parameters for due notes filtering
+private data class DueNotesParams(
+    val selectedNotes: List<Note>,
+    val ignoresFilters: Boolean,
+    val folderPath: String,
+    val includeSubfolders: Boolean,
+    val tag: String?,
+    val tagIgnoresFolders: Boolean
+)
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class GridViewModel : ViewModel() {
 
@@ -472,45 +482,66 @@ class GridViewModel : ViewModel() {
     val dueNotes = combine(
         refreshTrigger,
         selectedNotes,
-        prefs.dueViewIgnoresFilters.getFlow()
-    ) { _, selectedNotes, ignoresFilters ->
-        Pair(selectedNotes, ignoresFilters)
-    }.flatMapLatest { (selectedNotes, ignoresFilters) ->
-        if (ignoresFilters) {
-            // When ignoring filters, get all notes and filter/sort in memory
-            noteRepository.getAllNotes().flowMap { allNotes ->
-                val dueNotesFiltered = allNotes
-                    .mapNotNull { note ->
-                        val dueDate = FrontmatterParser.parseDueDate(note.content)
-                        if (dueDate != null) {
-                            GridNote(
-                                note = note,
-                                isUnique = true, // Assume unique when showing all
-                                selected = selectedNotes.contains(note),
-                                completed = FrontmatterParser.parseCompletedOrNull(note.content),
-                                dueDate = dueDate
-                            )
-                        } else null
+        prefs.dueViewIgnoresFilters.getFlow(),
+        currentNoteFolderRelativePath,
+        prefs.includeSubfolders.getFlow(),
+        selectedTag,
+        prefs.tagIgnoresFolders.getFlow()
+    ) { values ->
+        // Unpack the combined values
+        val selectedNotes = values[1] as List<Note>
+        val ignoresFilters = values[2] as Boolean
+        val folderPath = values[3] as String
+        val includeSubfolders = values[4] as Boolean
+        val tag = values[5] as String?
+        val tagIgnoresFolders = values[6] as Boolean
+        DueNotesParams(selectedNotes, ignoresFilters, folderPath, includeSubfolders, tag, tagIgnoresFolders)
+    }.flatMapLatest { params ->
+        // Always fetch all notes and filter/sort in memory to ensure proper due date sorting
+        noteRepository.getAllNotes().flowMap { allNotes ->
+            val dueNotesFiltered = allNotes
+                .filter { note ->
+                    // Apply folder filter if not ignoring filters
+                    if (!params.ignoresFilters) {
+                        val noteFolder = note.relativePath.substringBeforeLast("/", "")
+                        val folderMatches = if (params.includeSubfolders) {
+                            noteFolder == params.folderPath || noteFolder.startsWith(params.folderPath + "/") || params.folderPath.isEmpty()
+                        } else {
+                            noteFolder == params.folderPath
+                        }
+                        
+                        // Apply tag filter if a tag is selected
+                        val tagMatches = if (params.tag != null) {
+                            val noteTags = FrontmatterParser.parseTags(note.content)
+                            noteTags.contains(params.tag)
+                        } else {
+                            true
+                        }
+                        
+                        // When tag ignores folders, only apply tag filter; otherwise apply both
+                        if (params.tag != null && params.tagIgnoresFolders) {
+                            tagMatches
+                        } else {
+                            folderMatches && tagMatches
+                        }
+                    } else {
+                        true
                     }
-                    .sortedBy { it.dueDate }
-                PagingData.from(dueNotesFiltered)
-            }
-        } else {
-            // When respecting filters, use the regular paging flow
-            pagingFlow.flowMap { pagingData ->
-                pagingData
-                    .map { gridNote: GridNote ->
-                        val parsedDueDate = FrontmatterParser.parseDueDate(gridNote.note.content)
-                        gridNote.copy(
-                            selected = selectedNotes.contains(gridNote.note),
-                            completed = FrontmatterParser.parseCompletedOrNull(gridNote.note.content),
-                            dueDate = parsedDueDate
+                }
+                .mapNotNull { note ->
+                    val dueDate = FrontmatterParser.parseDueDate(note.content)
+                    if (dueDate != null) {
+                        GridNote(
+                            note = note,
+                            isUnique = true, // Assume unique when showing all
+                            selected = params.selectedNotes.contains(note),
+                            completed = FrontmatterParser.parseCompletedOrNull(note.content),
+                            dueDate = dueDate
                         )
-                    }
-                    .filter { gridNote: GridNote ->
-                        gridNote.dueDate != null
-                    }
-            }
+                    } else null
+                }
+                .sortedWith(compareBy({ it.completed == true }, { it.dueDate }))
+            PagingData.from(dueNotesFiltered)
         }
     }.flowOn(Dispatchers.Main)
 

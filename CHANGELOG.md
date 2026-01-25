@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Fixed
+
+- Due View: Notes are now properly sorted by due date when "Due view ignores all filters" is disabled
+- Due View: Completed tasks now sort to the bottom (same behavior as List view)
+
 ## [26.01.16]
 
 ### Added
